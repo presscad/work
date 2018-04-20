@@ -6,10 +6,15 @@
 std::vector<CLIENT_SOCK*> vctClientSock;
 CRITICAL_SECTION csClientSock;
 
+std::vector<CLIENT_BUF*> vctClientBuf;
+CRITICAL_SECTION csClientBuf;
+
 void InitClientSockMem()
 {
 	InitializeCriticalSection(&csClientSock);
 	vctClientSock.clear();
+	InitializeCriticalSection(&csClientBuf);
+	vctClientBuf.clear();
 }
 
 CLIENT_SOCK* allocClientSock(DWORD dwSize)
@@ -48,4 +53,39 @@ void freeClientSock(CLIENT_SOCK* client_sock)
 		HeapFree(GetProcessHeap(), HEAP_NO_SERIALIZE, client_sock);
 	}
 	LeaveCriticalSection(&csClientSock);
+}
+
+CLIENT_BUF* allocClientBuf(DWORD dwSize)
+{
+	CLIENT_BUF* client_buf = NULL;
+	EnterCriticalSection(&csClientBuf);
+	if (vctClientBuf.empty())
+	{
+		client_buf = (CLIENT_BUF*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dwSize);
+	}
+	else
+	{
+		client_buf = vctClientBuf.back();
+		vctClientBuf.pop_back();
+	}
+	LeaveCriticalSection(&csClientBuf);
+
+	if (client_buf)
+		client_buf->Init(dwSize - SIZE_OF_CLIENT_BUF_T);
+
+	return client_buf;
+}
+
+void freeClientBuf(CLIENT_BUF* client_buf)
+{
+	EnterCriticalSection(&csClientBuf);
+	if (vctClientBuf.size() < 1000)
+	{
+		vctClientBuf.push_back(client_buf);
+	}
+	else
+	{
+		HeapFree(GetProcessHeap(), HEAP_NO_SERIALIZE, client_buf);
+	}
+	LeaveCriticalSection(&csClientBuf);
 }

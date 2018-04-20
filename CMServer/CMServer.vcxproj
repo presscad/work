@@ -149,6 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="client_cmd.h" />
     <ClInclude Include="client_mem.h" />
     <ClInclude Include="client_postcompletion.h" />
     <ClInclude Include="client_requestpost.h" />
@@ -159,6 +160,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="client_cmd.cpp" />
     <ClCompile Include="client_mem.cpp" />
     <ClCompile Include="client_postcompletion.cpp" />
     <ClCompile Include="client_requestpost.cpp" />

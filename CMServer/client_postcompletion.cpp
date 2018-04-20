@@ -5,6 +5,7 @@
 #include "global_data.h"
 #include "client_mem.h"
 #include "client_requestpost.h"
+#include "client_cmd.h"
 
 struct tcp_keepalive alive_in = { TRUE, 1000 * 10, 1000 };
 struct tcp_keepalive alive_out = { 0 };
@@ -20,7 +21,7 @@ void Client_AcceptCompletionFailed(void* _lsock, void* _bobj)
 
 	CMCloseSocket(csock);
 
-	delete bobj;
+	freeClientBuf(bobj);
 	freeClientSock(csock);
 }
 
@@ -44,7 +45,7 @@ void Client_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void* _bobj
 
 		CMCloseSocket(csock);
 
-		delete bobj;
+		freeClientBuf(bobj);
 		freeClientSock(csock);
 		return;
 	}
@@ -66,19 +67,16 @@ void Client_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void* _bobj
 	DWORD len = csock->GetCmdDataLength();
 	while (len)
 	{
-		char buf[256];
-		DWORD dwRecvedCount = len;
-		csock->Read(buf, len);
+		BUFFER_OBJ* obj = allocBObj(g_dwPagesize);
+		csock->Read(obj->data, len);
+		obj->dwRecvedCount = len;
+		obj->pRelateClientSock = csock;
 		csock->AddRef();
-		if (0 == PostQueuedCompletionStatus(hComport, len, (ULONG_PTR)buf, NULL))
+		obj->SetIoRequestFunction(Client_CmdCompletionFailed, Client_CmdCompletionSuccess);
+		if (0 == PostQueuedCompletionStatus(hComport, len, (ULONG_PTR)obj, &obj->ol))
 		{
-			//freeBObj(obj);
-			if (0 == InterlockedDecrement(&csock->nRef))
-			{
-			//	CSCloseSocket(c_sobj);
-				//freeSObj(c_sobj);
-				return;
-			}
+			csock->DecRef();
+			freeBObj(obj);
 		}
 		len = csock->GetCmdDataLength();
 	}
@@ -91,7 +89,7 @@ void Client_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void* _bobj
 			CMCloseSocket(csock);
 			freeClientSock(csock);
 		}
-		delete bobj;
+		freeClientBuf(bobj);
 	}
 }
 
@@ -104,7 +102,7 @@ void Client_ZeroRecvCompletionFailed(void* _csock, void* _bobj)
 		CMCloseSocket(csock);
 		freeClientSock(csock);
 	}
-	delete bobj;
+	freeClientBuf(bobj);
 }
 
 void Client_ZeroRecvCompletionSuccess(DWORD dwTranstion, void* _csock, void* _bobj)
@@ -134,7 +132,7 @@ void Client_RecvCompletionFailed(void* _csock, void* _bobj)
 		CMCloseSocket(csock);
 		freeClientSock(csock);
 	}
-	delete bobj;
+	freeClientBuf(bobj);
 }
 void Client_RecvCompletionSuccess(DWORD dwTranstion, void* _csock, void* _bobj)
 {
@@ -148,7 +146,23 @@ void Client_RecvCompletionSuccess(DWORD dwTranstion, void* _csock, void* _bobj)
 	DWORD len = csock->GetCmdDataLength();
 	while (len)
 	{
-
+		BUFFER_OBJ* obj = allocBObj(g_dwPagesize);
+		csock->Read(obj->data, len);
+		obj->dwRecvedCount = len;
+		obj->pRelateClientSock = csock;
+		csock->AddRef();
+		obj->SetIoRequestFunction(Client_CmdCompletionFailed, Client_CmdCompletionSuccess);
+		if (0 == PostQueuedCompletionStatus(hComport, len, (ULONG_PTR)obj, &obj->ol))
+		{
+			freeBObj(obj);
+			if (0 == InterlockedDecrement(&csock->nRef))
+			{
+				CMCloseSocket(csock);
+				freeClientSock(csock);
+				return;
+			}
+		}
+		len = csock->GetCmdDataLength();
 	}
 
 	bobj->SetIoRequestFunction(Client_ZeroRecvCompletionFailed, Client_ZeroRecvCompletionSuccess);
@@ -159,15 +173,71 @@ void Client_RecvCompletionSuccess(DWORD dwTranstion, void* _csock, void* _bobj)
 			CMCloseSocket(csock);
 			freeClientSock(csock);
 		}
-		delete bobj;
+		freeClientBuf(bobj);
 	}
 }
 
-void Client_SendCompletionFailed(void* _csock, void* _bobj)
+void Client_SendCompletionFailed(void* _sobj, void* _bobj)
 {
+	SOCKET_OBJ* c_sobj = (SOCKET_OBJ*)_sobj;
+	BUFFER_OBJ* c_bobj = (BUFFER_OBJ*)_bobj;
 
+	BUFFER_OBJ* obj = c_sobj->GetNextData();
+	freeBObj(c_bobj);
+	if (obj)
+	{
+		InterlockedDecrement(&c_sobj->nRef);
+		obj->SetIoRequestFunction(Client_SendCompletionFailed, Client_SendCompletionSuccess);
+		if (!CLient_PostSend(c_sobj, obj))
+		{
+			Client_SendCompletionFailed(c_sobj, obj);
+		}
+	}
+	else
+	{
+		if (0 == InterlockedDecrement(&c_sobj->nRef))
+		{
+			CMCloseSocket(c_sobj);
+			freeSObj(c_sobj);
+		}
+	}
 }
-void Client_SendCompletionSuccess(DWORD dwTranstion, void* _csock, void* _bobj)
+void Client_SendCompletionSuccess(DWORD dwTranstion, void* _sobj, void* _bobj)
 {
+	if (dwTranstion <= 0)
+		return Client_SendCompletionFailed(_sobj, _bobj);
 
+	SOCKET_OBJ* c_sobj = (SOCKET_OBJ*)_sobj;
+	BUFFER_OBJ* c_bobj = (BUFFER_OBJ*)_bobj;
+
+	c_bobj->dwSendedCount += dwTranstion;
+	if (c_bobj->dwSendedCount < c_bobj->dwRecvedCount)
+	{
+		if (!CLient_PostSend(c_sobj, c_bobj))
+		{
+			Client_SendCompletionFailed(c_sobj, c_bobj);
+			return;
+		}
+		return;
+	}
+
+	BUFFER_OBJ* obj = c_sobj->GetNextData();
+	freeBObj(c_bobj);
+	if (obj)
+	{
+		InterlockedDecrement(&c_sobj->nRef);
+		obj->SetIoRequestFunction(Client_SendCompletionFailed, Client_SendCompletionSuccess);
+		if (!CLient_PostSend(c_sobj, obj))
+		{
+			Client_SendCompletionFailed(c_sobj, obj);
+		}
+	}
+	else
+	{
+		if (0 == InterlockedDecrement(&c_sobj->nRef))
+		{
+			CMCloseSocket(c_sobj);
+			freeSObj(c_sobj);
+		}
+	}
 }

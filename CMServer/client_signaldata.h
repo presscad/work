@@ -6,6 +6,19 @@
 typedef void(*PTIoRequestSuccess)(DWORD dwTranstion, void* key, void* buf);
 typedef void(*PTIoRequestFailed)(void* key, void* buf);
 
+typedef struct _client_buf_t
+{
+	WSAOVERLAPPED ol;
+	PTIoRequestFailed pfnFailed;
+	PTIoRequestSuccess pfnSuccess;
+	struct _client_sock* pRelateClientSock;
+	WSABUF wsaBuf;
+	DWORD dwRecvedCount;
+	DWORD dwSendedCount;
+	int datalen;
+}CLIENT_BUF_T;
+#define SIZE_OF_CLIENT_BUF_T sizeof(CLIENT_BUF_T)
+
 typedef struct _client_buf
 {
 public:
@@ -13,13 +26,27 @@ public:
 	PTIoRequestFailed pfnFailed;
 	PTIoRequestSuccess pfnSuccess;
 	struct _client_sock* pRelateClientSock;
+	WSABUF wsaBuf;
+	DWORD dwRecvedCount;
+	DWORD dwSendedCount;
+	int datalen;
+	TCHAR data[1];
+
+	void Init(DWORD dwSize)
+	{
+		memset(&ol, 0x00, sizeof(ol));
+		dwRecvedCount = 0;
+		dwSendedCount = 0;
+		datalen = dwSize;
+		memset(data, 0x00, dwSize);
+	}
 
 	void SetIoRequestFunction(PTIoRequestFailed _pfnFailed, PTIoRequestSuccess _pfnSuccess)
 	{
 		pfnFailed = _pfnFailed;
 		pfnSuccess = _pfnSuccess;
 	}
-}CLIENT_BUF;
+}CLIENT_BUF, BUFFER_OBJ;
 
 typedef struct _client_sock_t
 {
@@ -358,5 +385,5 @@ typedef struct _client_sock
 		LeaveCriticalSection(&cs);
 		return data;
 	}
-}CLIENT_SOCK;
+}CLIENT_SOCK, SOCKET_OBJ;
 #define SIZE_OF_CLIENT_SOCK sizeof(CLIENT_SOCK)

@@ -11,21 +11,21 @@ extern void Client_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void
 bool Client_PostAcceptEx(LISTEN_SOCK* lsock)
 {
 	DWORD dwBytes = 0;
-	CLIENT_BUF* bobj = new CLIENT_BUF;
+	CLIENT_BUF* bobj = allocClientBuf(g_dwPagesize);
 	if (NULL == bobj)
 		return false;
 
 	CLIENT_SOCK* csock = allocClientSock(g_dwPagesize);
 	if (NULL == csock)
 	{
-		delete bobj;
+		freeClientBuf(bobj);
 		return false;
 	}
 
 	csock->sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (INVALID_SOCKET == csock->sock)
 	{
-		delete bobj;
+		freeClientBuf(bobj);
 		freeClientSock(csock);
 		return false;
 	}
@@ -44,7 +44,7 @@ bool Client_PostAcceptEx(LISTEN_SOCK* lsock)
 			lsock->DeleteFromPendingMap(csock);
 			closesocket(csock->sock);
 			csock->sock = INVALID_SOCKET;
-			delete bobj;
+			freeClientBuf(bobj);
 			freeClientSock(csock);
 			return false;
 		}
@@ -88,6 +88,20 @@ BOOL Client_PostRecv(CLIENT_SOCK* _csock, CLIENT_BUF* _bobj)
 	return TRUE;
 }
 
+BOOL CLient_PostSend(SOCKET_OBJ* _sobj, BUFFER_OBJ* _bobj)
+{
+	DWORD dwBytes = 0;
+	int err = 0;
+
+	_bobj->wsaBuf.buf = _bobj->data + _bobj->dwSendedCount;
+	_bobj->wsaBuf.len = _bobj->dwRecvedCount - _bobj->dwSendedCount;
+
+	err = WSASend(_sobj->sock, &_bobj->wsaBuf, 1, &dwBytes, 0, &_bobj->ol, NULL);
+	if (SOCKET_ERROR == err && WSA_IO_PENDING != WSAGetLastError())
+		return FALSE;
+
+	return TRUE;
+}
 //BOOL CLient_PostSend(CLIENT_SOCK* _csock, CLIENT_BUF* _bobj)
 //{
 //	DWORD dwBytes = 0;
