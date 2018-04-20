@@ -15,6 +15,8 @@ typedef struct _client_buf_t
 	WSABUF wsaBuf;
 	DWORD dwRecvedCount;
 	DWORD dwSendedCount;
+	int nCmd;
+	int nSubCmd;
 	int datalen;
 }CLIENT_BUF_T;
 #define SIZE_OF_CLIENT_BUF_T sizeof(CLIENT_BUF_T)
@@ -29,6 +31,8 @@ public:
 	WSABUF wsaBuf;
 	DWORD dwRecvedCount;
 	DWORD dwSendedCount;
+	int nCmd;
+	int nSubCmd;
 	int datalen;
 	TCHAR data[1];
 
@@ -37,6 +41,8 @@ public:
 		memset(&ol, 0x00, sizeof(ol));
 		dwRecvedCount = 0;
 		dwSendedCount = 0;
+		nCmd = 0;
+		nSubCmd = 0;
 		datalen = dwSize;
 		memset(data, 0x00, dwSize);
 	}

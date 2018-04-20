@@ -154,6 +154,9 @@
     <ClInclude Include="client_postcompletion.h" />
     <ClInclude Include="client_requestpost.h" />
     <ClInclude Include="client_signaldata.h" />
+    <ClInclude Include="client_thread.h" />
+    <ClInclude Include="cmd_user.h" />
+    <ClInclude Include="cm_mysql.h" />
     <ClInclude Include="global_data.h" />
     <ClInclude Include="init.h" />
     <ClInclude Include="stdafx.h" />
@@ -165,7 +168,10 @@
     <ClCompile Include="client_postcompletion.cpp" />
     <ClCompile Include="client_requestpost.cpp" />
     <ClCompile Include="client_signaldata.cpp" />
+    <ClCompile Include="client_thread.cpp" />
+    <ClCompile Include="cmd_user.cpp" />
     <ClCompile Include="CMServer.cpp" />
+    <ClCompile Include="cm_mysql.cpp" />
     <ClCompile Include="global_data.cpp" />
     <ClCompile Include="init.cpp" />
     <ClCompile Include="stdafx.cpp">

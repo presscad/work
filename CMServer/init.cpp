@@ -75,6 +75,8 @@ bool GetExtensionFunctionPointer()
 	return true;
 }
 
+extern HANDLE hComport;
+
 bool InitClientListenSock(LISTEN_SOCK* lsock, USHORT nPort)
 {
 	if (NULL == lsock)
@@ -88,6 +90,23 @@ bool InitClientListenSock(LISTEN_SOCK* lsock, USHORT nPort)
 	lsock->sListenSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (INVALID_SOCKET == lsock->sListenSock)
 		return false;
+
+	if (NULL == CreateIoCompletionPort((HANDLE)lsock->sListenSock, hComport, (ULONG_PTR)lsock, 0))
+	{
+		closesocket(lsock->sListenSock);
+		lsock->sListenSock = INVALID_SOCKET;
+		return false;
+	}
+
+	LSock_Array[g_dwListenCount] = lsock;
+	hEvent_Array[g_dwListenCount++] = lsock->hPostAcceptExEvent;
+
+	if (SOCKET_ERROR == WSAEventSelect(lsock->sListenSock, lsock->hPostAcceptExEvent, FD_ACCEPT))
+	{
+		closesocket(lsock->sListenSock);
+		lsock->sListenSock = INVALID_SOCKET;
+		return false;
+	}
 
 	struct sockaddr_in laddr;
 	memset(&laddr, 0x00, sizeof(laddr));
@@ -108,9 +127,6 @@ bool InitClientListenSock(LISTEN_SOCK* lsock, USHORT nPort)
 		lsock->sListenSock = INVALID_SOCKET;
 		return false;
 	}
-
-	LSock_Array[g_dwListenCount] = lsock;
-	hEvent_Array[g_dwListenCount++] = lsock->hPostAcceptExEvent;
 
 	return true;
 }

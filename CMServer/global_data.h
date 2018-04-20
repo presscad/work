@@ -1,5 +1,10 @@
 #pragma once
 
+#define CLIENT_PORT	6086
+#define API_PORT	7086
+#define ACCEPT_NUM	10
+#define MAX_ACCEPT_NUM	100
+
 extern HANDLE hComport;
 extern DWORD g_dwPagesize;
 

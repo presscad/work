@@ -50,8 +50,3 @@ bool InitClientListenSock(LISTEN_SOCK* lsock, USHORT nPort);
 extern LISTEN_SOCK* LSock_Array[];
 extern HANDLE hEvent_Array[];
 extern DWORD g_dwListenCount;
-
-#define CLIENT_PORT	6086
-#define API_PORT	7086
-#define ACCEPT_NUM	10
-#define MAX_ACCEPT_NUM	100

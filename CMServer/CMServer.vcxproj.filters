@@ -16,6 +16,12 @@
     <Filter Include="Client">
       <UniqueIdentifier>{8c8890e7-1a04-4bcf-a097-6f247a8f461f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Client\USER">
+      <UniqueIdentifier>{f6042e2b-81c8-4034-83ab-befc3575a290}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mysql">
+      <UniqueIdentifier>{f4082cec-823b-44e6-a665-d6700af045ae}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -45,6 +51,15 @@
     <ClInclude Include="client_cmd.h">
       <Filter>Client</Filter>
     </ClInclude>
+    <ClInclude Include="client_thread.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="cmd_user.h">
+      <Filter>Client\USER</Filter>
+    </ClInclude>
+    <ClInclude Include="cm_mysql.h">
+      <Filter>Mysql</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -73,6 +88,15 @@
     </ClCompile>
     <ClCompile Include="client_cmd.cpp">
       <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="client_thread.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_user.cpp">
+      <Filter>Client\USER</Filter>
+    </ClCompile>
+    <ClCompile Include="cm_mysql.cpp">
+      <Filter>Mysql</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
