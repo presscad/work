@@ -66,6 +66,9 @@
     <ClInclude Include="api_requestpost.h">
       <Filter>API</Filter>
     </ClInclude>
+    <ClInclude Include="api_postcompletion.h">
+      <Filter>API</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -105,6 +108,9 @@
       <Filter>Mysql</Filter>
     </ClCompile>
     <ClCompile Include="api_requestpost.cpp">
+      <Filter>API</Filter>
+    </ClCompile>
+    <ClCompile Include="api_postcompletion.cpp">
       <Filter>API</Filter>
     </ClCompile>
   </ItemGroup>

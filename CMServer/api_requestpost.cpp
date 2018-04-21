@@ -32,7 +32,7 @@ bool Api_PostAcceptEx(void* _lsock)
 	}
 
 	bobj->pRelateClientSock = csock;
-	bobj->SetIoRequestFunction(NULL, NULL);
+	bobj->SetIoRequestFunction(API_AcceptCompletionFailed, API_AcceptCompletionSuccess);
 	// ÉèÖÃ»Øµô
 	csock->nKey = GetRand();
 	lsock->InsertIntoPendingMap(csock);
