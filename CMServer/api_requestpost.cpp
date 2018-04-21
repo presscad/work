@@ -138,3 +138,19 @@ void DoReturnData(BUFFER_OBJ* bobj)
 		return API_Failed(bobj);
 	}
 }
+
+TCHAR* Utf8ConvertAnsi(const TCHAR* strIn, int inLen)
+{
+	//int unicodeLen = MultiByteToWideChar(CP_UTF8, 0, strIn, -1, NULL, 0); // 如果字符串不是以空字符中止，设置为-1可能失败，可能成功
+	int unicodeLen = MultiByteToWideChar(CP_UTF8, 0, strIn, inLen, NULL, 0);
+	wchar_t* pUnicode = new wchar_t[unicodeLen + 1];
+	memset(pUnicode, 0, (unicodeLen + 1) * sizeof(wchar_t));
+	MultiByteToWideChar(CP_UTF8, 0, strIn, inLen, (LPWSTR)pUnicode, unicodeLen);
+	int targetLen = WideCharToMultiByte(CP_ACP, 0, (LPWSTR)pUnicode, -1, NULL, 0, NULL, NULL);
+	BYTE* pTargetData = new BYTE[targetLen + 1];
+	memset(pTargetData, 0, targetLen + 1);
+	WideCharToMultiByte(CP_ACP, 0, (LPWSTR)pUnicode, -1, (char*)pTargetData, targetLen, NULL, NULL);
+
+	delete pUnicode;
+	return (TCHAR*)pTargetData;
+}
