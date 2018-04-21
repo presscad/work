@@ -14,7 +14,7 @@ extern LPFN_CONNECTEX lpfnConnectEx;
 
 int GetRand();
 
-void CMCloseSocket(CLIENT_SOCK* client_sock);
+void CMCloseSocket(void* client_sock);
 
 void DoSend(BUFFER_OBJ* bobj);
 

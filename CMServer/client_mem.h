@@ -4,16 +4,16 @@ void InitClientSockMem();
 
 CLIENT_SOCK* allocClientSock(DWORD dwSize);
 
-#define allocSObj allocClientSock
-
 void freeClientSock(CLIENT_SOCK* cleint_sock);
 
-#define freeSObj freeClientSock
-
-CLIENT_BUF* allocClientBuf(DWORD dwSize);
-
-#define allocBObj allocClientBuf
+CLIENT_BUF* allocClientBuf();
 
 void freeClientBuf(CLIENT_BUF* client_buf);
 
-#define freeBObj freeClientBuf
+SOCKET_OBJ* allocSObj();
+
+void freeSObj(SOCKET_OBJ* sobj);
+
+BUFFER_OBJ* allocBObj(DWORD dwSize);
+
+void freeBObj(BUFFER_OBJ* bobj);

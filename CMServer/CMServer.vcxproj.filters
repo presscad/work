@@ -22,6 +22,9 @@
     <Filter Include="Mysql">
       <UniqueIdentifier>{f4082cec-823b-44e6-a665-d6700af045ae}</UniqueIdentifier>
     </Filter>
+    <Filter Include="API">
+      <UniqueIdentifier>{259471dc-a2cf-4138-b282-673c47e166f6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -60,6 +63,9 @@
     <ClInclude Include="cm_mysql.h">
       <Filter>Mysql</Filter>
     </ClInclude>
+    <ClInclude Include="api_requestpost.h">
+      <Filter>API</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -97,6 +103,9 @@
     </ClCompile>
     <ClCompile Include="cm_mysql.cpp">
       <Filter>Mysql</Filter>
+    </ClCompile>
+    <ClCompile Include="api_requestpost.cpp">
+      <Filter>API</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

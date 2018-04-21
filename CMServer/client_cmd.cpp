@@ -9,12 +9,12 @@
 void Client_CmdCompletionFailed(void* bobj_, void* _bobj)
 {
 	BUFFER_OBJ* bobj = (BUFFER_OBJ*)_bobj;
-	SOCKET_OBJ* sobj = bobj->pRelateClientSock;
+	CLIENT_SOCK* sobj = (CLIENT_SOCK*)bobj->pRelateClientSock;
 	
 	if (0 == InterlockedDecrement(&sobj->nRef))
 	{
 		CMCloseSocket(sobj);
-		freeSObj(sobj);
+		freeClientSock(sobj);
 	}
 	freeBObj(bobj);
 }

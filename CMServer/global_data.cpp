@@ -18,18 +18,19 @@ int GetRand()
 	return urand(randeg);
 }
 
-void CMCloseSocket(CLIENT_SOCK* client_sock)
+void CMCloseSocket(void* client_sock)
 {
-	if (INVALID_SOCKET != client_sock->sock)
+
+	if (INVALID_SOCKET != ((KEY_VALUE*)client_sock)->sock)
 	{
-		closesocket(client_sock->sock);
-		client_sock->sock = INVALID_SOCKET;
+		closesocket(((KEY_VALUE*)client_sock)->sock);
+		((KEY_VALUE*)client_sock)->sock = INVALID_SOCKET;
 	}
 }
 
 void DoSend(BUFFER_OBJ* bobj)
 {
-	SOCKET_OBJ* c_sobj = bobj->pRelateClientSock;
+	CLIENT_SOCK* c_sobj = (CLIENT_SOCK*)bobj->pRelateClientSock;
 	if (c_sobj->CheckSend(bobj))
 	{
 		bobj->SetIoRequestFunction(Client_SendCompletionFailed, Client_SendCompletionSuccess);

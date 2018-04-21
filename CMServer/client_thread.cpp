@@ -3,10 +3,17 @@
 #include "client_thread.h"
 #include "global_data.h"
 
+typedef struct _obj_value
+{
+	WSAOVERLAPPED ol;
+	PTIoRequestFailed pfnFailed;
+	PTIoRequestSuccess pfnSuccess;
+}OBJ_VALUE;
+
 unsigned int _stdcall client_thread(LPVOID pVoid)
 {
 	ULONG_PTR key;
-	BUFFER_OBJ* bobj;
+	OBJ_VALUE* bobj;
 	LPOVERLAPPED lpol;
 	DWORD dwTranstion;
 	BOOL bSuccess;
@@ -20,7 +27,7 @@ unsigned int _stdcall client_thread(LPVOID pVoid)
 			return 0;
 		}
 
-		bobj = CONTAINING_RECORD(lpol, BUFFER_OBJ, ol);
+		bobj = CONTAINING_RECORD(lpol, OBJ_VALUE, ol);
 
 		if (!bSuccess)
 			bobj->pfnFailed((void*)key, bobj);

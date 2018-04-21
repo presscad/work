@@ -1,6 +1,8 @@
 #pragma once
 #include <tbb\concurrent_hash_map.h>
 
+typedef bool(*FT_AcceptExPost)(void* lsock);
+
 typedef struct _key_value
 {
 	int nKey;
@@ -10,6 +12,7 @@ typedef struct _key_value
 typedef struct _listen_sock
 {
 	SOCKET sListenSock;
+	FT_AcceptExPost f_acceptex;
 	HANDLE hPostAcceptExEvent;
 	tbb::concurrent_hash_map<int, void*> acceptPendingMap;
 
@@ -20,6 +23,7 @@ typedef struct _listen_sock
 			closesocket(sListenSock);
 			sListenSock = INVALID_SOCKET;
 		}
+		f_acceptex;
 		hPostAcceptExEvent = NULL;
 		acceptPendingMap.clear();
 	}

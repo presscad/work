@@ -15,7 +15,7 @@ void Client_AcceptCompletionFailed(void* _lsock, void* _bobj)
 {
 	LISTEN_SOCK* lsock = (LISTEN_SOCK*)_lsock;
 	CLIENT_BUF* bobj = (CLIENT_BUF*)_bobj;
-	CLIENT_SOCK* csock = bobj->pRelateClientSock;
+	CLIENT_SOCK* csock = (CLIENT_SOCK*)bobj->pRelateClientSock;
 
 	lsock->DeleteFromPendingMap(csock);
 
@@ -32,7 +32,7 @@ void Client_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void* _bobj
 
 	LISTEN_SOCK* lsock = (LISTEN_SOCK*)_lsock;
 	CLIENT_BUF* bobj = (CLIENT_BUF*)_bobj;
-	CLIENT_SOCK* csock = bobj->pRelateClientSock;
+	CLIENT_SOCK* csock = (CLIENT_SOCK*)bobj->pRelateClientSock;
 
 	lsock->DeleteFromPendingMap(csock);
 
@@ -179,7 +179,7 @@ void Client_RecvCompletionSuccess(DWORD dwTranstion, void* _csock, void* _bobj)
 
 void Client_SendCompletionFailed(void* _sobj, void* _bobj)
 {
-	SOCKET_OBJ* c_sobj = (SOCKET_OBJ*)_sobj;
+	CLIENT_SOCK* c_sobj = (CLIENT_SOCK*)_sobj;
 	BUFFER_OBJ* c_bobj = (BUFFER_OBJ*)_bobj;
 
 	BUFFER_OBJ* obj = c_sobj->GetNextData();
@@ -198,7 +198,7 @@ void Client_SendCompletionFailed(void* _sobj, void* _bobj)
 		if (0 == InterlockedDecrement(&c_sobj->nRef))
 		{
 			CMCloseSocket(c_sobj);
-			freeSObj(c_sobj);
+			freeClientSock(c_sobj);
 		}
 	}
 }
@@ -207,7 +207,7 @@ void Client_SendCompletionSuccess(DWORD dwTranstion, void* _sobj, void* _bobj)
 	if (dwTranstion <= 0)
 		return Client_SendCompletionFailed(_sobj, _bobj);
 
-	SOCKET_OBJ* c_sobj = (SOCKET_OBJ*)_sobj;
+	CLIENT_SOCK* c_sobj = (CLIENT_SOCK*)_sobj;
 	BUFFER_OBJ* c_bobj = (BUFFER_OBJ*)_bobj;
 
 	c_bobj->dwSendedCount += dwTranstion;
@@ -237,7 +237,7 @@ void Client_SendCompletionSuccess(DWORD dwTranstion, void* _sobj, void* _bobj)
 		if (0 == InterlockedDecrement(&c_sobj->nRef))
 		{
 			CMCloseSocket(c_sobj);
-			freeSObj(c_sobj);
+			freeClientSock(c_sobj);
 		}
 	}
 }

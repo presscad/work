@@ -6,28 +6,49 @@
 typedef void(*PTIoRequestSuccess)(DWORD dwTranstion, void* key, void* buf);
 typedef void(*PTIoRequestFailed)(void* key, void* buf);
 
-typedef struct _client_buf_t
-{
-	WSAOVERLAPPED ol;
-	PTIoRequestFailed pfnFailed;
-	PTIoRequestSuccess pfnSuccess;
-	struct _client_sock* pRelateClientSock;
-	WSABUF wsaBuf;
-	DWORD dwRecvedCount;
-	DWORD dwSendedCount;
-	int nCmd;
-	int nSubCmd;
-	int datalen;
-}CLIENT_BUF_T;
-#define SIZE_OF_CLIENT_BUF_T sizeof(CLIENT_BUF_T)
-
 typedef struct _client_buf
 {
 public:
 	WSAOVERLAPPED ol;
 	PTIoRequestFailed pfnFailed;
 	PTIoRequestSuccess pfnSuccess;
-	struct _client_sock* pRelateClientSock;
+	void* pRelateClientSock;
+
+	void Init()
+	{
+		memset(&ol, 0x00, sizeof(ol));
+		pRelateClientSock = NULL;
+	}
+
+	void SetIoRequestFunction(PTIoRequestFailed _pfnFailed, PTIoRequestSuccess _pfnSuccess)
+	{
+		pfnFailed = _pfnFailed;
+		pfnSuccess = _pfnSuccess;
+	}
+}CLIENT_BUF;
+#define SIZE_OF_CLIENT_BUF sizeof(CLIENT_BUF)
+
+typedef struct _buffer_obj_t
+{
+	WSAOVERLAPPED ol;
+	PTIoRequestFailed pfnFailed;
+	PTIoRequestSuccess pfnSuccess;
+	void* pRelateClientSock;
+	WSABUF wsaBuf;
+	DWORD dwRecvedCount;
+	DWORD dwSendedCount;
+	int nCmd;
+	int nSubCmd;
+	int datalen;
+}BUFFER_OBJ_T;
+#define SIZE_BUFFER_OBJ_T sizeof(BUFFER_OBJ_T)
+
+typedef struct _buffer_obj
+{
+	WSAOVERLAPPED ol;
+	PTIoRequestFailed pfnFailed;
+	PTIoRequestSuccess pfnSuccess;
+	void* pRelateClientSock;
 	WSABUF wsaBuf;
 	DWORD dwRecvedCount;
 	DWORD dwSendedCount;
@@ -52,7 +73,7 @@ public:
 		pfnFailed = _pfnFailed;
 		pfnSuccess = _pfnSuccess;
 	}
-}CLIENT_BUF, BUFFER_OBJ;
+}BUFFER_OBJ;
 
 typedef struct _client_sock_t
 {
@@ -77,7 +98,7 @@ typedef struct _client_sock
 {
 	int nKey;
 	SOCKET sock;
-	std::list<CLIENT_BUF*>* lstSend;
+	std::list<BUFFER_OBJ*>* lstSend;
 	CRITICAL_SECTION cs;
 	WSABUF wsabuf[2];
 	DWORD dwBufsize;
@@ -364,7 +385,7 @@ typedef struct _client_sock
 		InterlockedDecrement(&nRef);
 	}
 
-	bool CheckSend(CLIENT_BUF* data)
+	bool CheckSend(BUFFER_OBJ* data)
 	{
 		EnterCriticalSection(&cs);
 		if (lstSend->empty())
@@ -381,9 +402,9 @@ typedef struct _client_sock
 		}
 	}
 
-	CLIENT_BUF* GetNextData()
+	BUFFER_OBJ* GetNextData()
 	{
-		CLIENT_BUF* data = NULL;;
+		BUFFER_OBJ* data = NULL;;
 		EnterCriticalSection(&cs);
 		lstSend->pop_back();
 		if (!lstSend->empty())
@@ -391,5 +412,22 @@ typedef struct _client_sock
 		LeaveCriticalSection(&cs);
 		return data;
 	}
-}CLIENT_SOCK, SOCKET_OBJ;
+}CLIENT_SOCK;
 #define SIZE_OF_CLIENT_SOCK sizeof(CLIENT_SOCK)
+
+typedef struct _socket_obj
+{
+	int nKey;
+	SOCKET sock;
+
+	void Init()
+	{
+		if (INVALID_SOCKET != sock)
+		{
+			closesocket(sock);
+			sock = INVALID_SOCKET;
+		}
+		nKey = 0;
+	}
+}SOCKET_OBJ;
+#define SIZE_OF_SOCKET_OBJ sizeof(SOCKET_OBJ)

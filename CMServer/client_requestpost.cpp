@@ -8,10 +8,11 @@
 extern void Client_AcceptCompletionFailed(void* _lsock, void* _bobj);
 extern void Client_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void* _bobj);
 
-bool Client_PostAcceptEx(LISTEN_SOCK* lsock)
+bool Client_PostAcceptEx(void* _lsock)
 {
+	LISTEN_SOCK* lsock = (LISTEN_SOCK*)_lsock;
 	DWORD dwBytes = 0;
-	CLIENT_BUF* bobj = allocClientBuf(g_dwPagesize);
+	CLIENT_BUF* bobj = allocClientBuf();
 	if (NULL == bobj)
 		return false;
 
@@ -42,8 +43,7 @@ bool Client_PostAcceptEx(LISTEN_SOCK* lsock)
 		if (WSA_IO_PENDING != WSAGetLastError())
 		{
 			lsock->DeleteFromPendingMap(csock);
-			closesocket(csock->sock);
-			csock->sock = INVALID_SOCKET;
+			CMCloseSocket(csock);
 			freeClientBuf(bobj);
 			freeClientSock(csock);
 			return false;
@@ -88,7 +88,7 @@ BOOL Client_PostRecv(CLIENT_SOCK* _csock, CLIENT_BUF* _bobj)
 	return TRUE;
 }
 
-BOOL CLient_PostSend(SOCKET_OBJ* _sobj, BUFFER_OBJ* _bobj)
+BOOL CLient_PostSend(CLIENT_SOCK* _sobj, BUFFER_OBJ* _bobj)
 {
 	DWORD dwBytes = 0;
 	int err = 0;
