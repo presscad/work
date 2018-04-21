@@ -22,7 +22,7 @@
     <Filter Include="Mysql">
       <UniqueIdentifier>{f4082cec-823b-44e6-a665-d6700af045ae}</UniqueIdentifier>
     </Filter>
-    <Filter Include="API">
+    <Filter Include="NC">
       <UniqueIdentifier>{259471dc-a2cf-4138-b282-673c47e166f6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -63,11 +63,11 @@
     <ClInclude Include="cm_mysql.h">
       <Filter>Mysql</Filter>
     </ClInclude>
-    <ClInclude Include="api_requestpost.h">
-      <Filter>API</Filter>
+    <ClInclude Include="nc_postcompletion.h">
+      <Filter>NC</Filter>
     </ClInclude>
-    <ClInclude Include="api_postcompletion.h">
-      <Filter>API</Filter>
+    <ClInclude Include="nc_requestpost.h">
+      <Filter>NC</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -107,11 +107,11 @@
     <ClCompile Include="cm_mysql.cpp">
       <Filter>Mysql</Filter>
     </ClCompile>
-    <ClCompile Include="api_requestpost.cpp">
-      <Filter>API</Filter>
+    <ClCompile Include="nc_postcompletion.cpp">
+      <Filter>NC</Filter>
     </ClCompile>
-    <ClCompile Include="api_postcompletion.cpp">
-      <Filter>API</Filter>
+    <ClCompile Include="nc_requestpost.cpp">
+      <Filter>NC</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -151,8 +151,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="api_postcompletion.h" />
-    <ClInclude Include="api_requestpost.h" />
+    <ClInclude Include="nc_postcompletion.h" />
+    <ClInclude Include="nc_requestpost.h" />
     <ClInclude Include="client_cmd.h" />
     <ClInclude Include="client_mem.h" />
     <ClInclude Include="client_postcompletion.h" />
@@ -167,8 +167,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="api_postcompletion.cpp" />
-    <ClCompile Include="api_requestpost.cpp" />
+    <ClCompile Include="nc_postcompletion.cpp" />
+    <ClCompile Include="nc_requestpost.cpp" />
     <ClCompile Include="client_cmd.cpp" />
     <ClCompile Include="client_mem.cpp" />
     <ClCompile Include="client_postcompletion.cpp" />

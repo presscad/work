@@ -2,14 +2,14 @@
 #include "client_signaldata.h"
 #include "init.h"
 #include "global_data.h"
-#include "api_postcompletion.h"
+#include "nc_postcompletion.h"
 #include "client_mem.h"
 
 extern struct tcp_keepalive alive_in;
 extern struct tcp_keepalive alive_out;
 extern unsigned long ulBytesReturn;
 
-void API_AcceptCompletionFailed(void* _lsock, void* _bobj)
+void Nc_AcceptCompletionFailed(void* _lsock, void* _bobj)
 {
 	LISTEN_SOCK* lobj = (LISTEN_SOCK*)_lsock;
 	BUFFER_OBJ* bobj = (BUFFER_OBJ*)_bobj;
@@ -22,10 +22,10 @@ void API_AcceptCompletionFailed(void* _lsock, void* _bobj)
 	freeBObj(bobj);
 }
 
-void API_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void* _bobj)
+void Nc_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void* _bobj)
 {
 	if (dwTranstion <= 0)
-		return API_AcceptCompletionFailed(_lsock, _bobj);
+		return Nc_AcceptCompletionFailed(_lsock, _bobj);
 
 	LISTEN_SOCK* lobj = (LISTEN_SOCK*)_lsock;
 	BUFFER_OBJ* bobj = (BUFFER_OBJ*)_bobj;

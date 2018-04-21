@@ -2,13 +2,13 @@
 #include "init.h"
 #include "client_signaldata.h"
 #include "global_data.h"
-#include "api_requestpost.h"
+#include "nc_requestpost.h"
 #include "client_mem.h"
 
-extern void API_AcceptCompletionFailed(void* _lsock, void* _bobj);
-extern void API_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void* _bobj);
+extern void Nc_AcceptCompletionFailed(void* _lsock, void* _bobj);
+extern void Nc_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void* _bobj);
 
-bool Api_PostAcceptEx(void* _lsock)
+bool Nc_PostAcceptEx(void* _lsock)
 {
 	LISTEN_SOCK* lsock = (LISTEN_SOCK*)_lsock;
 	DWORD dwBytes = 0;
@@ -32,7 +32,7 @@ bool Api_PostAcceptEx(void* _lsock)
 	}
 
 	bobj->pRelateClientSock = csock;
-	bobj->SetIoRequestFunction(API_AcceptCompletionFailed, API_AcceptCompletionSuccess);
+	bobj->SetIoRequestFunction(Nc_AcceptCompletionFailed, Nc_AcceptCompletionSuccess);
 	// ÉèÖÃ»Øµô
 	csock->nKey = GetRand();
 	lsock->InsertIntoPendingMap(csock);
