@@ -4,6 +4,7 @@
 #include "global_data.h"
 #include "nc_postcompletion.h"
 #include "client_mem.h"
+#include "nc_requestpost.h"
 
 extern struct tcp_keepalive alive_in;
 extern struct tcp_keepalive alive_out;
@@ -61,8 +62,8 @@ void Nc_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void* _bobj)
 
 	if (NULL == strstr(bobj->data, "</NotifyContractRoot>") && NULL == strstr(bobj->data, "</WanrningContractRoot>"))
 	{
-		//c_bobj->SetIoRequestFunction(NC_RecvZeroCompFailed, NC_RecvZeroCompSuccess);
-		//if (!PostZeroRecv(c_sobj, c_bobj))
+		bobj->SetIoRequestFunction(NC_RecvZeroCompFailed, NC_RecvZeroCompSuccess);
+		if (Nc_PostZeroRecv(sobj, bobj))
 		{
 			CMCloseSocket(sobj);
 			freeSObj(sobj);
@@ -73,5 +74,130 @@ void Nc_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void* _bobj)
 	else
 	{
 		//doNcData(c_bobj);
+	}
+}
+
+void NC_RecvZeroCompFailed(void* _sobj, void* _bobj)
+{
+	SOCKET_OBJ* c_sobj = (SOCKET_OBJ*)_sobj;
+	BUFFER_OBJ* c_bobj = (BUFFER_OBJ*)_bobj;
+
+#ifdef _DEBUG
+	DWORD dwTranstion = 0;
+	DWORD dwFlags = 0;
+	if (!WSAGetOverlappedResult(c_sobj->sock, &c_bobj->ol, &dwTranstion, FALSE, &dwFlags))
+		_tprintf(_T("º¯Êý:%s ErrorCode = %d\n"), __FUNCTION__, WSAGetLastError());
+#endif
+
+	CMCloseSocket(c_sobj);
+	freeSObj(c_sobj);
+	freeBObj(c_bobj);
+}
+
+void NC_RecvZeroCompSuccess(DWORD dwTransion, void* _sobj, void* _bobj)
+{
+	SOCKET_OBJ* c_sobj = (SOCKET_OBJ*)_sobj;
+	BUFFER_OBJ* c_bobj = (BUFFER_OBJ*)_bobj;
+
+	c_bobj->SetIoRequestFunction(NC_RecvCompFailed, NC_RecvCompSuccess);
+	if (!Nc_PostRecv(c_sobj, c_bobj))
+	{
+		CMCloseSocket(c_sobj);
+		freeSObj(c_sobj);
+		freeBObj(c_bobj);
+		return;
+	}
+}
+
+void NC_RecvCompFailed(void* _sobj, void* _bobj)
+{
+	SOCKET_OBJ* c_sobj = (SOCKET_OBJ*)_sobj;
+	BUFFER_OBJ* c_bobj = (BUFFER_OBJ*)_bobj;
+
+#ifdef _DEBUG
+	DWORD dwTranstion = 0;
+	DWORD dwFlags = 0;
+	if (!WSAGetOverlappedResult(c_sobj->sock, &c_bobj->ol, &dwTranstion, FALSE, &dwFlags))
+		_tprintf(_T("º¯Êý:%s ErrorCode = %d\n"), __FUNCTION__, WSAGetLastError());
+#endif
+
+	CMCloseSocket(c_sobj);
+	freeSObj(c_sobj);
+	freeBObj(c_bobj);
+}
+
+void NC_RecvCompSuccess(DWORD dwTransion, void* _sobj, void* _bobj)
+{
+	if (dwTransion <= 0)
+		return NC_RecvCompFailed(_sobj, _bobj);
+
+	SOCKET_OBJ* c_sobj = (SOCKET_OBJ*)_sobj;
+	BUFFER_OBJ* c_bobj = (BUFFER_OBJ*)_bobj;
+
+	c_bobj->dwRecvedCount += dwTransion;
+	if (NULL == strstr(c_bobj->data, "</NotifyContractRoot>") && NULL == strstr(c_bobj->data, "</WanrningContractRoot>"))
+	{
+		c_bobj->SetIoRequestFunction(NC_RecvZeroCompFailed, NC_RecvZeroCompSuccess);
+		if (!Nc_PostZeroRecv(c_sobj, c_bobj))
+		{
+			CMCloseSocket(c_sobj);
+			freeSObj(c_sobj);
+			freeBObj(c_bobj);
+			return;
+		}
+	}
+	else
+	{
+		//doNcData(c_bobj);
+	}
+}
+
+void NC_SendCompFailed(void* _sobj, void* _bobj)
+{
+	SOCKET_OBJ* c_sobj = (SOCKET_OBJ*)_sobj;
+	BUFFER_OBJ* c_bobj = (BUFFER_OBJ*)_bobj;
+
+#ifdef _DEBUG
+	DWORD dwTranstion = 0;
+	DWORD dwFlags = 0;
+	if (!WSAGetOverlappedResult(c_sobj->sock, &c_bobj->ol, &dwTranstion, FALSE, &dwFlags))
+		_tprintf(_T("º¯Êý:%s ErrorCode = %d\n"), __FUNCTION__, WSAGetLastError());
+#endif
+
+	(c_sobj);
+	freeSObj(c_sobj);
+	freeBObj(c_bobj);
+}
+
+void NC_SendCompSuccess(DWORD dwTransion, void* _sobj, void* _bobj)
+{
+	if (dwTransion <= 0)
+		return NC_SendCompFailed(_sobj, _bobj);
+
+	SOCKET_OBJ* c_sobj = (SOCKET_OBJ*)_sobj;
+	BUFFER_OBJ* c_bobj = (BUFFER_OBJ*)_bobj;
+
+	c_bobj->dwSendedCount += dwTransion;
+	if (c_bobj->dwSendedCount < c_bobj->dwRecvedCount)
+	{
+		if (!Nc_PostSend(c_sobj, c_bobj))
+		{
+			CMCloseSocket(c_sobj);
+			freeSObj(c_sobj);
+			freeBObj(c_bobj);
+			return;
+		}
+		return;
+	}
+
+	c_bobj->dwRecvedCount = 0;
+	c_bobj->dwSendedCount = 0;
+	c_bobj->SetIoRequestFunction(NC_RecvZeroCompFailed, NC_RecvZeroCompSuccess);
+	if (!Nc_PostZeroRecv(c_sobj, c_bobj))
+	{
+		CMCloseSocket(c_sobj);
+		freeSObj(c_sobj);
+		freeBObj(c_bobj);
+		return;
 	}
 }

@@ -6,6 +6,8 @@
 typedef void(*PTIoRequestSuccess)(DWORD dwTranstion, void* key, void* buf);
 typedef void(*PTIoRequestFailed)(void* key, void* buf);
 
+typedef bool(*PTAPIResponse)(void* bobj);
+
 typedef struct _client_buf
 {
 public:
@@ -33,6 +35,7 @@ typedef struct _buffer_obj_t
 	WSAOVERLAPPED ol;
 	PTIoRequestFailed pfnFailed;
 	PTIoRequestSuccess pfnSuccess;
+	PTAPIResponse pfndoApiResponse;
 	void* pRelateClientSock;
 	WSABUF wsaBuf;
 	DWORD dwRecvedCount;
@@ -48,6 +51,7 @@ typedef struct _buffer_obj
 	WSAOVERLAPPED ol;
 	PTIoRequestFailed pfnFailed;
 	PTIoRequestSuccess pfnSuccess;
+	PTAPIResponse pfndoApiResponse;
 	void* pRelateClientSock;
 	WSABUF wsaBuf;
 	DWORD dwRecvedCount;
@@ -60,6 +64,9 @@ typedef struct _buffer_obj
 	void Init(DWORD dwSize)
 	{
 		memset(&ol, 0x00, sizeof(ol));
+		pfnFailed = NULL;
+		pfnSuccess = NULL;
+		pfndoApiResponse = NULL;
 		dwRecvedCount = 0;
 		dwSendedCount = 0;
 		nCmd = 0;
@@ -419,6 +426,8 @@ typedef struct _socket_obj
 {
 	int nKey;
 	SOCKET sock;
+	ADDRINFOT *sAddrInfo;
+	DWORD dwTick;
 
 	void Init()
 	{
@@ -428,6 +437,8 @@ typedef struct _socket_obj
 			sock = INVALID_SOCKET;
 		}
 		nKey = 0;
+		dwTick = 0;
+		sAddrInfo = NULL;
 	}
 }SOCKET_OBJ;
 #define SIZE_OF_SOCKET_OBJ sizeof(SOCKET_OBJ)

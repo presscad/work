@@ -52,3 +52,52 @@ bool Nc_PostAcceptEx(void* _lsock)
 
 	return true;
 }
+
+BOOL Nc_PostZeroRecv(SOCKET_OBJ* _sobj, BUFFER_OBJ* _bobj)
+{
+	DWORD dwBytes = 0,
+		dwFlags = 0;
+
+	int err = 0;
+
+	_bobj->wsaBuf.buf = NULL;
+	_bobj->wsaBuf.len = 0;
+
+	err = WSARecv(_sobj->sock, &_bobj->wsaBuf, 1, &dwBytes, &dwFlags, &_bobj->ol, NULL);
+	if (SOCKET_ERROR == err && WSA_IO_PENDING != WSAGetLastError())
+		return FALSE;
+
+	return TRUE;
+}
+
+BOOL Nc_PostRecv(SOCKET_OBJ* _sobj, BUFFER_OBJ* _bobj)
+{
+	DWORD dwBytes = 0,
+		dwFlags = 0;
+
+	int err = 0;
+
+	_bobj->wsaBuf.buf = _bobj->data + _bobj->dwRecvedCount;
+	_bobj->wsaBuf.len = _bobj->datalen - _bobj->dwRecvedCount;
+
+	err = WSARecv(_sobj->sock, &_bobj->wsaBuf, 1, &dwBytes, &dwFlags, &_bobj->ol, NULL);
+	if (SOCKET_ERROR == err && WSA_IO_PENDING != WSAGetLastError())
+		return FALSE;
+
+	return TRUE;
+}
+
+BOOL Nc_PostSend(SOCKET_OBJ* _sobj, BUFFER_OBJ* _bobj)
+{
+	DWORD dwBytes = 0;
+	int err = 0;
+
+	_bobj->wsaBuf.buf = _bobj->data + _bobj->dwSendedCount;
+	_bobj->wsaBuf.len = _bobj->dwRecvedCount - _bobj->dwSendedCount;
+
+	err = WSASend(_sobj->sock, &_bobj->wsaBuf, 1, &dwBytes, 0, &_bobj->ol, NULL);
+	if (SOCKET_ERROR == err && WSA_IO_PENDING != WSAGetLastError())
+		return FALSE;
+
+	return TRUE;
+}
