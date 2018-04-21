@@ -78,7 +78,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>C:\Program Files\MySQL\MySQL Server 5.7\include;..\tbb_concurrent_hash_map\include;..\msgpack-c\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files\MySQL\MySQL Server 5.7\lib;E:\Git\work\tbb_concurrent_hash_map\build\vs2013\x64\Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Program Files\MySQL\MySQL Server 5.7\lib;..\tbb_concurrent_hash_map\build\vs2013\x64\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
