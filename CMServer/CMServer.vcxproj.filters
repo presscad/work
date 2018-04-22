@@ -28,6 +28,9 @@
     <Filter Include="API">
       <UniqueIdentifier>{59c212a6-e482-4b96-bd95-b8d69e92967d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Client\SIM">
+      <UniqueIdentifier>{e27467e6-0fda-4c59-bd50-b47799abe71c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -78,6 +81,9 @@
     <ClInclude Include="api_requestpost.h">
       <Filter>API</Filter>
     </ClInclude>
+    <ClInclude Include="cmd_sim.h">
+      <Filter>Client\SIM</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -127,6 +133,9 @@
     </ClCompile>
     <ClCompile Include="api_requestpost.cpp">
       <Filter>API</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_sim.cpp">
+      <Filter>Client\SIM</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

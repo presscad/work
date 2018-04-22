@@ -19,3 +19,5 @@ void CMCloseSocket(void* client_sock);
 void DoSend(BUFFER_OBJ* bobj);
 
 void DealTail(msgpack::sbuffer& sBuf, BUFFER_OBJ* bobj);
+
+int error_info(BUFFER_OBJ* buffer, const TCHAR* format, ...);

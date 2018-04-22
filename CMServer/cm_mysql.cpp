@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include "client_signaldata.h"
+#include "global_data.h"
 #include "cm_mysql.h"
 #include <vector>
 
@@ -45,6 +47,7 @@ bool Mysql_InitConnectionPool(int nMin, int nMax)
 	if (bInitial)
 	{
 		InitializeCriticalSection(&csMysql);
+		vctMysql.clear();
 		hWaitMysql = CreateEvent(NULL, TRUE, FALSE, NULL);
 		g_nMinConnection = nMin;
 		g_nMaxConnection = nMax;
@@ -134,4 +137,46 @@ void Mysql_BackToPool(MYSQL* pMysql)
 	vctMysql.push_back(pMysql);
 	LeaveCriticalSection(&csMysql);
 	SetEvent(hWaitMysql);
+}
+
+bool InsertIntoTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj)
+{
+	size_t len = _tcslen(sql);
+	if (0 != mysql_real_query(pMysql, sql, (ULONG)len))
+	{
+		return false;
+	}
+
+	if (mysql_affected_rows(pMysql) == 0)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool SelectFromTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj, MYSQL_RES** res)
+{
+	size_t len = _tcslen(sql);
+	if (0 != mysql_real_query(pMysql, sql, (ULONG)len))
+	{
+		error_info(bobj, _T("数据库异常 ErrorCode = %08x, ErrorMsg = %s"), mysql_errno(pMysql), mysql_error(pMysql));
+		return false;
+	}
+
+	*res = mysql_store_result(pMysql);
+	if (NULL == *res)
+	{
+		if (mysql_field_count(pMysql) != 0)
+		{
+			error_info(bobj, _T("数据库异常 ErrorCode = %08x, ErrorMsg = %s"), mysql_errno(pMysql), mysql_error(pMysql));
+		}
+		else
+		{
+			error_info(bobj, _T("未查询到匹配数据"));
+		}
+		return false;
+	}
+
+	return true;
 }

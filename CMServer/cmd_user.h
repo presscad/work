@@ -8,4 +8,4 @@ typedef enum
 	USER_LIST,
 }SUBCMD_USER;
 
-bool cmd_user(msgpack::object* pArray, BUFFER_OBJ* bobj);
+bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj);

@@ -37,9 +37,20 @@ void Client_CmdCompletionSuccess(DWORD dwTranstion, void* bobj_, void* _bobj)
 		bobj->nCmd = (pArray++)->as<int>();
 		switch (bobj->nCmd)
 		{
-		case 1:
+		case USER_DATA:
 		{
-			cmd_user(pArray, bobj);
+			if (!cmd_user(pArray, bobj))
+			{
+				msgpack::sbuffer sbuf;
+				msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
+				sbuf.write("\xfb\xfc", 6);
+				_msgpack.pack_array(5);
+				_msgpack.pack(bobj->nCmd);
+				_msgpack.pack(bobj->nSubCmd);
+				_msgpack.pack(0);
+				_msgpack.pack(bobj->data);
+				DealTail(sbuf, bobj);
+			}
 		}
 		break;
 		default:
