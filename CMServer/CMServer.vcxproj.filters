@@ -31,6 +31,9 @@
     <Filter Include="Client\SIM">
       <UniqueIdentifier>{e27467e6-0fda-4c59-bd50-b47799abe71c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Client\代理">
+      <UniqueIdentifier>{c98ac7da-564c-46ec-b63c-725284a5018e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -84,6 +87,9 @@
     <ClInclude Include="cmd_sim.h">
       <Filter>Client\SIM</Filter>
     </ClInclude>
+    <ClInclude Include="cmd_proxy.h">
+      <Filter>Client\代理</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -136,6 +142,9 @@
     </ClCompile>
     <ClCompile Include="cmd_sim.cpp">
       <Filter>Client\SIM</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_proxy.cpp">
+      <Filter>Client\代理</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

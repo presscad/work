@@ -140,13 +140,12 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		if (nUsertype == 1) // 超级管理员
 		{
 			pSql = _T("SELECT COUNT(*) AS num FROM user_tbl WHERE Fatherid=%u");
-			_stprintf_s(sql, sizeof(sql), pSql, nId);
 		}
 		else
 		{
 			pSql = _T("SELECT COUNT(*) AS num FROM user_tbl WHERE Fatherid=%u");
-			_stprintf_s(sql, sizeof(sql), pSql, nId);
 		}
+		_stprintf_s(sql, sizeof(sql), pSql, nId);
 
 		MYSQL* pMysql = Mysql_AllocConnection();
 		if (NULL == pMysql)
