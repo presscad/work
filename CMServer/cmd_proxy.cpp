@@ -5,7 +5,7 @@ bool cmd_proxy()
 {
 	if (1)
 	{
-		_T("select a.User,(select count(1) from sim_tbl b where b.Proxy01_id=a.id) simcount,(select count(1) from sim_tbl b where b.Proxy01_id=a.id) simusingcount from user_tbl a limit 0,10;");
+		// select t1.User, count(t2.Proxy01_id) count from(select * from user_tbl where Usertype = 2) t1 left join sim_tbl t2 on t1.id = t2.Proxy01_id group by t1.User;
 	}
 	else if (2)
 	{
