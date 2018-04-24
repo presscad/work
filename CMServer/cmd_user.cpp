@@ -20,6 +20,7 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
 		std::string strUser = (pArray++)->as<std::string>();
 		std::string strPassword = (pArray++)->as<std::string>();
+		std::string strKhmc = (pArray++)->as<std::string>();
 		unsigned int nAuthority = (pArray++)->as<unsigned int>();
 		unsigned int nUsertype = (pArray++)->as<unsigned int>();
 		unsigned int nFatherid = (pArray++)->as<unsigned int>();
@@ -51,8 +52,18 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			Mysql_BackToPool(pMysql);
 			return false;
 		}
+		my_ulonglong nIndex = mysql_insert_id(pMysql); // 新添加的用户的id
 
-		my_ulonglong nIndex = mysql_insert_id(pMysql);
+		pSql = _T("UPDATE TABLE kh_tbl SET Userid=%u WHERE khmc='%s'");
+		memset(sql, 0x00, sizeof(sql));
+		_stprintf_s(sql, sizeof(sql), pSql, (unsigned int)nIndex, strKhmc.c_str());
+		if (!UpdateTbl(sql, pMysql, bobj))
+		{
+			// 删除刚添加的用户
+			Mysql_BackToPool(pMysql);
+			return false;
+		}
+
 		pSql = _T("SELECT %s FROM user_tbl WHERE id=%u");
 		memset(sql, 0x00, sizeof(sql));
 		_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, (unsigned int)nIndex);

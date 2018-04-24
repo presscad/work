@@ -180,3 +180,19 @@ bool SelectFromTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj, MYSQL_RES*
 
 	return true;
 }
+
+bool UpdateTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj)
+{
+	size_t len = _tcslen(sql);
+	if (0 != mysql_real_query(pMysql, sql, (ULONG)len))
+	{
+		return false;
+	}
+
+	if (mysql_affected_rows(pMysql) == 0)
+	{
+		return false;
+	}
+
+	return true;
+}
