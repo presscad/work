@@ -28,7 +28,7 @@ bool Mysql_ConnectDB(MYSQL** pMysql)
 	{
 		return false;
 	}
-	mysql_set_character_set(*pMysql, "utf-8");
+	mysql_set_character_set(*pMysql, "gbk");
 
 	return true;
 }
