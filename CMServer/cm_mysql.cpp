@@ -24,10 +24,11 @@ bool Mysql_ConnectDB(MYSQL** pMysql)
 	if (NULL == *pMysql)
 		return false;
 
-	if (NULL == mysql_real_connect(*pMysql, _T("localhost"), DB_USER, DB_PWD, DB_NAME, 0, NULL, 0))
+	if (NULL == mysql_real_connect(*pMysql, _T("localhost"), DB_USER, DB_PWD, DB_NAME, 3307, NULL, 0))
 	{
 		return false;
 	}
+	mysql_set_character_set(*pMysql, "utf-8");
 
 	return true;
 }
@@ -194,5 +195,70 @@ bool UpdateTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj)
 		return false;
 	}
 
+	return true;
+}
+
+#define CREATE_USER_TBL _T("CREATE TABLE IF NOT EXISTS user_tbl(id int unsigned not null auto_increment,\
+User char(32) NOT NULL,\
+Password char(41) NOT NULL,\
+Authority int NOT NULL,\
+Usertype int NOT NULL,\
+Fatherid int unsigned DEFAULT 0,\
+Dj double(8,2) DEFAULT 0.00,\
+Xgsj date,\
+primary key(id),\
+unique key(User),\
+key(Fatherid))")
+bool CreateUserTbl()
+{
+	MYSQL* pMysql = Mysql_AllocConnection();
+	if (NULL == pMysql)
+	{
+		_tprintf(_T("%s:连接服务器失败\n"), __FUNCTION__);
+		return false;
+	}
+	size_t len = _tcslen(CREATE_USER_TBL);
+	if (0 != mysql_real_query(pMysql, CREATE_USER_TBL, (ULONG)len))
+	{
+		Mysql_BackToPool(pMysql);
+		return false;
+	}
+	Mysql_BackToPool(pMysql);
+	return true;
+}
+
+#define CREATE_KH_TBL _T("CREATE TABLE IF NOT EXISTS kh_tbl(id int unsigned not null auto_increment,\
+Khmc char(41) NOT NULL,\
+Userid int unsigned DEFAULT 0,\
+Fatherid int unsigned DEFAULT 0,\
+Jlxm char(64) NOT NULL,\
+Dj double(8,2) DEFAULT 0.00,\
+Lxfs varchar(64),\
+Ssdq varchar(64), \
+On1m int unsigned DEFAULT 0,\
+On15d int unsigned DEFAULT 0,\
+Du15d int unsigned DEFAULT 0,\
+Du1m int unsigned DEFAULT 0,\
+Bz varchar(64),\
+primary key(id),\
+unique key(Khmc),\
+key(Fatherid),\
+key(Jlxm))")
+bool CreateKhTbl()
+{
+	MYSQL* pMysql = Mysql_AllocConnection();
+	if (NULL == pMysql)
+	{
+		_tprintf(_T("%s:连接服务器失败\n"), __FUNCTION__);
+		return false;
+	}
+	size_t len = _tcslen(CREATE_KH_TBL);
+	if (0 != mysql_real_query(pMysql, CREATE_KH_TBL, (ULONG)len))
+	{
+		_tprintf_s(_T("数据库异常 ErrorCode = %08x, ErrorMsg = %s"), mysql_errno(pMysql), mysql_error(pMysql));
+		Mysql_BackToPool(pMysql);
+		return false;
+	}
+	Mysql_BackToPool(pMysql);
 	return true;
 }

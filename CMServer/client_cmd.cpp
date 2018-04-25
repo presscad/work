@@ -5,6 +5,7 @@
 #include "global_data.h"
 #include "client_mem.h"
 #include "cmd_user.h"
+#include "cmd_kh.h"
 
 void Client_CmdCompletionFailed(void* bobj_, void* _bobj)
 {
@@ -39,18 +40,13 @@ void Client_CmdCompletionSuccess(DWORD dwTranstion, void* bobj_, void* _bobj)
 		{
 		case USER_DATA:
 		{
-			if (!cmd_user(pArray, bobj))
-			{
-				msgpack::sbuffer sbuf;
-				msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
-				sbuf.write("\xfb\xfc", 6);
-				_msgpack.pack_array(5);
-				_msgpack.pack(bobj->nCmd);
-				_msgpack.pack(bobj->nSubCmd);
-				_msgpack.pack(0);
-				_msgpack.pack(bobj->data);
-				DealTail(sbuf, bobj);
-			}
+			cmd_user(pArray, bobj);
+			return;
+		}
+		break;
+		case KH_DATA:
+		{
+			cmd_kh(pArray, bobj);
 		}
 		break;
 		default:

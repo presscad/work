@@ -37,6 +37,12 @@
     <Filter Include="Client\客户">
       <UniqueIdentifier>{c98ac7da-564c-46ec-b63c-725284a5018e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Client\客户经理">
+      <UniqueIdentifier>{6ae741d8-7d37-40b3-9132-9c8edd3e9233}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\电信账号">
+      <UniqueIdentifier>{e0763831-986b-48f2-9b3f-6e8b39cbfc40}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -99,6 +105,12 @@
     <ClInclude Include="cmd_kh.h">
       <Filter>Client\客户</Filter>
     </ClInclude>
+    <ClInclude Include="cmd_khjl.h">
+      <Filter>Client\客户经理</Filter>
+    </ClInclude>
+    <ClInclude Include="cmd_dxzh.h">
+      <Filter>Client\电信账号</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -160,6 +172,12 @@
     </ClCompile>
     <ClCompile Include="cmd_kh.cpp">
       <Filter>Client\客户</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_khjl.cpp">
+      <Filter>Client\客户经理</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_dxzh.cpp">
+      <Filter>Client\电信账号</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

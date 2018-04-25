@@ -5,7 +5,7 @@
 #include "global_data.h"
 #include "cmd_error.h"
 
-#define USER_ITEM	_T("id,User,Password,Authority,Usertype,Fatherid,Dj,Xgsj")
+#define USER_ITEM	_T("id,User,Password,Authority,Usertype,Fatherid,Xgsj")
 
 void ParserUser(msgpack::packer<msgpack::sbuffer>& _msgpack, MYSQL_ROW& row);
 
@@ -25,19 +25,42 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		unsigned int nAuthority = (pArray++)->as<unsigned int>();
 		unsigned int nUsertype = (pArray++)->as<unsigned int>();
 		unsigned int nFatherid = (pArray++)->as<unsigned int>();
-		double nDj = (pArray++)->as<double>();
 
-		const TCHAR* pSql = _T("INSERT INTO user_tbl (%s) VALUES(null,'%s','%s',%u,%u,%u,%f,now())");
+		const TCHAR* pSql = _T("SELECT Userid From kh_tbl WHERE Khmc='%s'");
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
-		_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, strUser.c_str(), strPassword.c_str(), nAuthority, nUsertype, nDj);
-
+		_stprintf_s(sql, sizeof(sql), pSql, strKhmc.c_str());
 		MYSQL* pMysql = Mysql_AllocConnection();
 		if (NULL == pMysql)
 		{
 			error_info(bobj, _T("连接数据库失败"));
 			return cmd_error(bobj);
 		}
+
+		MYSQL_RES* res = NULL;
+		if (!SelectFromTbl(sql, pMysql, bobj, &res))
+		{
+			Mysql_BackToPool(pMysql);
+			return cmd_error(bobj);
+		}
+
+		MYSQL_ROW row = mysql_fetch_row(res);
+		unsigned int nNum = 0;
+		sscanf_s(row[0], "%u", &nNum);
+		if (nNum != 0)
+		{
+			mysql_free_result(res);
+			res = NULL;
+			Mysql_BackToPool(pMysql);
+			error_info(bobj, _T("客户已经分配过账号信息"));
+			return cmd_error(bobj);
+		}
+		mysql_free_result(res);
+		res = NULL;
+
+		pSql = _T("INSERT INTO user_tbl (%s) VALUES(null,'%s','%s',%u,%u,%u,now())");
+		memset(sql, 0x00, sizeof(sql));
+		_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, strUser.c_str(), strPassword.c_str(), nAuthority, nFatherid, nUsertype);
 
 		if (!InsertIntoTbl(sql, pMysql, bobj))
 		{
@@ -69,7 +92,7 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		memset(sql, 0x00, sizeof(sql));
 		_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, (unsigned int)nIndex);
 
-		MYSQL_RES* res = NULL;
+		res = NULL;
 		if (!SelectFromTbl(sql, pMysql, bobj, &res))
 		{
 			Mysql_BackToPool(pMysql);
@@ -78,7 +101,7 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		Mysql_BackToPool(pMysql);
 
-		MYSQL_ROW row = mysql_fetch_row(res);
+		row = mysql_fetch_row(res);
 		msgpack::sbuffer sbuf;
 		msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
 		sbuf.write("\xfb\xfc", 6);
@@ -139,8 +162,6 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case USER_LIST:
 	{
-		// 在不加WHERE限制条件的情况下，COUNT(*)与COUNT(COL)基本可以认为是等价的；
-		// 但是在有WHERE限制条件的情况下，COUNT(*)会比COUNT(COL)快非常多；
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
@@ -178,21 +199,27 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		unsigned int nNum = 0;
 		sscanf_s(row[0], "%u", &nNum);
 
-		if (nAB == 3) // 尾页
+		if (nAB == 0) // 首页
 		{
-
-			pSql = _T("SELECT %s FROM user_tbl WHERE ");
+			pSql = _T("SELECT * FROM user_tbl WHERE Fatherid=%u AND id>%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, nId, nKeyid, nPagesize);
 		}
-		else if (nAB == 1) // 上一页
+		else if (nAB == 1)
 		{
-			pSql = _T("SELECT %s FROM user_tbl WHERE nFatherid=%u AND id<%u OERDER BY id LIMIT %d");
+			pSql = _T("SELECT * FROM user_tbl WHERE Fatherid=%u AND id<%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, nId, nKeyid, nPagesize);
 		}
-		else// 下一页
+		else if (nAB == 2)
 		{
-			pSql = _T("SELECT %s FROM user_tbl WHERE nFatherid=%u AND id>%u OERDER BY id LIMIT %d");
+			pSql = _T("SELECT * FROM user_tbl WHERE Fatherid=%u AND id>%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, nId, nKeyid, nPagesize);
 		}
-		
-		_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, nId, nKeyid, nPagesize);
+		else
+		{
+			unsigned int nTemp = nNum % nPagesize;
+			pSql = _T("SELECT * FROM user_tbl WHERE Fatherid=%u ORDER BY id desc LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, nId, nPagesize);
+		}
 
 		res = NULL;
 		if (!SelectFromTbl(sql, pMysql, bobj, &res))
