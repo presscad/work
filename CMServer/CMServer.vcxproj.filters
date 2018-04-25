@@ -31,7 +31,10 @@
     <Filter Include="Client\SIM">
       <UniqueIdentifier>{e27467e6-0fda-4c59-bd50-b47799abe71c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Client\代理">
+    <Filter Include="Client\批量导入">
+      <UniqueIdentifier>{59a24e51-28a8-4dbe-963c-23ad363cda06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\客户">
       <UniqueIdentifier>{c98ac7da-564c-46ec-b63c-725284a5018e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -87,8 +90,14 @@
     <ClInclude Include="cmd_sim.h">
       <Filter>Client\SIM</Filter>
     </ClInclude>
-    <ClInclude Include="cmd_proxy.h">
-      <Filter>Client\代理</Filter>
+    <ClInclude Include="cmd_load.h">
+      <Filter>Client\批量导入</Filter>
+    </ClInclude>
+    <ClInclude Include="cmd_error.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="cmd_kh.h">
+      <Filter>Client\客户</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -143,8 +152,14 @@
     <ClCompile Include="cmd_sim.cpp">
       <Filter>Client\SIM</Filter>
     </ClCompile>
-    <ClCompile Include="cmd_proxy.cpp">
-      <Filter>Client\代理</Filter>
+    <ClCompile Include="cmd_load.cpp">
+      <Filter>Client\批量导入</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_error.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_kh.cpp">
+      <Filter>Client\客户</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

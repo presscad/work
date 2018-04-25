@@ -153,7 +153,9 @@
   <ItemGroup>
     <ClInclude Include="api_postcompletion.h" />
     <ClInclude Include="api_requestpost.h" />
-    <ClInclude Include="cmd_proxy.h" />
+    <ClInclude Include="cmd_error.h" />
+    <ClInclude Include="cmd_load.h" />
+    <ClInclude Include="cmd_kh.h" />
     <ClInclude Include="cmd_sim.h" />
     <ClInclude Include="nc_postcompletion.h" />
     <ClInclude Include="nc_requestpost.h" />
@@ -173,7 +175,9 @@
   <ItemGroup>
     <ClCompile Include="api_postcompletion.cpp" />
     <ClCompile Include="api_requestpost.cpp" />
-    <ClCompile Include="cmd_proxy.cpp" />
+    <ClCompile Include="cmd_error.cpp" />
+    <ClCompile Include="cmd_load.cpp" />
+    <ClCompile Include="cmd_kh.cpp" />
     <ClCompile Include="cmd_sim.cpp" />
     <ClCompile Include="nc_postcompletion.cpp" />
     <ClCompile Include="nc_requestpost.cpp" />
