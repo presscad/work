@@ -154,6 +154,7 @@
     <ClInclude Include="api_postcompletion.h" />
     <ClInclude Include="api_requestpost.h" />
     <ClInclude Include="cmd_data.h" />
+    <ClInclude Include="cmd_disnumber.h" />
     <ClInclude Include="cmd_dxzh.h" />
     <ClInclude Include="cmd_error.h" />
     <ClInclude Include="cmd_khjl.h" />
@@ -182,6 +183,7 @@
     <ClCompile Include="api_postcompletion.cpp" />
     <ClCompile Include="api_requestpost.cpp" />
     <ClCompile Include="cmd_data.cpp" />
+    <ClCompile Include="cmd_disnumber.cpp" />
     <ClCompile Include="cmd_dxzh.cpp" />
     <ClCompile Include="cmd_error.cpp" />
     <ClCompile Include="cmd_khjl.cpp" />

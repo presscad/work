@@ -52,6 +52,9 @@
     <Filter Include="Client\流量池">
       <UniqueIdentifier>{87233ce4-1abe-487e-b704-b0959071f4a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="API\停复机">
+      <UniqueIdentifier>{9046faee-fe5d-4fc1-9a6b-315868c42c72}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -132,6 +135,9 @@
     <ClInclude Include="cmd_llc.h">
       <Filter>Client\流量池</Filter>
     </ClInclude>
+    <ClInclude Include="cmd_disnumber.h">
+      <Filter>API\停复机</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -211,6 +217,9 @@
     </ClCompile>
     <ClCompile Include="cmd_llc.cpp">
       <Filter>Client\流量池</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_disnumber.cpp">
+      <Filter>API\停复机</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
