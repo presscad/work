@@ -1,27 +1,23 @@
 #include "stdafx.h"
 #include "client_signaldata.h"
-#include "cmd_dxzh.h"
+#include "cmd_ssdq.h"
 #include "cm_mysql.h"
 #include "global_data.h"
 #include "cmd_error.h"
 #include "cmd_data.h"
 
-bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
+bool cmd_ssdq(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 {
 	bobj->nSubCmd = (pRootArray++)->as<int>();
 	unsigned int nId = (pRootArray++)->as<unsigned int>();
 	unsigned int nUsertype = (pRootArray++)->as<unsigned int>();
 	switch (bobj->nSubCmd)
 	{
-	case DXZH_ADD:
+	case SSDQ_ADD:
 	{
 		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
-		std::string strDxzh = (pArray++)->as<std::string>();
-		std::string strUser = (pArray++)->as<std::string>();
-		std::string strPassword = (pArray++)->as<std::string>();
-		std::string strKey = (pArray++)->as<std::string>();
-		std::string strBz = (pArray++)->as<std::string>();
+		std::string strSsdq = (pArray++)->as<std::string>();
 
 		if (nUsertype != 1)
 		{
@@ -29,10 +25,10 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			return cmd_error(bobj);
 		}
 
-		const TCHAR* pSql = _T("INSERT INTO dxzh_tbl (id,Dxzh,User,Password,Key,Bz) VALUES(null,'%s','%s','%s','%s','%s')");
+		const TCHAR* pSql = _T("INSERT INTO ssdq_tbl (id,Ssdq) VALUES(null,'%s')");
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
-		_stprintf_s(sql, sizeof(sql), pSql, strDxzh.c_str(), strUser.c_str(), strPassword.c_str(), strKey.c_str(), strBz.c_str());
+		_stprintf_s(sql, sizeof(sql), pSql, strSsdq.c_str());
 
 		MYSQL* pMysql = Mysql_AllocConnection();
 		if (NULL == pMysql)
@@ -57,7 +53,7 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		}
 		my_ulonglong nIndex = mysql_insert_id(pMysql); // 新添加的用户的id
 
-		pSql = _T("SELECT %s FROM dxzg_tbl WHERE id=%u");
+		pSql = _T("SELECT %s FROM ssdq_tbl WHERE id=%u");
 		memset(sql, 0x00, sizeof(sql));
 		_stprintf_s(sql, sizeof(sql), pSql, (unsigned int)nIndex);
 
@@ -79,13 +75,13 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack(bobj->nSubCmd);
 		_msgpack.pack(0);
 		_msgpack.pack_array(1);
-		ParserDxzh(_msgpack, row);
+		ParserSsdq(_msgpack, row);
 		mysql_free_result(res);
 
 		DealTail(sbuf, bobj);
 	}
 	break;
-	case DXZH_LIST:
+	case SSDQ_LIST:
 	{
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
@@ -102,7 +98,7 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
 
-		pSql = _T("SELECT COUNT(*) AS num FROM dxzh_tbl");
+		pSql = _T("SELECT COUNT(*) AS num FROM ssdq_tbl");
 		_stprintf_s(sql, sizeof(sql), pSql);
 
 		MYSQL* pMysql = Mysql_AllocConnection();
@@ -126,24 +122,24 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		if (nAB == 0) // 首页
 		{
-			pSql = _T("SELECT %s FROM dxzh_tbl WHERE id>%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, DXZH_SELECT, nKeyid, nPagesize);
+			pSql = _T("SELECT %s FROM ssdq_tbl WHERE id>%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, SSDQ_SELECT, nKeyid, nPagesize);
 		}
 		else if (nAB == 1)
 		{
-			pSql = _T("SELECT %s FROM dxzh_tbl WHERE id<%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, DXZH_SELECT, nKeyid, nPagesize);
+			pSql = _T("SELECT %s FROM ssdq_tbl WHERE id<%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, SSDQ_SELECT, nKeyid, nPagesize);
 		}
 		else if (nAB == 2)
 		{
-			pSql = _T("SELECT %s FROM dxzh_tbl WHERE id>%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, DXZH_SELECT, nKeyid, nPagesize);
+			pSql = _T("SELECT %s FROM ssdq_tbl WHERE id>%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, SSDQ_SELECT, nKeyid, nPagesize);
 		}
 		else
 		{
 			unsigned int nTemp = nNum % nPagesize;
-			pSql = _T("SELECT %s FROM dxzh_tbl ORDER BY id desc LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, DXZH_SELECT, nPagesize);
+			pSql = _T("SELECT %s FROM ssdq_tbl ORDER BY id desc LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, SSDQ_SELECT, nPagesize);
 		}
 
 		res = NULL;
@@ -169,7 +165,7 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack_array(nRows);
 		while (row)
 		{
-			ParserDxzh(_msgpack, row);
+			ParserSsdq(_msgpack, row);
 			row = mysql_fetch_row(res);
 		}
 		mysql_free_result(res);

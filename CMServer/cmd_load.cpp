@@ -3,6 +3,7 @@
 #include "cmd_load.h"
 #include "cm_mysql.h"
 #include "global_data.h"
+#include "cmd_error.h"
 
 bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 {
@@ -22,7 +23,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		if (NULL == pMysql)
 		{
 			error_info(bobj, _T("连接数据库失败"));
-			return false;
+			return cmd_error(bobj, nIndex);
 		}
 		mysql_autocommit(pMysql, 0);
 
@@ -44,7 +45,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 				mysql_rollback(pMysql);
 				mysql_autocommit(pMysql, 1);
 				Mysql_BackToPool(pMysql);
-				return false;
+				return cmd_error(bobj, nIndex);
 			}
 		}
 
@@ -62,7 +63,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		if (NULL == pMysql)
 		{
 			error_info(bobj, _T("连接数据库失败"));
-			return false;
+			return cmd_error(bobj, nIndex);
 		}
 		mysql_autocommit(pMysql, 0);
 
@@ -77,12 +78,48 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			TCHAR sql[256];
 			memset(sql, 0x00, sizeof(sql));
 			_stprintf_s(sql, sizeof(sql), pSql, strKhmc.c_str(), strJlxm.c_str(), strXsrq.c_str(), strJrhm.c_str());
-			if (!InsertIntoTbl(sql, pMysql, bobj))
+			if (!UpdateTbl(sql, pMysql, bobj))
 			{
 				mysql_rollback(pMysql);
 				mysql_autocommit(pMysql, 1);
 				Mysql_BackToPool(pMysql);
-				return false;
+				return cmd_error(bobj, nIndex);
+			}
+		}
+
+		mysql_commit(pMysql);
+		mysql_autocommit(pMysql, 1);
+		Mysql_BackToPool(pMysql);
+	}
+	break;
+	case EXCEL_XFQD:
+	{
+		int nArraySize = pRootArray->via.array.size;
+		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
+		MYSQL* pMysql = Mysql_AllocConnection();
+		if (NULL == pMysql)
+		{
+			error_info(bobj, _T("连接数据库失败"));
+			return cmd_error(bobj, nIndex);
+		}
+		mysql_autocommit(pMysql, 0);
+
+		for (int i = 0; i < nArraySize; i++)
+		{
+			msgpack::object* pArray = (pDataArray++)->via.array.ptr;
+			std::string strJrhm = (pArray++)->as<std::string>();
+			std::string strXfrq = (pArray++)->as<std::string>();
+			int nMonth = (pArray++)->as<int>();
+			const TCHAR* pSql = _T("UPDATE sim_tbl SET Xfrq='%s',Dqrq=DATE_ADD(IF('%s'>Dqrq,'%s',Dqrq),INTERVAL %d MONTH) WHERE Jrhm='%s'");
+			TCHAR sql[256];
+			memset(sql, 0x00, sizeof(sql));
+			_stprintf_s(sql, sizeof(sql), pSql, strXfrq.c_str(), strXfrq.c_str(), strXfrq.c_str(), strJrhm.c_str(), nMonth, strJrhm.c_str());
+			if (!UpdateTbl(sql, pMysql, bobj))
+			{
+				mysql_rollback(pMysql);
+				mysql_autocommit(pMysql, 1);
+				Mysql_BackToPool(pMysql);
+				return cmd_error(bobj, nIndex);
 			}
 		}
 

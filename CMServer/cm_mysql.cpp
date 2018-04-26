@@ -186,14 +186,34 @@ bool UpdateTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj)
 	size_t len = _tcslen(sql);
 	if (0 != mysql_real_query(pMysql, sql, (ULONG)len))
 	{
+		error_info(bobj, _T("数据库异常 ErrorCode = %08x, ErrorMsg = %s"), mysql_errno(pMysql), mysql_error(pMysql));
 		return false;
 	}
 
 	if (mysql_affected_rows(pMysql) == 0)
 	{
+		error_info(bobj, _T("数据不存在"));
 		return false;
 	}
 
+	return true;
+}
+
+bool CreateTbl(const TCHAR* sql)
+{
+	MYSQL* pMysql = Mysql_AllocConnection();
+	if (NULL == pMysql)
+	{
+		_tprintf(_T("%s:连接服务器失败\n"), __FUNCTION__);
+		return false;
+	}
+	size_t len = _tcslen(sql);
+	if (0 != mysql_real_query(pMysql, sql, (ULONG)len))
+	{
+		Mysql_BackToPool(pMysql);
+		return false;
+	}
+	Mysql_BackToPool(pMysql);
 	return true;
 }
 
@@ -210,20 +230,7 @@ unique key(User),\
 key(Fatherid))")
 bool CreateUserTbl()
 {
-	MYSQL* pMysql = Mysql_AllocConnection();
-	if (NULL == pMysql)
-	{
-		_tprintf(_T("%s:连接服务器失败\n"), __FUNCTION__);
-		return false;
-	}
-	size_t len = _tcslen(CREATE_USER_TBL);
-	if (0 != mysql_real_query(pMysql, CREATE_USER_TBL, (ULONG)len))
-	{
-		Mysql_BackToPool(pMysql);
-		return false;
-	}
-	Mysql_BackToPool(pMysql);
-	return true;
+	return CreateTbl(CREATE_USER_TBL);
 }
 
 #define CREATE_KH_TBL _T("CREATE TABLE IF NOT EXISTS kh_tbl(id int unsigned not null auto_increment,\
@@ -245,19 +252,84 @@ key(Fatherid),\
 key(Jlxm))")
 bool CreateKhTbl()
 {
-	MYSQL* pMysql = Mysql_AllocConnection();
-	if (NULL == pMysql)
-	{
-		_tprintf(_T("%s:连接服务器失败\n"), __FUNCTION__);
-		return false;
-	}
-	size_t len = _tcslen(CREATE_KH_TBL);
-	if (0 != mysql_real_query(pMysql, CREATE_KH_TBL, (ULONG)len))
-	{
-		_tprintf_s(_T("数据库异常 ErrorCode = %08x, ErrorMsg = %s"), mysql_errno(pMysql), mysql_error(pMysql));
-		Mysql_BackToPool(pMysql);
-		return false;
-	}
-	Mysql_BackToPool(pMysql);
-	return true;
+	return CreateTbl(CREATE_KH_TBL);
+}
+
+#define CREATE_SIM_TBL _T("CREATE TABLE IF NOT EXISTS sim_tbl(id int unsigned not null auto_increment,\
+Jrhm char(16) NOT NULL,\
+Iccid char(20) NOT NULL,\
+Dxzh varchar(64) NOT NULL,\
+Llchm varchar(16) NOT NULL,\
+Llclx varchar(8),\
+Khid01 int unsigned default 0,\
+Khid02 int unsigned default 0, \
+Xsrq date,\
+Xfrq date,\
+Dqrq date,\
+Zxrq date,\
+Bz varchar(64),\
+primary key(id),\
+unique key(Jrhm),\
+key(Khid01),\
+key(Khid02))")
+bool CreateSimTbl()
+{
+	return CreateTbl(CREATE_SIM_TBL);
+}
+
+#define CREATE_KHJL_TBL _T("CREATE TABLE IF NOT EXISTS khjl_tbl(id int unsigned not null auto_increment,\
+Jlxm char(16) NOT NULL,\
+Lxfs char(20) NOT NULL,\
+Bz varchar(64),\
+primary key(id),\
+unique key(Jlxm))")
+bool CreateKhjlTbl()
+{
+	return CreateTbl(CREATE_KHJL_TBL);
+}
+
+#define CREATE_LLC_TBL _T("CREATE TABLE IF NOT EXISTS llc_tbl(id int unsigned not null auto_increment,\
+Llchm char(16) NOT NULL,\
+Llclx char(8) NOT NULL,\
+Dxzh varchar(64) NOT NULL,\
+Bz varchar(64),\
+primary key(id),\
+unique key(Llchm))")
+bool CreateLlcTbl()
+{
+	return CreateTbl(CREATE_LLC_TBL);
+}
+
+#define CREATE_LLTC_TBL _T("CREATE TABLE IF NOT EXISTS llc_tbl(id int unsigned not null auto_increment,\
+Tcmc char(16) NOT NULL,\
+Tcfl char(8) NOT NULL,\
+Bz varchar(64),\
+primary key(id),\
+unique key(Tcmc))")
+bool CreateLltcTbl()
+{
+	return CreateTbl(CREATE_LLTC_TBL);
+}
+
+#define CREATE_SSDQ_TBL _T("CREATE TABLE IF NOT EXISTS ssdq_tbl(id int unsigned not null auto_increment,\
+Ssdq varchar(64) NOT NULL,\
+Bz varchar(64),\
+primary key(id),\
+unique key(Ssdq))")
+bool CreateSsdqTbl()
+{
+	return CreateTbl(CREATE_SSDQ_TBL);
+}
+
+#define CREATE_DXZH_TBL _T("CREATE TABLE IF NOT EXISTS dxzh_tbl(id int unsigned not null auto_increment,\
+Dxzh varchar(64) NOT NULL,\
+User varchar(64),\
+Password varchar(64),\
+Key varchar(64),\
+Bz varchar(64),\
+primary key(id),\
+unique key(Dxzh))")
+bool CreateDxzhTbl()
+{
+	return CreateTbl(CREATE_DXZH_TBL);
 }

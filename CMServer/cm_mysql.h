@@ -14,3 +14,15 @@ bool UpdateTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj);
 bool CreateUserTbl();
 
 bool CreateKhTbl();
+
+bool CreateSimTbl();
+
+bool CreateKhjlTbl();
+
+bool CreateLlcTbl();
+
+bool CreateLltcTbl();
+
+bool CreateSsdqTbl();
+
+bool CreateDxzhTbl();

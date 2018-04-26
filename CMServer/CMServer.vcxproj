@@ -153,12 +153,16 @@
   <ItemGroup>
     <ClInclude Include="api_postcompletion.h" />
     <ClInclude Include="api_requestpost.h" />
+    <ClInclude Include="cmd_data.h" />
     <ClInclude Include="cmd_dxzh.h" />
     <ClInclude Include="cmd_error.h" />
     <ClInclude Include="cmd_khjl.h" />
+    <ClInclude Include="cmd_llc.h" />
+    <ClInclude Include="cmd_lltc.h" />
     <ClInclude Include="cmd_load.h" />
     <ClInclude Include="cmd_kh.h" />
     <ClInclude Include="cmd_sim.h" />
+    <ClInclude Include="cmd_ssdq.h" />
     <ClInclude Include="nc_postcompletion.h" />
     <ClInclude Include="nc_requestpost.h" />
     <ClInclude Include="client_cmd.h" />
@@ -177,12 +181,16 @@
   <ItemGroup>
     <ClCompile Include="api_postcompletion.cpp" />
     <ClCompile Include="api_requestpost.cpp" />
+    <ClCompile Include="cmd_data.cpp" />
     <ClCompile Include="cmd_dxzh.cpp" />
     <ClCompile Include="cmd_error.cpp" />
     <ClCompile Include="cmd_khjl.cpp" />
+    <ClCompile Include="cmd_llc.cpp" />
+    <ClCompile Include="cmd_lltc.cpp" />
     <ClCompile Include="cmd_load.cpp" />
     <ClCompile Include="cmd_kh.cpp" />
     <ClCompile Include="cmd_sim.cpp" />
+    <ClCompile Include="cmd_ssdq.cpp" />
     <ClCompile Include="nc_postcompletion.cpp" />
     <ClCompile Include="nc_requestpost.cpp" />
     <ClCompile Include="client_cmd.cpp" />

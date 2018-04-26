@@ -4,12 +4,13 @@
 #include "cm_mysql.h"
 #include "global_data.h"
 #include "cmd_error.h"
-
-void ParserKhjl(msgpack::packer<msgpack::sbuffer>& _msgpack, MYSQL_ROW& row);
+#include "cmd_data.h"
 
 bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 {
 	bobj->nSubCmd = (pRootArray++)->as<int>();
+	unsigned int nId = (pRootArray++)->as<unsigned int>();
+	unsigned int nUsertype = (pRootArray++)->as<unsigned int>();
 	switch (bobj->nSubCmd)
 	{
 	case KHJL_ADD:
@@ -23,11 +24,6 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
 		int nKeyid = (pRootArray++)->as<int>();
-
-		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
-		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
-		unsigned int nId = (pArray++)->as<unsigned int>();
-		unsigned int nUsertype = (pArray++)->as<unsigned int>();
 
 		if (nUsertype != 1)
 		{
@@ -63,24 +59,24 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		if (nAB == 0) // Ê×Ò³
 		{
-			pSql = _T("SELECT id,Khmc,Lxfs,Ssdq,Jlxm,Dj FROM khjl_tbl WHERE id>%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, nKeyid, nPagesize);
+			pSql = _T("SELECT %s FROM khjl_tbl WHERE id>%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, nKeyid, nPagesize);
 		}
 		else if (nAB == 1)
 		{
-			pSql = _T("SELECT id,Khmc,Lxfs,Ssdq,Jlxm,Dj FROM khjl_tbl WHERE id<%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, nKeyid, nPagesize);
+			pSql = _T("SELECT %s FROM khjl_tbl WHERE id<%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, nKeyid, nPagesize);
 		}
 		else if (nAB == 2)
 		{
-			pSql = _T("SELECT id,Khmc,Lxfs,Ssdq,Jlxm,Dj FROM khjl_tbl WHERE id>%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, nKeyid, nPagesize);
+			pSql = _T("SELECT %s FROM khjl_tbl WHERE id>%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, nKeyid, nPagesize);
 		}
 		else
 		{
 			unsigned int nTemp = nNum % nPagesize;
-			pSql = _T("SELECT id,Khmc,Lxfs,Ssdq,Jlxm,Dj FROM khjl_tbl ORDER BY id desc LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, nPagesize);
+			pSql = _T("SELECT %s FROM khjl_tbl ORDER BY id desc LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, nPagesize);
 		}
 
 		res = NULL;
@@ -118,9 +114,4 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		break;
 	}
 	return true;
-}
-
-void ParserKhjl(msgpack::packer<msgpack::sbuffer>& _msgpack, MYSQL_ROW& row)
-{
-
 }

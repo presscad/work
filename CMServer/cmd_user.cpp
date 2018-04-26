@@ -4,15 +4,13 @@
 #include "cm_mysql.h"
 #include "global_data.h"
 #include "cmd_error.h"
-
-#define USER_ITEM	_T("id,User,Password,Authority,Usertype,Fatherid,Xgsj")
-
-void ParserUser(msgpack::packer<msgpack::sbuffer>& _msgpack, MYSQL_ROW& row);
+#include "cmd_data.h"
 
 bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 {
 	bobj->nSubCmd = (pRootArray++)->as<int>();
-
+	unsigned int nId = (pRootArray++)->as<unsigned int>();
+	unsigned int nUsertype = (pRootArray++)->as<unsigned int>();
 	switch (bobj->nSubCmd)
 	{
 	case USER_ADD:
@@ -58,9 +56,9 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		mysql_free_result(res);
 		res = NULL;
 
-		pSql = _T("INSERT INTO user_tbl (%s) VALUES(null,'%s','%s',%u,%u,%u,now())");
+		pSql = _T("INSERT INTO user_tbl (id,User,Password,Authority,Usertype,Fatherid,Xgsj) VALUES(null,'%s','%s',%u,%u,%u,now())");
 		memset(sql, 0x00, sizeof(sql));
-		_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, strUser.c_str(), strPassword.c_str(), nAuthority, nFatherid, nUsertype);
+		_stprintf_s(sql, sizeof(sql), pSql, strUser.c_str(), strPassword.c_str(), nAuthority, nFatherid, nUsertype);
 
 		if (!InsertIntoTbl(sql, pMysql, bobj))
 		{
@@ -90,7 +88,7 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		pSql = _T("SELECT %s FROM user_tbl WHERE id=%u");
 		memset(sql, 0x00, sizeof(sql));
-		_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, (unsigned int)nIndex);
+		_stprintf_s(sql, sizeof(sql), pSql, USER_SELECT, (unsigned int)nIndex);
 
 		res = NULL;
 		if (!SelectFromTbl(sql, pMysql, bobj, &res))
@@ -127,7 +125,7 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		const TCHAR* pSql = _T("SELECT %s FROM user_tbl WHERE User='%s' AND Password='%s'");
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
-		_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, strUser.c_str(), strPassword.c_str());
+		_stprintf_s(sql, sizeof(sql), pSql, USER_SELECT, strUser.c_str(), strPassword.c_str());
 
 		MYSQL* pMysql = Mysql_AllocConnection();
 		if (NULL == pMysql)
@@ -167,11 +165,6 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		int nAB = (pRootArray++)->as<int>();
 		int nKeyid = (pRootArray++)->as<int>();
 
-		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
-		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
-		unsigned int nId  = (pArray++)->as<unsigned int>();
-		unsigned int nUsertype = (pArray++)->as<unsigned int>();
-
 		const TCHAR* pSql = pSql = _T("SELECT COUNT(*) AS num FROM user_tbl WHERE nFatherid=%u");
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
@@ -201,24 +194,24 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		if (nAB == 0) // Ê×Ò³
 		{
-			pSql = _T("SELECT * FROM user_tbl WHERE Fatherid=%u AND id>%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, nId, nKeyid, nPagesize);
+			pSql = _T("SELECT %s FROM user_tbl WHERE Fatherid=%u AND id>%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, USER_SELECT, nId, nKeyid, nPagesize);
 		}
 		else if (nAB == 1)
 		{
-			pSql = _T("SELECT * FROM user_tbl WHERE Fatherid=%u AND id<%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, nId, nKeyid, nPagesize);
+			pSql = _T("SELECT %s FROM user_tbl WHERE Fatherid=%u AND id<%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, USER_SELECT, nId, nKeyid, nPagesize);
 		}
 		else if (nAB == 2)
 		{
-			pSql = _T("SELECT * FROM user_tbl WHERE Fatherid=%u AND id>%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, nId, nKeyid, nPagesize);
+			pSql = _T("SELECT %s FROM user_tbl WHERE Fatherid=%u AND id>%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, USER_SELECT, nId, nKeyid, nPagesize);
 		}
 		else
 		{
 			unsigned int nTemp = nNum % nPagesize;
-			pSql = _T("SELECT * FROM user_tbl WHERE Fatherid=%u ORDER BY id desc LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, USER_ITEM, nId, nPagesize);
+			pSql = _T("SELECT %s FROM user_tbl WHERE Fatherid=%u ORDER BY id desc LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, USER_SELECT, nId, nPagesize);
 		}
 
 		res = NULL;
@@ -257,25 +250,4 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	}
 
 	return true;
-}
-
-// row[0] = id;
-// row[1] = User;
-// row[2] = Password;
-// row[3] = Authority;
-// row[4] = Usertype;
-// row[5] = Dj;
-// row[6] = Fatherid;
-// row[7] = Xgsj;
-void ParserUser(msgpack::packer<msgpack::sbuffer>& _msgpack, MYSQL_ROW& row)
-{
-	_msgpack.pack_array(8);
-	_msgpack.pack(row[0]);
-	_msgpack.pack(row[1]);
-	_msgpack.pack(row[2]);
-	_msgpack.pack(row[3]);
-	_msgpack.pack(row[4]);
-	_msgpack.pack(row[5]);
-	_msgpack.pack(row[6]);
-	_msgpack.pack(row[7]);
 }

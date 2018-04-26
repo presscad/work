@@ -43,6 +43,15 @@
     <Filter Include="Client\电信账号">
       <UniqueIdentifier>{e0763831-986b-48f2-9b3f-6e8b39cbfc40}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Client\所属地区">
+      <UniqueIdentifier>{5341504e-22a2-454c-b592-f8522da3c333}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\流量套餐">
+      <UniqueIdentifier>{34f28d55-1822-47a5-981a-fa93cc0b8e53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\流量池">
+      <UniqueIdentifier>{87233ce4-1abe-487e-b704-b0959071f4a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -111,6 +120,18 @@
     <ClInclude Include="cmd_dxzh.h">
       <Filter>Client\电信账号</Filter>
     </ClInclude>
+    <ClInclude Include="cmd_data.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="cmd_ssdq.h">
+      <Filter>Client\所属地区</Filter>
+    </ClInclude>
+    <ClInclude Include="cmd_lltc.h">
+      <Filter>Client\流量套餐</Filter>
+    </ClInclude>
+    <ClInclude Include="cmd_llc.h">
+      <Filter>Client\流量池</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -178,6 +199,18 @@
     </ClCompile>
     <ClCompile Include="cmd_dxzh.cpp">
       <Filter>Client\电信账号</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_data.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_ssdq.cpp">
+      <Filter>Client\所属地区</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_lltc.cpp">
+      <Filter>Client\流量套餐</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_llc.cpp">
+      <Filter>Client\流量池</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
