@@ -42,6 +42,7 @@ typedef struct _buffer_obj_t
 	DWORD dwSendedCount;
 	int nCmd;
 	int nSubCmd;
+	int nSubSubCmd;
 	int datalen;
 }BUFFER_OBJ_T;
 #define SIZE_BUFFER_OBJ_T sizeof(BUFFER_OBJ_T)
@@ -58,6 +59,7 @@ typedef struct _buffer_obj
 	DWORD dwSendedCount;
 	int nCmd;
 	int nSubCmd;
+	int nSubSubCmd;
 	int datalen;
 	TCHAR data[1];
 
@@ -71,6 +73,7 @@ typedef struct _buffer_obj
 		dwSendedCount = 0;
 		nCmd = 0;
 		nSubCmd = 0;
+		nSubSubCmd = 0;
 		datalen = dwSize;
 		memset(data, 0x00, dwSize);
 	}
