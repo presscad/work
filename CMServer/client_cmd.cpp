@@ -9,6 +9,11 @@
 #include "cmd_load.h"
 #include "cmd_sim.h"
 #include "cmd_beat.h"
+#include "cmd_khjl.h"
+#include "cmd_dxzh.h"
+#include "cmd_llc.h"
+#include "cmd_lltc.h"
+#include "cmd_ssdq.h"
 
 void Client_CmdCompletionFailed(void* bobj_, void* _bobj)
 {
@@ -53,6 +58,12 @@ void Client_CmdCompletionSuccess(DWORD dwTranstion, void* bobj_, void* _bobj)
 			return;
 		}
 		break;
+		case KHJL_DATA:
+		{
+			cmd_khjl(pArray, bobj);
+			return;
+		}
+		break;
 		case EXCEL_LOAD:
 		{
 			cmd_load(pArray, bobj);
@@ -64,7 +75,30 @@ void Client_CmdCompletionSuccess(DWORD dwTranstion, void* bobj_, void* _bobj)
 			return;
 		}
 		break;
-
+		case SSDQ_DATA:
+		{
+			cmd_ssdq(pArray, bobj);
+			return;
+		}
+		break;
+		case LLTC_DATA:
+		{
+			cmd_lltc(pArray, bobj);
+			return;
+		}
+		break;
+		case LLC_DATA:
+		{
+			cmd_llc(pArray, bobj);
+			return;
+		}
+		break;
+		case DXZH_DATA:
+		{
+			cmd_dxzh(pArray, bobj);
+			return;
+		}
+		break;
 		case BEAT_DATA:
 		{
 			cmd_beat(pArray, bobj);
