@@ -164,7 +164,7 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack_array(nRows);
 		while (row)
 		{
-			ParserSim(_msgpack, row);
+			ParserSim(_msgpack, row, SIM_SELECT_SIZE);
 			row = mysql_fetch_row(res);
 		}
 		mysql_free_result(res);
@@ -178,13 +178,13 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
 		std::string strJrhm = (pArray++)->as<std::string>();
 
-		const TCHAR* pSql = _T("SELECT * FROM sim_tbl WHERE Khid01=%u");
+		const TCHAR* pSql = _T("SELECT a.id,a.Jrhm,a.Iccid,a.Llchm,a.Llclx,b.Khmc FROM (SELECT %s FROM sim_tbl WHERE Jrhm='%s') a LEFT JOIN kh_tbl b ON a.Khid01=b.id");
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
-		_stprintf_s(sql, sizeof(sql), pSql, nId);
+		_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, strJrhm.c_str());
 		MYSQL* pMysql = Mysql_AllocConnection();
 		if (NULL == pMysql)
-		{
+		{ 
 			error_info(bobj, _T("连接数据库失败"));
 			return cmd_error(bobj);
 		}
@@ -196,7 +196,6 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			return cmd_error(bobj);
 		}
 		MYSQL_ROW row = mysql_fetch_row(res);
-		mysql_free_result(res);
 
 		row = mysql_fetch_row(res);
 		msgpack::sbuffer sbuf;
@@ -207,7 +206,7 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack(bobj->nSubCmd);
 		_msgpack.pack(0);
 		_msgpack.pack_array(1);
-		ParserSim(_msgpack, row);
+		ParserSim(_msgpack, row, SIM_SELECT_SIZE);
 		mysql_free_result(res);
 
 		DealTail(sbuf, bobj);

@@ -75,7 +75,7 @@ bool cmd_ssdq(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack(bobj->nSubCmd);
 		_msgpack.pack(0);
 		_msgpack.pack_array(1);
-		ParserSsdq(_msgpack, row);
+		ParserSsdq(_msgpack, row, SSDQ_SELECT_SIZE);
 		mysql_free_result(res);
 
 		DealTail(sbuf, bobj);
@@ -165,7 +165,7 @@ bool cmd_ssdq(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack_array(nRows);
 		while (row)
 		{
-			ParserSsdq(_msgpack, row);
+			ParserSsdq(_msgpack, row, SSDQ_SELECT_SIZE);
 			row = mysql_fetch_row(res);
 		}
 		mysql_free_result(res);

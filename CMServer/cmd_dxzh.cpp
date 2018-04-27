@@ -29,7 +29,7 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			return cmd_error(bobj);
 		}
 
-		const TCHAR* pSql = _T("INSERT INTO dxzh_tbl (id,Dxzh,User,Password,Key,Bz) VALUES(null,'%s','%s','%s','%s','%s')");
+		const TCHAR* pSql = _T("INSERT INTO dxzh_tbl (id,Dxzh,User,Password,Key,Xgsj,Bz) VALUES(null,'%s','%s','%s','%s',now,'%s')");
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
 		_stprintf_s(sql, sizeof(sql), pSql, strDxzh.c_str(), strUser.c_str(), strPassword.c_str(), strKey.c_str(), strBz.c_str());
@@ -59,7 +59,7 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		pSql = _T("SELECT %s FROM dxzg_tbl WHERE id=%u");
 		memset(sql, 0x00, sizeof(sql));
-		_stprintf_s(sql, sizeof(sql), pSql, (unsigned int)nIndex);
+		_stprintf_s(sql, sizeof(sql), pSql, DXZH_SELECT, (unsigned int)nIndex);
 
 		MYSQL_RES* res = NULL;
 		if (!SelectFromTbl(sql, pMysql, bobj, &res))
@@ -79,7 +79,7 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack(bobj->nSubCmd);
 		_msgpack.pack(0);
 		_msgpack.pack_array(1);
-		ParserDxzh(_msgpack, row);
+		ParserDxzh(_msgpack, row, DXZH_SELECT_SIZE);
 		mysql_free_result(res);
 
 		DealTail(sbuf, bobj);
@@ -169,7 +169,7 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack_array(nRows);
 		while (row)
 		{
-			ParserDxzh(_msgpack, row);
+			ParserDxzh(_msgpack, row, DXZH_SELECT_SIZE);
 			row = mysql_fetch_row(res);
 		}
 		mysql_free_result(res);

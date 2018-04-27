@@ -6,6 +6,9 @@
 #include "client_mem.h"
 #include "cmd_user.h"
 #include "cmd_kh.h"
+#include "cmd_load.h"
+#include "cmd_sim.h"
+#include "cmd_beat.h"
 
 void Client_CmdCompletionFailed(void* bobj_, void* _bobj)
 {
@@ -47,6 +50,25 @@ void Client_CmdCompletionSuccess(DWORD dwTranstion, void* bobj_, void* _bobj)
 		case KH_DATA:
 		{
 			cmd_kh(pArray, bobj);
+			return;
+		}
+		break;
+		case EXCEL_LOAD:
+		{
+			cmd_load(pArray, bobj);
+			return;
+		}
+		case SIM_DATA:
+		{
+			cmd_sim(pArray, bobj);
+			return;
+		}
+		break;
+
+		case BEAT_DATA:
+		{
+			cmd_beat(pArray, bobj);
+			return;
 		}
 		break;
 		default:

@@ -15,7 +15,72 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	{
 	case KHJL_ADD:
 	{
-		
+		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
+		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
+		std::string strJlxm = (pArray++)->as<std::string>();
+		std::string strLxfs = (pArray++)->as<std::string>();
+		std::string strBz = (pArray++)->as<std::string>();
+
+		if (nUsertype != 1)
+		{
+			error_info(bobj, _T("无权限"));
+			return cmd_error(bobj);
+		}
+
+		const TCHAR* pSql = _T("INSERT INTO khjl_tbl (id,Jlxm,Lxfs,Xgsj,Bz) VALUES(null,'%s','%s',now(),'%s')");
+		TCHAR sql[256];
+		memset(sql, 0x00, sizeof(sql));
+		_stprintf_s(sql, sizeof(sql), pSql, strJlxm.c_str(), strLxfs.c_str(), strBz.c_str());
+
+		MYSQL* pMysql = Mysql_AllocConnection();
+		if (NULL == pMysql)
+		{
+			error_info(bobj, _T("连接数据库失败"));
+			return cmd_error(bobj);
+		}
+
+		if (!InsertIntoTbl(sql, pMysql, bobj))
+		{
+			UINT uError = mysql_errno(pMysql);
+			if (uError == 1062)
+			{
+				error_info(bobj, _T("客户经理已存在"));
+			}
+			else
+			{
+				error_info(bobj, _T("数据库异常 ErrorCode = %08x, ErrorMsg = %s"), uError, mysql_error(pMysql));
+			}
+			Mysql_BackToPool(pMysql);
+			return cmd_error(bobj);
+		}
+		my_ulonglong nIndex = mysql_insert_id(pMysql); // 新添加的用户的id
+
+		pSql = _T("SELECT %s FROM khjl_tbl WHERE id=%u");
+		memset(sql, 0x00, sizeof(sql));
+		_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, (unsigned int)nIndex);
+
+		MYSQL_RES* res = NULL;
+		if (!SelectFromTbl(sql, pMysql, bobj, &res))
+		{
+			Mysql_BackToPool(pMysql);
+			return cmd_error(bobj);
+		}
+
+		Mysql_BackToPool(pMysql);
+
+		MYSQL_ROW row = mysql_fetch_row(res);
+		msgpack::sbuffer sbuf;
+		msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
+		sbuf.write("\xfb\xfc", 6);
+		_msgpack.pack_array(4);
+		_msgpack.pack(bobj->nCmd);
+		_msgpack.pack(bobj->nSubCmd);
+		_msgpack.pack(0);
+		_msgpack.pack_array(1);
+		ParserLlc(_msgpack, row, KHJL_SELECT_SIZE);
+		mysql_free_result(res);
+
+		DealTail(sbuf, bobj);
 	}
 	break;
 	case KHJL_LIST:
@@ -102,7 +167,7 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack_array(nRows);
 		while (row)
 		{
-			ParserKhjl(_msgpack, row);
+			ParserKhjl(_msgpack, row, KHJL_SELECT_SIZE);
 			row = mysql_fetch_row(res);
 		}
 		mysql_free_result(res);

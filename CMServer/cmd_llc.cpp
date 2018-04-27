@@ -17,9 +17,9 @@ bool cmd_llc(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	{
 		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
-		std::string strDxzh = (pArray++)->as<std::string>();
 		std::string strLlchm = (pArray++)->as<std::string>();
 		std::string strLlclx = (pArray++)->as<std::string>();
+		std::string strDxzh = (pArray++)->as<std::string>();
 		std::string strBz = (pArray++)->as<std::string>();
 
 		if (nUsertype != 1)
@@ -28,7 +28,7 @@ bool cmd_llc(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			return cmd_error(bobj);
 		}
 
-		const TCHAR* pSql = _T("INSERT INTO llc_tbl (id,Dxzh,Llchm,Llclx,Bz) VALUES(null,'%s','%s','%s','%s')");
+		const TCHAR* pSql = _T("INSERT INTO llc_tbl (id,Dxzh,Llchm,Llclx,Xgsj,Bz) VALUES(null,'%s','%s','%s',now(),'%s')");
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
 		_stprintf_s(sql, sizeof(sql), pSql, strDxzh.c_str(), strLlchm.c_str(), strLlclx.c_str(), strBz.c_str());
@@ -78,7 +78,7 @@ bool cmd_llc(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack(bobj->nSubCmd);
 		_msgpack.pack(0);
 		_msgpack.pack_array(1);
-		ParserLlc(_msgpack, row);
+		ParserLlc(_msgpack, row, LLC_SELECT_SIZE);
 		mysql_free_result(res);
 
 		DealTail(sbuf, bobj);
@@ -168,7 +168,7 @@ bool cmd_llc(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack_array(nRows);
 		while (row)
 		{
-			ParserLlc(_msgpack, row);
+			ParserLlc(_msgpack, row, LLC_SELECT_SIZE);
 			row = mysql_fetch_row(res);
 		}
 		mysql_free_result(res);

@@ -24,7 +24,7 @@ bool Mysql_ConnectDB(MYSQL** pMysql)
 	if (NULL == *pMysql)
 		return false;
 
-	if (NULL == mysql_real_connect(*pMysql, _T("localhost"), DB_USER, DB_PWD, DB_NAME, 3306, NULL, 0))
+	if (NULL == mysql_real_connect(*pMysql, _T("localhost"), DB_USER, DB_PWD, DB_NAME, 3307, NULL, 0))
 	{
 		return false;
 	}
@@ -144,6 +144,7 @@ bool InsertIntoTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj)
 	size_t len = _tcslen(sql);
 	if (0 != mysql_real_query(pMysql, sql, (ULONG)len))
 	{
+		error_info(bobj, _T("Êý¾Ý¿âÒì³£ ErrorCode = %08x, ErrorMsg = %s"), mysql_errno(pMysql), mysql_error(pMysql));
 		return false;
 	}
 
@@ -223,8 +224,8 @@ Password char(41) NOT NULL,\
 Authority int NOT NULL,\
 Usertype int NOT NULL,\
 Fatherid int unsigned DEFAULT 0,\
-Dj double(8,2) DEFAULT 0.00,\
-Xgsj date,\
+Xgsj datetime,\
+Bz varchar(64),\
 primary key(id),\
 unique key(User),\
 key(Fatherid))")
@@ -245,6 +246,7 @@ On1m int unsigned DEFAULT 0,\
 On15d int unsigned DEFAULT 0,\
 Du15d int unsigned DEFAULT 0,\
 Du1m int unsigned DEFAULT 0,\
+Xgsj datetime,\
 Bz varchar(64),\
 primary key(id),\
 unique key(Khmc),\
@@ -259,11 +261,14 @@ bool CreateKhTbl()
 Jrhm char(16) NOT NULL,\
 Iccid char(20) NOT NULL,\
 Dxzh varchar(64) NOT NULL,\
-Llchm varchar(16) NOT NULL,\
-Llclx varchar(8),\
+Zt char(16),\
+Llchm varchar(32) NOT NULL,\
+Llclx varchar(32),\
+Jlxm char(32),\
 Khid01 int unsigned default 0,\
 Khid02 int unsigned default 0, \
 Xsrq date,\
+Jhrq date,\
 Xfrq date,\
 Dqrq date,\
 Zxrq date,\
@@ -280,6 +285,7 @@ bool CreateSimTbl()
 #define CREATE_KHJL_TBL _T("CREATE TABLE IF NOT EXISTS khjl_tbl(id int unsigned not null auto_increment,\
 Jlxm char(16) NOT NULL,\
 Lxfs char(20) NOT NULL,\
+Xgsj datetime,\
 Bz varchar(64),\
 primary key(id),\
 unique key(Jlxm))")
@@ -292,6 +298,7 @@ bool CreateKhjlTbl()
 Llchm char(16) NOT NULL,\
 Llclx char(8) NOT NULL,\
 Dxzh varchar(64) NOT NULL,\
+Xgsj datetime,\
 Bz varchar(64),\
 primary key(id),\
 unique key(Llchm))")
@@ -303,6 +310,7 @@ bool CreateLlcTbl()
 #define CREATE_LLTC_TBL _T("CREATE TABLE IF NOT EXISTS llc_tbl(id int unsigned not null auto_increment,\
 Tcmc char(16) NOT NULL,\
 Tcfl char(8) NOT NULL,\
+Xgsj datetime,\
 Bz varchar(64),\
 primary key(id),\
 unique key(Tcmc))")
@@ -313,6 +321,7 @@ bool CreateLltcTbl()
 
 #define CREATE_SSDQ_TBL _T("CREATE TABLE IF NOT EXISTS ssdq_tbl(id int unsigned not null auto_increment,\
 Ssdq varchar(64) NOT NULL,\
+Xgsj datetime,\
 Bz varchar(64),\
 primary key(id),\
 unique key(Ssdq))")
@@ -326,6 +335,7 @@ Dxzh varchar(64) NOT NULL,\
 User varchar(64),\
 Password varchar(64),\
 Key varchar(64),\
+Xgsj datetime,\
 Bz varchar(64),\
 primary key(id),\
 unique key(Dxzh))")

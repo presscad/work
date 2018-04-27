@@ -30,7 +30,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		double nDj = (pArray++)->as<double>();
 		std::string strBz = (pArray++)->as<std::string>();
 
-		const TCHAR* pSql = _T("INSERT INTO kh_tbl (id,Khmc,Fatherid,Lxfs,Ssdq,Jlxm,Dj,Bz) VALUES(null,'%s',%u,'%s','%s','%s',%f,'%s')");
+		const TCHAR* pSql = _T("INSERT INTO kh_tbl (id,Khmc,Fatherid,Lxfs,Ssdq,Jlxm,Dj,Xgsj,Bz) VALUES(null,'%s',%u,'%s','%s','%s',%f,now(),'%s')");
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
 		_stprintf_s(sql, sizeof(sql), pSql, strKhmc.c_str(), nFatherid, strLxfs.c_str(), strSsdq.c_str(), strJlxm.c_str(), nDj, strBz.c_str());
@@ -80,13 +80,17 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack(bobj->nSubCmd);
 		_msgpack.pack(0);
 		_msgpack.pack_array(1);
-		ParserKh(_msgpack, row);
+		ParserKh(_msgpack, row, KH_SELECT_SIZE);
 		mysql_free_result(res);
 
 		DealTail(sbuf, bobj);
 	}
 	break;
-
+	case KH_QUERY:
+	{
+		
+	}
+	break;
 	case KH_LIST:
 	{
 		int nIndex = (pRootArray++)->as<int>();
@@ -94,7 +98,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		int nAB = (pRootArray++)->as<int>();
 		int nKeyid = (pRootArray++)->as<int>();
 
-		const TCHAR* pSql = pSql = _T("SELECT COUNT(*) num FROM kh_tbl WHERE nFatherid=%u");
+		const TCHAR* pSql = pSql = _T("SELECT COUNT(*) num FROM kh_tbl WHERE Fatherid=%u");
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
 		if (nUsertype == 1) // 超级管理员
@@ -166,7 +170,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack_array(nRows);
 		while (row)
 		{
-			ParserKh(_msgpack, row);
+			ParserKh(_msgpack, row, KH_SELECT_SIZE);
 			row = mysql_fetch_row(res);
 		}
 		mysql_free_result(res);
@@ -289,7 +293,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack_array(nRows);
 		while (row)
 		{
-			ParserSim(_msgpack, row);
+			ParserSim(_msgpack, row, SIM_SELECT_SIZE);
 			row = mysql_fetch_row(res);
 		}
 		mysql_free_result(res);
@@ -405,7 +409,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack_array(nRows);
 		while (row)
 		{
-			ParserSim(_msgpack, row);
+			ParserSim(_msgpack, row, SIM_SELECT_SIZE);
 			row = mysql_fetch_row(res);
 		}
 		mysql_free_result(res);
@@ -506,7 +510,6 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		}
 
 		Mysql_BackToPool(pMysql);
-
 		unsigned int nRows = (unsigned int)mysql_num_rows(res);
 		row = mysql_fetch_row(res);
 		msgpack::sbuffer sbuf;
@@ -521,7 +524,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack_array(nRows);
 		while (row)
 		{
-			ParserSim(_msgpack, row);
+			ParserSim(_msgpack, row, SIM_SELECT_SIZE);
 			row = mysql_fetch_row(res);
 		}
 		mysql_free_result(res);
@@ -637,7 +640,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack_array(nRows);
 		while (row)
 		{
-			ParserSim(_msgpack, row);
+			ParserSim(_msgpack, row, SIM_SELECT_SIZE);
 			row = mysql_fetch_row(res);
 		}
 		mysql_free_result(res);
@@ -753,7 +756,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack_array(nRows);
 		while (row)
 		{
-			ParserSim(_msgpack, row);
+			ParserSim(_msgpack, row, SIM_SELECT_SIZE);
 			row = mysql_fetch_row(res);
 		}
 		mysql_free_result(res);

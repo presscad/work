@@ -9,22 +9,22 @@
 bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 {
 	bobj->nSubCmd = (pRootArray++)->as<int>();
-	unsigned int nId = (pRootArray++)->as<unsigned int>();
-	unsigned int nUsertype = (pRootArray++)->as<unsigned int>();
 	switch (bobj->nSubCmd)
 	{
 	case USER_ADD:
 	{
+		unsigned int nId = (pRootArray++)->as<unsigned int>();
+		unsigned int nUsertype = (pRootArray++)->as<unsigned int>();
 		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
 		std::string strUser = (pArray++)->as<std::string>();
 		std::string strPassword = (pArray++)->as<std::string>();
 		std::string strKhmc = (pArray++)->as<std::string>();
 		unsigned int nAuthority = (pArray++)->as<unsigned int>();
-		unsigned int nUsertype = (pArray++)->as<unsigned int>();
+		unsigned int nNewUsertype = (pArray++)->as<unsigned int>();
 		unsigned int nFatherid = (pArray++)->as<unsigned int>();
 
-		const TCHAR* pSql = _T("SELECT Userid From kh_tbl WHERE Khmc='%s'");
+		const TCHAR* pSql = _T("SELECT Userid FROM kh_tbl WHERE Khmc='%s'");
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
 		_stprintf_s(sql, sizeof(sql), pSql, strKhmc.c_str());
@@ -58,7 +58,7 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		pSql = _T("INSERT INTO user_tbl (id,User,Password,Authority,Usertype,Fatherid,Xgsj) VALUES(null,'%s','%s',%u,%u,%u,now())");
 		memset(sql, 0x00, sizeof(sql));
-		_stprintf_s(sql, sizeof(sql), pSql, strUser.c_str(), strPassword.c_str(), nAuthority, nFatherid, nUsertype);
+		_stprintf_s(sql, sizeof(sql), pSql, strUser.c_str(), strPassword.c_str(), nAuthority, nNewUsertype, nFatherid);
 
 		if (!InsertIntoTbl(sql, pMysql, bobj))
 		{
@@ -108,7 +108,7 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack(bobj->nSubCmd);
 		_msgpack.pack(0);
 		_msgpack.pack_array(1);
-		ParserUser(_msgpack, row);
+		ParserUser(_msgpack, row, USER_SELECT_SIZE);
 		mysql_free_result(res);
 
 		DealTail(sbuf, bobj);
@@ -152,7 +152,7 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack(bobj->nSubCmd);
 		_msgpack.pack(0);
 		_msgpack.pack_array(1);
-		ParserUser(_msgpack, row);
+		ParserUser(_msgpack, row, USER_SELECT_SIZE);
 		mysql_free_result(res);
 
 		DealTail(sbuf, bobj);
@@ -160,12 +160,14 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case USER_LIST:
 	{
+		unsigned int nId = (pRootArray++)->as<unsigned int>();
+		unsigned int nUsertype = (pRootArray++)->as<unsigned int>();
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
 		int nKeyid = (pRootArray++)->as<int>();
 
-		const TCHAR* pSql = pSql = _T("SELECT COUNT(*) AS num FROM user_tbl WHERE nFatherid=%u");
+		const TCHAR* pSql = pSql = _T("SELECT COUNT(*) AS num FROM user_tbl WHERE Fatherid=%u");
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
 		if (nUsertype == 1) // 超级管理员
@@ -237,7 +239,7 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack_array(nRows);
 		while (row)
 		{
-			ParserUser(_msgpack, row);
+			ParserUser(_msgpack, row, USER_SELECT_SIZE);
 			row = mysql_fetch_row(res);
 		}
 		mysql_free_result(res);
