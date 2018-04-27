@@ -16,7 +16,7 @@ bool cmd_disnumber(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	bobj->nSubSubCmd = (pRootArray++)->as<int>();
 	unsigned int nId = (pRootArray++)->as<unsigned int>();
 	unsigned int nUsertype = (pRootArray++)->as<unsigned int>();
-	bobj->pfndoApiResponse = NULL;
+	bobj->pfndoApiResponse = doDisNumberResponse;
 	switch (bobj->nSubCmd)
 	{
 	case DN_DISABLE:
@@ -44,7 +44,7 @@ void DoDisNumData(msgpack::object* pRootArray, BUFFER_OBJ* bobj, const TCHAR* pD
 	std::string strJrhm = (pArray++)->as<std::string>();
 	std::string dxzh = (pArray++)->as<std::string>();
 
-	const TCHAR* pSql = _T("SELECT userid,pwd,skey FROM dxzh_tbl WHERE dxzh LIKE '%%%s%%'");
+	const TCHAR* pSql = _T("SELECT User,Password,MKey FROM dxzh_tbl WHERE User='yunhu2017'");
 	TCHAR sql[256];
 	memset(sql, 0x00, 256);
 	_stprintf_s(sql, 256, pSql, dxzh.c_str());
@@ -66,7 +66,7 @@ void DoDisNumData(msgpack::object* pRootArray, BUFFER_OBJ* bobj, const TCHAR* pD
 	MYSQL_ROW row = mysql_fetch_row(res);
 	std::string key(row[2]);
 	std::string method = _T("disabledNumber");
-	WOTEDUtils::EncInterfacePtr ep(__uuidof(DesUtils));
+	_EncInterfacePtr ep(__uuidof(EDesUtils));
 	_variant_t varPwd = ep->strEnc(row[1], key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
 	_variant_t varSign = ep->strEncSign6(strJrhm.c_str(), row[0], row[1], method.c_str(), "", orderTypeId,
 		key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());

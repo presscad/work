@@ -6,10 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WOTEDUtils
+namespace BLEDUtils
 {
-    [Guid("AA3F3188-2D24-4585-8044-AC2E1B6AE45A")]
-    public interface EncInterface
+    [Guid("3B5C7EB0-88A3-4817-B9F6-673CC53DA9F6")]
+    public interface _EncInterface
     {
         [DispId(1)]
         string strEnc(string data, string firstKey, string secondKey, string thirdKey);
@@ -27,11 +27,11 @@ namespace WOTEDUtils
         string strDec(string data, string firstKey, string secondKey, string thirdKey);
     }
 
-    [Guid("937A91E8-3B05-4FB9-A6E5-BD2261533458"),
+    [Guid("04C8CC7E-E17B-4280-BC8B-612BBECB1585"),
         ClassInterface(ClassInterfaceType.None)]
-    public class DesUtils : EncInterface
+    public class EDesUtils : _EncInterface
     {
-        public DesUtils()
+        public EDesUtils()
         {
         }
 

@@ -24,7 +24,7 @@ bool Mysql_ConnectDB(MYSQL** pMysql)
 	if (NULL == *pMysql)
 		return false;
 
-	if (NULL == mysql_real_connect(*pMysql, _T("localhost"), DB_USER, DB_PWD, DB_NAME, 3307, NULL, 0))
+	if (NULL == mysql_real_connect(*pMysql, _T("localhost"), DB_USER, DB_PWD, DB_NAME, 3306, NULL, 0))
 	{
 		return false;
 	}
@@ -211,6 +211,7 @@ bool CreateTbl(const TCHAR* sql)
 	size_t len = _tcslen(sql);
 	if (0 != mysql_real_query(pMysql, sql, (ULONG)len))
 	{
+		_tprintf_s(_T("Êý¾Ý¿âÒì³£ ErrorCode = %08x, ErrorMsg = %s"), mysql_errno(pMysql), mysql_error(pMysql));
 		Mysql_BackToPool(pMysql);
 		return false;
 	}
@@ -334,7 +335,7 @@ bool CreateSsdqTbl()
 Dxzh varchar(64) NOT NULL,\
 User varchar(64),\
 Password varchar(64),\
-Key varchar(64),\
+MKey varchar(64),\
 Xgsj datetime,\
 Bz varchar(64),\
 primary key(id),\

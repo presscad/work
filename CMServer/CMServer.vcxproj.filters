@@ -144,6 +144,12 @@
     <ClInclude Include="cmd_beat.h">
       <Filter>Client\心跳</Filter>
     </ClInclude>
+    <ClInclude Include="cJSON.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="tinyxml2.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -229,6 +235,12 @@
     </ClCompile>
     <ClCompile Include="cmd_beat.cpp">
       <Filter>Client\心跳</Filter>
+    </ClCompile>
+    <ClCompile Include="cjson.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="tinyxml2.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

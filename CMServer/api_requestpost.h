@@ -1,11 +1,11 @@
 #pragma once
 
 #ifdef _DEBUG
-#import "..\WOTEDUtils\bin\Debug\WOTEDUtils.tlb"
+#import "..\BLEDUtils\bin\Debug\BLEDUtils.tlb"
 #else
-#import "..\WOTEDUtils\bin\Release\WOTEDUtils.tlb"
+#import "..\BLEDUtils\bin\Release\BLEDUtils.tlb"
 #endif // _DEBUG
-using namespace WOTEDUtils;
+using namespace BLEDUtils;
 
 void InsertIntoPendingConnMap(SOCKET_OBJ* sobj);
 
@@ -18,3 +18,5 @@ void API_Failed(BUFFER_OBJ* bobj);
 void DoReturnData(BUFFER_OBJ* bobj);
 
 TCHAR* Utf8ConvertAnsi(const TCHAR* strIn, int inLen);
+
+bool doDisNumberResponse(void* _bobj);

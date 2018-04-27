@@ -6,6 +6,8 @@
 #include "api_requestpost.h"
 #include "api_postcompletion.h"
 #include "client_mem.h"
+#include "tinyxml2.h"
+#include "cJSON.h"
 
 extern void API_ConnectCompFailed(void* _sobj, void* _bobj);
 extern void API_ConnectCompSuccess(DWORD dwTransion, void* _sobj, void* _bobj);
@@ -153,4 +155,62 @@ TCHAR* Utf8ConvertAnsi(const TCHAR* strIn, int inLen)
 
 	delete pUnicode;
 	return (TCHAR*)pTargetData;
+}
+
+//	static const char* test = "<?xml version = \"1.0\" encoding = \"utf-8\"?>"
+//	"<businessServiceResponse>" // 业务根节点
+//		"<RspType>0</RspType>"	// 请求状态 返回0，标识请求成功
+//		"<result>0</result>"	// 状态响应码 返回0，标识成功接收消息
+//		"<resultMsg>成功接收消息</resultMsg>"	// 返回消息信息
+//		"<GROUP_TRANSACTIONID>1000000252201606149170517340</GROUP_TRANSACTIONID>" // 流水号 请求流水
+//	"</businessServiceResponse>";
+bool doDisNumberResponse(void* _bobj)
+{
+	BUFFER_OBJ* bobj = (BUFFER_OBJ*)_bobj;
+	TCHAR* pResponData = Utf8ConvertAnsi(bobj->data, bobj->dwRecvedCount);
+	tinyxml2::XMLDocument doc;
+	if (tinyxml2::XML_SUCCESS != doc.Parse(pResponData))
+	{
+		delete pResponData;
+		return false;
+	}
+	delete pResponData;
+
+	//DIS_NUMBER* pds = new DIS_NUMBER;
+	//pds->strJrhm = bobj->strJrhm;
+	tinyxml2::XMLElement* root = doc.RootElement();
+	tinyxml2::XMLElement* RspType = root->FirstChildElement(); // <RspType>0</RspType>
+	//pds->strRsptype = RspType->GetText();
+
+	tinyxml2::XMLElement* result = RspType->NextSiblingElement(); // <result>0</result>
+	//pds->strResult = result->GetText();
+
+	tinyxml2::XMLElement* resultMsg = result->NextSiblingElement(); // <resultMsg>成功接收消息</resultMsg>
+	//pds->strResultMsg = resultMsg->GetText();
+
+	tinyxml2::XMLElement* GROUP_TRANSACTIONID = resultMsg->NextSiblingElement(); // <GROUP_TRANSACTIONID>1000000252201606149170517340</GROUP_TRANSACTIONID>
+	//pds->strGROUP_TRANSACTIONID = GROUP_TRANSACTIONID->GetText();
+
+	msgpack::sbuffer sbuf;
+	msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
+	sbuf.write("\xfb\xfc", 6);
+
+	_msgpack.pack_array(6);
+	_msgpack.pack(bobj->nCmd);
+	_msgpack.pack(bobj->nSubCmd);
+	_msgpack.pack(bobj->nSubSubCmd);
+	_msgpack.pack(0);
+//	_msgpack.pack(bobj->strJrhm);
+	_msgpack.pack_array(1);
+	_msgpack.pack_array(4);
+	//_msgpack.pack(atoi(pds->strRsptype.c_str()));
+	//_msgpack.pack(atoi(pds->strResult.c_str()));
+	//_msgpack.pack(pds->strResultMsg);
+	//_msgpack.pack(pds->strGROUP_TRANSACTIONID);
+
+	DealTail(sbuf, bobj);
+
+//	PostThreadMessage(g_HelpThreadID, MSG_DIS_NUMBER, (WPARAM)pds, 0);// 进行数据库操作
+
+	return true;
 }

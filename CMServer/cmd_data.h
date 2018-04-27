@@ -13,7 +13,7 @@ void ParserData(msgpack::packer<msgpack::sbuffer>& _msgpack, MYSQL_ROW& row, uns
 #define ParserKhjl ParserData
 
 #define DXZH_SELECT_SIZE 7
-#define DXZH_SELECT _T("id,Dxzh,User,Password,Key,Xgsj,Bz")
+#define DXZH_SELECT _T("id,Dxzh,User,Password,MKey,Xgsj,Bz")
 //void ParserDxzh(msgpack::packer<msgpack::sbuffer>& _msgpack, MYSQL_ROW& row);
 #define ParserDxzh ParserData
 

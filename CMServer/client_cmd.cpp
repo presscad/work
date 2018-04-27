@@ -14,6 +14,7 @@
 #include "cmd_llc.h"
 #include "cmd_lltc.h"
 #include "cmd_ssdq.h"
+#include "cmd_disnumber.h"
 
 void Client_CmdCompletionFailed(void* bobj_, void* _bobj)
 {
@@ -102,6 +103,12 @@ void Client_CmdCompletionSuccess(DWORD dwTranstion, void* bobj_, void* _bobj)
 		case BEAT_DATA:
 		{
 			cmd_beat(pArray, bobj);
+			return;
+		}
+		break;
+		case DISABLE_NUMBER_DATA:
+		{
+			cmd_disnumber(pArray, bobj);
 			return;
 		}
 		break;

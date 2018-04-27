@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="api_postcompletion.h" />
     <ClInclude Include="api_requestpost.h" />
+    <ClInclude Include="cJSON.h" />
     <ClInclude Include="cmd_beat.h" />
     <ClInclude Include="cmd_data.h" />
     <ClInclude Include="cmd_disnumber.h" />
@@ -179,10 +180,14 @@
     <ClInclude Include="init.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="tinyxml2.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="api_postcompletion.cpp" />
     <ClCompile Include="api_requestpost.cpp" />
+    <ClCompile Include="cjson.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="cmd_beat.cpp" />
     <ClCompile Include="cmd_data.cpp" />
     <ClCompile Include="cmd_disnumber.cpp" />
@@ -214,6 +219,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="tinyxml2.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

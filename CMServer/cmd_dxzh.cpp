@@ -29,7 +29,7 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			return cmd_error(bobj);
 		}
 
-		const TCHAR* pSql = _T("INSERT INTO dxzh_tbl (id,Dxzh,User,Password,Key,Xgsj,Bz) VALUES(null,'%s','%s','%s','%s',now,'%s')");
+		const TCHAR* pSql = _T("INSERT INTO dxzh_tbl (id,Dxzh,User,Password,MKey,Xgsj,Bz) VALUES(null,'%s','%s','%s','%s',now,'%s')");
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
 		_stprintf_s(sql, sizeof(sql), pSql, strDxzh.c_str(), strUser.c_str(), strPassword.c_str(), strKey.c_str(), strBz.c_str());
