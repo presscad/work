@@ -66,12 +66,12 @@ void DoDisNumData(msgpack::object* pRootArray, BUFFER_OBJ* bobj, const TCHAR* pD
 	MYSQL_ROW row = mysql_fetch_row(res);
 	std::string key(row[2]);
 	std::string method = _T("disabledNumber");
-	_EncInterfacePtr ep(__uuidof(EDesUtils));
-	_variant_t varPwd = ep->strEnc(row[1], key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
-	_variant_t varSign = ep->strEncSign6(strJrhm.c_str(), row[0], row[1], method.c_str(), "", orderTypeId,
-		key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
+	//_EncInterfacePtr ep(__uuidof(EDesUtils));
+	//_variant_t varPwd = ep->strEnc(row[1], key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
+	//_variant_t varSign = ep->strEncSign6(strJrhm.c_str(), row[0], row[1], method.c_str(), "", orderTypeId,
+	//	key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
 
-	_stprintf_s(bobj->data, bobj->datalen, pData, row[0], strJrhm.c_str(), (const char*)(_bstr_t)varPwd, (const char*)(_bstr_t)varSign);
+	//_stprintf_s(bobj->data, bobj->datalen, pData, row[0], strJrhm.c_str(), (const char*)(_bstr_t)varPwd, (const char*)(_bstr_t)varSign);
 	bobj->dwRecvedCount = strlen(bobj->data);
 	doApi(bobj);
 }
