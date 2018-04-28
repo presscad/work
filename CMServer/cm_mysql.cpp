@@ -29,6 +29,11 @@ bool Mysql_ConnectDB(MYSQL** pMysql)
 		return false;
 	}
 
+	if (0 != mysql_set_character_set(*pMysql, "gbk"))
+	{
+		return false;
+	}
+
 	return true;
 }
 
