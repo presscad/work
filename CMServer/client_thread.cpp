@@ -12,6 +12,7 @@ typedef struct _obj_value
 
 unsigned int _stdcall client_thread(LPVOID pVoid)
 {
+	::CoInitialize(NULL);
 	ULONG_PTR key;
 	OBJ_VALUE* bobj;
 	LPOVERLAPPED lpol;
