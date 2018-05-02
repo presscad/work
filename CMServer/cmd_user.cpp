@@ -201,8 +201,8 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		}
 		else if (nAB == 1)
 		{
-			pSql = _T("SELECT %s FROM user_tbl WHERE Fatherid=%u AND id<%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, USER_SELECT, nId, nKeyid, nPagesize);
+			pSql = _T("SELECT %s FROM (SELECT %s FROM user_tbl WHERE Fatherid=%u AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+			_stprintf_s(sql, sizeof(sql), pSql, USER_SELECT, USER_SELECT, nId, nKeyid, nPagesize);
 		}
 		else if (nAB == 2)
 		{
@@ -211,9 +211,9 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		}
 		else
 		{
-			unsigned int nTemp = nNum % nPagesize;
-			pSql = _T("SELECT %s FROM user_tbl WHERE Fatherid=%u ORDER BY id desc LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, USER_SELECT, nId, nPagesize);
+			unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+			pSql = _T("SELECT %s FROM (SELECT %s FROM user_tbl WHERE Fatherid=%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+			_stprintf_s(sql, sizeof(sql), pSql, USER_SELECT, USER_SELECT, nId, nTemp);
 		}
 
 		res = NULL;

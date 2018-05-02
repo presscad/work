@@ -9,8 +9,12 @@
 bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 {
 	bobj->nSubCmd = (pRootArray++)->as<int>();
-	unsigned int nId = (pRootArray++)->as<unsigned int>();
-	unsigned int nUsertype = (pRootArray++)->as<unsigned int>();
+	std::string strId = (pRootArray++)->as<std::string>();
+	unsigned int nId = 0;
+	sscanf_s(strId.c_str(), "%u", &nId);
+	std::string strUsertype = (pRootArray++)->as<std::string>();
+	unsigned int nUsertype = 0;
+	sscanf_s(strUsertype.c_str(), "%u", &nUsertype);
 
 	switch (bobj->nSubCmd)
 	{
@@ -201,8 +205,8 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else if (nAB == 1)
 			{
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u AND Xsrq='%s'and id<%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u AND Xsrq='%s'and id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
@@ -211,9 +215,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else
 			{
-				unsigned int nTemp = nNum % nPagesize;
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u AND Xsrq='%s'ORDER BY id desc LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nPagesize);
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u AND Xsrq='%s'ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
 			}
 		}
 		else if (nUsertype == 2)
@@ -225,8 +229,8 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else if (nAB == 1)
 			{
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u AND Xsrq='%s'and id<%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u AND Xsrq='%s'and id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
@@ -235,9 +239,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else
 			{
-				unsigned int nTemp = nNum % nPagesize;
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u AND Xsrq='%s'ORDER BY id desc LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nPagesize);
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u AND Xsrq='%s'ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
 			}
 		}
 
@@ -313,8 +317,8 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		}
 		else if (nAB == 1)
 		{
-			pSql = _T("SELECT %s FROM kh_tbl WHERE Fatherid=%u AND id<%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, nId, nKeyid, nPagesize);
+			pSql = _T("SELECT %s FROM (SELECT %s FROM kh_tbl WHERE Fatherid=%u AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, KH_SELECT, nId, nKeyid, nPagesize);
 		}
 		else if (nAB == 2)
 		{
@@ -323,9 +327,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		}
 		else
 		{
-			unsigned int nTemp = nNum % nPagesize;
-			pSql = _T("SELECT %s FROM kh_tbl WHERE Fatherid=%u ORDER BY id desc LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, nId, nPagesize);
+			unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+			pSql = _T("SELECT %s FROM (SELECT %s FROM kh_tbl WHERE Fatherid=%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, KH_SELECT, nId, nTemp);
 		}
 
 		res = NULL;
@@ -411,8 +415,8 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else if (nAB == 1)
 			{
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u and id<%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u and id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
@@ -421,9 +425,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else
 			{
-				unsigned int nTemp = nNum % nPagesize;
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u ORDER BY id desc LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nPagesize);
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
 			}
 		}
 		else if (nUsertype == 2)
@@ -435,8 +439,8 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else if (nAB == 1)
 			{
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u and id<%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u and id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
@@ -445,9 +449,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else
 			{
-				unsigned int nTemp = nNum % nPagesize;
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u ORDER BY id desc LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nPagesize);
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
 			}
 		}
 
@@ -527,8 +531,8 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else if (nAB == 1)
 			{
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u and Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 15 DAY) AND id<%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u and Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 15 DAY) AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
@@ -537,9 +541,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else
 			{
-				unsigned int nTemp = nNum % nPagesize;
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u AND Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 15 DAY) ORDER BY id desc LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nPagesize);
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u AND Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 15 DAY) ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
 			}
 		}
 		else if (nUsertype == 2)
@@ -551,8 +555,8 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else if (nAB == 1)
 			{
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 15 DAY) AND id<%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 15 DAY) AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
@@ -561,9 +565,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else
 			{
-				unsigned int nTemp = nNum % nPagesize;
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 15 DAY) ORDER BY id desc LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nPagesize);
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 15 DAY) ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
 			}
 		}
 
@@ -643,8 +647,8 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else if (nAB == 1)
 			{
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u AND Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 1 MONTH) AND id<%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u AND Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 1 MONTH) AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
@@ -653,9 +657,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else
 			{
-				unsigned int nTemp = nNum % nPagesize;
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u AND Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 1 MONTH) ORDER BY id desc LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nPagesize);
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u AND Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 1 MONTH) ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
 			}
 		}
 		else if (nUsertype == 2)
@@ -667,8 +671,8 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else if (nAB == 1)
 			{
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 1 MONTH) AND id<%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 1 MONTH) AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
@@ -677,9 +681,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else
 			{
-				unsigned int nTemp = nNum % nPagesize;
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 1 MONTH) ORDER BY id desc LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nPagesize);
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq>CURDATE() AND Dqrq<DATE_ADD(CURDATE(),INTERVAL 1 MONTH) ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
 			}
 		}
 
@@ -758,8 +762,8 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else if (nAB == 1)
 			{
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 1 MONTH) AND id<%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 1 MONTH) AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
@@ -768,9 +772,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else
 			{
-				unsigned int nTemp = nNum % nPagesize;
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 1 MONTH) ORDER BY id desc LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nPagesize);
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 1 MONTH) ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
 			}
 		}
 		else if (nUsertype == 2)
@@ -782,8 +786,8 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else if (nAB == 1)
 			{
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 1 MONTH) AND id<%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 1 MONTH) AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
@@ -792,9 +796,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else
 			{
-				unsigned int nTemp = nNum % nPagesize;
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 1 MONTH) ORDER BY id desc LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nPagesize);
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 1 MONTH) ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
 			}
 		}
 
@@ -874,8 +878,8 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else if (nAB == 1)
 			{
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 15 DAY) AND id<%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 15 DAY) AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
@@ -884,9 +888,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else
 			{
-				unsigned int nTemp = nNum % nPagesize;
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 15 DAY) ORDER BY id desc LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nPagesize);
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 15 DAY) ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
 			}
 		}
 		else if (nUsertype == 2)
@@ -898,8 +902,8 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else if (nAB == 1)
 			{
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 15 DAY) AND id<%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 15 DAY) AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
@@ -908,9 +912,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else
 			{
-				unsigned int nTemp = nNum % nPagesize;
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 15 DAY) ORDER BY id desc LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nPagesize);
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u AND Dqrq<CURDATE() AND Dqrq>DATE_SUB(CURDATE(),INTERVAL 15 DAY) ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
 			}
 		}
 

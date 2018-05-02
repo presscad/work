@@ -9,8 +9,12 @@
 bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 {
 	bobj->nSubCmd = (pRootArray++)->as<int>();
-	unsigned int nId = (pRootArray++)->as<unsigned int>();
-	unsigned int nUsertype = (pRootArray++)->as<unsigned int>();
+	std::string strId = (pRootArray++)->as<std::string>();
+	unsigned int nId = 0;
+	sscanf_s(strId.c_str(), "%u", &nId);
+	std::string strUsertype = (pRootArray++)->as<std::string>();
+	unsigned int nUsertype = 0;
+	sscanf_s(strUsertype.c_str(), "%u", &nUsertype);
 	switch (bobj->nSubCmd)
 	{
 	case DXZH_ADD:
@@ -29,7 +33,7 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			return cmd_error(bobj);
 		}
 
-		const TCHAR* pSql = _T("INSERT INTO dxzh_tbl (id,Dxzh,User,Password,MKey,Xgsj,Bz) VALUES(null,'%s','%s','%s','%s',now,'%s')");
+		const TCHAR* pSql = _T("INSERT INTO dxzh_tbl (id,Dxzh,User,Password,MKey,Xgsj,Bz) VALUES(null,'%s','%s','%s','%s',now(),'%s')");
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
 		_stprintf_s(sql, sizeof(sql), pSql, strDxzh.c_str(), strUser.c_str(), strPassword.c_str(), strKey.c_str(), strBz.c_str());
@@ -57,7 +61,7 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		}
 		my_ulonglong nIndex = mysql_insert_id(pMysql); // 新添加的用户的id
 
-		pSql = _T("SELECT %s FROM dxzg_tbl WHERE id=%u");
+		pSql = _T("SELECT %s FROM dxzh_tbl WHERE id=%u");
 		memset(sql, 0x00, sizeof(sql));
 		_stprintf_s(sql, sizeof(sql), pSql, DXZH_SELECT, (unsigned int)nIndex);
 
@@ -87,6 +91,7 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case DXZH_LIST:
 	{
+		bobj->nSubSubCmd = (pRootArray++)->as<int>();
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
@@ -131,8 +136,8 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		}
 		else if (nAB == 1)
 		{
-			pSql = _T("SELECT %s FROM dxzh_tbl WHERE id<%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, DXZH_SELECT, nKeyid, nPagesize);
+			pSql = _T("SELECT %s FROM (SELECT %s FROM dxzh_tbl WHERE id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+			_stprintf_s(sql, sizeof(sql), pSql, DXZH_SELECT, DXZH_SELECT, nKeyid, nPagesize);
 		}
 		else if (nAB == 2)
 		{
@@ -141,9 +146,9 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		}
 		else
 		{
-			unsigned int nTemp = nNum % nPagesize;
-			pSql = _T("SELECT %s FROM dxzh_tbl ORDER BY id desc LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, DXZH_SELECT, nPagesize);
+			unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+			pSql = _T("SELECT %s FROM (SELECT %s FROM dxzh_tbl ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+			_stprintf_s(sql, sizeof(sql), pSql, DXZH_SELECT, DXZH_SELECT, nTemp);
 		}
 
 		res = NULL;
@@ -160,9 +165,10 @@ bool cmd_dxzh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		msgpack::sbuffer sbuf;
 		msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
 		sbuf.write("\xfb\xfc", 6);
-		_msgpack.pack_array(6);
+		_msgpack.pack_array(7);
 		_msgpack.pack(bobj->nCmd);
 		_msgpack.pack(bobj->nSubCmd);
+		_msgpack.pack(bobj->nSubSubCmd);
 		_msgpack.pack(nIndex);
 		_msgpack.pack(0);
 		_msgpack.pack(nNum);

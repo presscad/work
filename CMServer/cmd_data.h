@@ -38,11 +38,11 @@ void ParserData(msgpack::packer<msgpack::sbuffer>& _msgpack, MYSQL_ROW& row, uns
 #define ParserLltc ParserData
 
 #define LLC_SELECT_SIZE 6
-#define LLC_SELECT _T("id,Dxzh,Llchm,Llclx,Xgsj,Bz")
+#define LLC_SELECT _T("id,Llchm,Llclx,Dxzh,Bz,Xgsj")
 //void ParserLlc(msgpack::packer<msgpack::sbuffer>& _msgpack, MYSQL_ROW& row);
 #define ParserLlc ParserData
 
 #define XSRQ_SELECT_SIZE 2
-#define XSRQ_SELECT _T("Xsrq,num"
+#define XSRQ_SELECT _T("Xsrq,num")
 //void ParserXsrq(msgpack::packer<msgpack::sbuffer>& _msgpack, MYSQL_ROW& row);
 #define ParserXsrq ParserData

@@ -40,8 +40,12 @@ unsigned int GetIndexByName(const TCHAR* name , BUFFER_OBJ* bobj)
 bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 {
 	bobj->nSubCmd = (pRootArray++)->as<int>();
-	unsigned int nId = (pRootArray++)->as<unsigned int>();
-	unsigned int nUsertype = (pRootArray++)->as<unsigned int>();
+	std::string strId = (pRootArray++)->as<std::string>();
+	unsigned int nId = 0;
+	sscanf_s(strId.c_str(), "%u", &nId);
+	std::string strUsertype = (pRootArray++)->as<std::string>();
+	unsigned int nUsertype = 0;
+	sscanf_s(strUsertype.c_str(), "%u", &nUsertype);
 	int nIndex = (pRootArray++)->as<int>();
 
 	switch (bobj->nSubCmd)
@@ -56,7 +60,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		if (NULL == pMysql)
 		{
 			error_info(bobj, _T("连接数据库失败"));
-			return cmd_error(bobj, nIndex);
+			goto error;
 		}
 		mysql_autocommit(pMysql, 0);
 
@@ -78,7 +82,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 				mysql_rollback(pMysql);
 				mysql_autocommit(pMysql, 1);
 				Mysql_BackToPool(pMysql);
-				return cmd_error(bobj, nIndex);
+				goto error;
 			}
 		}
 
@@ -106,7 +110,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		if (NULL == pMysql)
 		{
 			error_info(bobj, _T("连接数据库失败"));
-			return cmd_error(bobj, nIndex);
+			goto error;
 		}
 		mysql_autocommit(pMysql, 0);
 
@@ -123,7 +127,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 				mysql_rollback(pMysql);
 				mysql_autocommit(pMysql, 1);
 				Mysql_BackToPool(pMysql);
-				return cmd_error(bobj, nIndex);
+				goto error;
 			}
 			const TCHAR* pSql = _T("UPDATE sim_tbl SET Khid01=%u,Jlxm='%s',Xsrq='%s' WHERE Jrhm='%s'");
 			TCHAR sql[256];
@@ -134,7 +138,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 				mysql_rollback(pMysql);
 				mysql_autocommit(pMysql, 1);
 				Mysql_BackToPool(pMysql);
-				return cmd_error(bobj, nIndex);
+				goto error;
 			}
 		}
 
@@ -161,7 +165,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		if (NULL == pMysql)
 		{
 			error_info(bobj, _T("连接数据库失败"));
-			return cmd_error(bobj, nIndex);
+			goto error;
 		}
 		mysql_autocommit(pMysql, 0);
 
@@ -181,7 +185,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 				mysql_rollback(pMysql);
 				mysql_autocommit(pMysql, 1);
 				Mysql_BackToPool(pMysql);
-				return cmd_error(bobj, nIndex);
+				goto error;
 			}
 		}
 
@@ -205,4 +209,16 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	}
 
 	return true;
+
+error:
+	msgpack::sbuffer sbuf;
+	msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
+	sbuf.write("\xfb\xfc", 6);
+	_msgpack.pack_array(4);
+	_msgpack.pack(bobj->nCmd);
+	_msgpack.pack(bobj->nSubCmd);
+	_msgpack.pack(nIndex);
+	_msgpack.pack(1);
+	DealTail(sbuf, bobj);
+	return false;
 }

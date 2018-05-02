@@ -6,16 +6,52 @@
 #include "cmd_error.h"
 #include "cmd_data.h"
 
+unsigned int GetIndexByName(const TCHAR* name, BUFFER_OBJ* bobj);
+
 bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 {
 	bobj->nSubCmd = (pRootArray++)->as<int>();
-	unsigned int nId = (pRootArray++)->as<unsigned int>();
-	unsigned int nUsertype = (pRootArray++)->as<unsigned int>();
+	std::string strId = (pRootArray++)->as<std::string>();
+	unsigned int nId = 0;
+	sscanf_s(strId.c_str(), "%u", &nId);
+	std::string strUsertype = (pRootArray++)->as<std::string>();
+	unsigned int nUsertype = 0;
+	sscanf_s(strUsertype.c_str(), "%u", &nUsertype);
 	switch (bobj->nCmd)
 	{
 	case SIM_ADD:
 	{
-		
+		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
+		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
+		std::string strJrhm = (pArray++)->as<std::string>();
+		std::string strKhmc = (pArray++)->as<std::string>();
+		std::string strJlxm = (pArray++)->as<std::string>();
+		std::string strXsrq = (pArray++)->as<std::string>();
+		std::string strBz = (pArray++)->as<std::string>();
+
+		unsigned int Khid = GetIndexByName(strKhmc.c_str(), bobj);
+
+		if (0 == Khid)
+		{
+			
+		}
+
+		MYSQL* pMysql = Mysql_AllocConnection();
+		if (NULL == pMysql)
+		{
+			error_info(bobj, _T("连接数据库失败"));
+			return cmd_error(bobj);
+		}
+
+		const TCHAR* pSql = _T("UPDATE sim_tbl SET Khid01=%u,Jlxm='%s',Xsrq='%s',Bz='%s' WHERE Jrhm='%s'");
+		TCHAR sql[256];
+		memset(sql, 0x00, sizeof(sql));
+		_stprintf_s(sql, sizeof(sql), pSql, Khid, strJlxm.c_str(), strXsrq.c_str(), strBz.c_str(), strJrhm.c_str());
+		if (!UpdateTbl(sql, pMysql, bobj))
+		{
+			Mysql_BackToPool(pMysql);
+			return cmd_error(bobj);
+		}
 	}
 	break;
 	case SIM_LIST:
@@ -77,8 +113,8 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else if (nAB == 1)
 			{
-				pSql = _T("SELECT %s FROM sim_tbl WHERE id<%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKeyid, nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
@@ -87,9 +123,9 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else
 			{
-				unsigned int nTemp = nNum % nPagesize;
-				pSql = _T("SELECT %s FROM sim_tbl ORDER BY id desc LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nPagesize);
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nTemp);
 			}
 		}
 		else if (nUsertype == 2)
@@ -101,8 +137,8 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else if (nAB == 1)
 			{
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u AND id<%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
@@ -111,9 +147,9 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else
 			{
-				unsigned int nTemp = nNum % nPagesize;
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u ORDER BY id desc LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nPagesize);
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
 			}
 		}
 		else if (nUsertype == 3)
@@ -125,8 +161,8 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else if (nAB == 1)
 			{
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u AND id<%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
@@ -135,9 +171,9 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 			else
 			{
-				unsigned int nTemp = nNum % nPagesize;
-				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u ORDER BY id desc LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nPagesize);
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
 			}
 		}
 

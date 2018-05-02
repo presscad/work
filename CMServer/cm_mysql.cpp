@@ -313,7 +313,7 @@ bool CreateLlcTbl()
 	return CreateTbl(CREATE_LLC_TBL);
 }
 
-#define CREATE_LLTC_TBL _T("CREATE TABLE IF NOT EXISTS llc_tbl(id int unsigned not null auto_increment,\
+#define CREATE_LLTC_TBL _T("CREATE TABLE IF NOT EXISTS lltc_tbl(id int unsigned not null auto_increment,\
 Tcmc char(16) NOT NULL,\
 Tcfl char(8) NOT NULL,\
 Xgsj datetime,\

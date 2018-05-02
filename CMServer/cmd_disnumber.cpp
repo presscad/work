@@ -43,7 +43,6 @@ void DoDisNumData(msgpack::object* pRootArray, BUFFER_OBJ* bobj, const TCHAR* pD
 	msgpack::object* pArray = (pDataArray++)->via.array.ptr;
 	std::string strJrhm = (pArray++)->as<std::string>();
 	std::string dxzh = (pArray++)->as<std::string>();
-	WOTEDUtils::EncInterfacePtr ep1(__uuidof(WOTEDUtils::DesUtils));
 	const TCHAR* pSql = _T("SELECT User,Password,MKey FROM dxzh_tbl WHERE Dxzh='%s'");
 	TCHAR sql[256];
 	memset(sql, 0x00, 256);

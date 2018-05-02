@@ -58,6 +58,9 @@
     <Filter Include="Client\心跳">
       <UniqueIdentifier>{89a8abc2-d44d-44fc-94b4-3f12822e3084}</UniqueIdentifier>
     </Filter>
+    <Filter Include="API\状态查询">
+      <UniqueIdentifier>{11262e5e-3b48-4b98-a430-53158712e7fb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -150,6 +153,9 @@
     <ClInclude Include="tinyxml2.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="cmd_state.h">
+      <Filter>API\状态查询</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -241,6 +247,9 @@
     </ClCompile>
     <ClCompile Include="tinyxml2.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_state..cpp">
+      <Filter>API\状态查询</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
