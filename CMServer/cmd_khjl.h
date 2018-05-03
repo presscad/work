@@ -8,6 +8,7 @@ typedef enum
 	KHJL_QUERY,
 	KHJL_LIST,
 	KHJL_SIM_XSRQ,
+	KHJL_FIND,
 }SUBCMD_KHJL;
 
 bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj);

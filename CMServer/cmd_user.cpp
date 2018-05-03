@@ -230,9 +230,10 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		msgpack::sbuffer sbuf;
 		msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
 		sbuf.write("\xfb\xfc", 6);
-		_msgpack.pack_array(6);
+		_msgpack.pack_array(7);
 		_msgpack.pack(bobj->nCmd);
 		_msgpack.pack(bobj->nSubCmd);
+		_msgpack.pack(bobj->nSubSubCmd);
 		_msgpack.pack(nIndex);
 		_msgpack.pack(0);
 		_msgpack.pack(nNum);

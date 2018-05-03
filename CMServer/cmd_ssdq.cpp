@@ -23,13 +23,7 @@ bool cmd_ssdq(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
 		std::string strSsdq = (pArray++)->as<std::string>();
 
-		if (nUsertype != 1)
-		{
-			error_info(bobj, _T("ÎÞÈ¨ÏÞ"));
-			return cmd_error(bobj);
-		}
-
-		const TCHAR* pSql = _T("INSERT INTO ssdq_tbl (id,Ssdq) VALUES(null,'%s')");
+		const TCHAR* pSql = _T("INSERT INTO ssdq_tbl (id,Ssdq,Xgsj) VALUES(null,'%s',now())");
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
 		_stprintf_s(sql, sizeof(sql), pSql, strSsdq.c_str());

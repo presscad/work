@@ -15,6 +15,13 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	std::string strUsertype = (pRootArray++)->as<std::string>();
 	unsigned int nUsertype = 0;
 	sscanf_s(strUsertype.c_str(), "%u", &nUsertype);
+
+	if (nUsertype != 1)
+	{
+		error_info(bobj, _T("无权限"));
+		return cmd_error(bobj);
+	}
+
 	switch (bobj->nSubCmd)
 	{
 	case KHJL_ADD:
@@ -24,12 +31,6 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		std::string strJlxm = (pArray++)->as<std::string>();
 		std::string strLxfs = (pArray++)->as<std::string>();
 		std::string strBz = (pArray++)->as<std::string>();
-
-		if (nUsertype != 1)
-		{
-			error_info(bobj, _T("无权限"));
-			return cmd_error(bobj);
-		}
 
 		const TCHAR* pSql = _T("INSERT INTO khjl_tbl (id,Jlxm,Lxfs,Xgsj,Bz) VALUES(null,'%s','%s',now(),'%s')");
 		TCHAR sql[256];
@@ -81,7 +82,7 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack(bobj->nSubCmd);
 		_msgpack.pack(0);
 		_msgpack.pack_array(1);
-		ParserLlc(_msgpack, row, KHJL_SELECT_SIZE);
+		ParserKhjl(_msgpack, row, KHJL_SELECT_SIZE);
 		mysql_free_result(res);
 
 		DealTail(sbuf, bobj);
@@ -94,12 +95,6 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
 		int nKeyid = (pRootArray++)->as<int>();
-
-		if (nUsertype != 1)
-		{
-			error_info(bobj, _T("无权限"));
-			return cmd_error(bobj, nIndex);
-		}
 
 		const TCHAR* pSql = NULL;
 		TCHAR sql[256];
@@ -188,16 +183,13 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		int nAB = (pRootArray++)->as<int>();
 		int nKeyid = (pRootArray++)->as<int>();
 
-		const TCHAR* pSql = pSql = _T("SELECT COUNT(*) num FROM kh_tbl WHERE Jlxm='%s'");
-		TCHAR sql[256];
-		memset(sql, 0x00, sizeof(sql));
-
 		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
 		std::string strJlxm = (pArray++)->as<std::string>();
 
-		if (nUsertype == 1) // 超级管理员
-			nId = 1;
+		const TCHAR* pSql = pSql = _T("SELECT COUNT(*) num FROM kh_tbl WHERE Jlxm='%s'");
+		TCHAR sql[256];
+		memset(sql, 0x00, sizeof(sql));
 
 		_stprintf_s(sql, sizeof(sql), pSql, strJlxm.c_str());
 
@@ -222,23 +214,23 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		if (nAB == 0) // 首页
 		{
-			pSql = _T("SELECT %s FROM kh_tbl WHERE Jlxm='%s' AND id>%u LIMIT %d");
+			pSql = _T("SELECT %s FROM kh_tbl WHERE Fatherid=1 AND Jlxm='%s' AND id>%u LIMIT %d");
 			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, strJlxm.c_str(), nKeyid, nPagesize);
 		}
 		else if (nAB == 1)
 		{
-			pSql = _T("SELECT %s FROM (SELECT %s FROM kh_tbl WHERE Jlxm='%s' AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+			pSql = _T("SELECT %s FROM (SELECT %s FROM kh_tbl WHERE Fatherid=1 AND Jlxm='%s' AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
 			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, KH_SELECT, strJlxm.c_str(), nKeyid, nPagesize);
 		}
 		else if (nAB == 2)
 		{
-			pSql = _T("SELECT %s FROM kh_tbl WHERE Jlxm='%s' AND id>%u LIMIT %d");
+			pSql = _T("SELECT %s FROM kh_tbl WHERE Fatherid=1 AND Jlxm='%s' AND id>%u LIMIT %d");
 			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, strJlxm.c_str(), nKeyid, nPagesize);
 		}
 		else
 		{
 			unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
-			pSql = _T("SELECT %s FROM (SELECT %s FROM kh_tbl WHERE Jlxm='%s' ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+			pSql = _T("SELECT %s FROM (SELECT %s FROM kh_tbl WHERE Fatherid=1 AND Jlxm='%s' ORDER BY id desc LIMIT %d) a ORDER BY id asc");
 			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, KH_SELECT, strJlxm.c_str(), nTemp);
 		}
 
@@ -256,9 +248,10 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		msgpack::sbuffer sbuf;
 		msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
 		sbuf.write("\xfb\xfc", 6);
-		_msgpack.pack_array(6);
+		_msgpack.pack_array(7);
 		_msgpack.pack(bobj->nCmd);
 		_msgpack.pack(bobj->nSubCmd);
+		_msgpack.pack(bobj->nSubSubCmd);
 		_msgpack.pack(nIndex);
 		_msgpack.pack(0);
 		_msgpack.pack(nNum);
@@ -275,7 +268,6 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case KHJL_QUERY:
 	{
-		_T("SELECT Xsrq,COUNT(*) num FROM sim_tbl WHERE Khid IN (SELECT id FROM kh_tbl WHERE Jlxm='%s') GROUP BY Xsrq)");
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
@@ -283,21 +275,15 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
-		unsigned int nKhid = (pArray++)->as<unsigned int>();
+		std::string strJlxm = (pDataArray++)->as<std::string>();
 
 		const TCHAR* pSql = NULL;
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
-		if (nUsertype == 1)
-		{
-			pSql = _T("SELECT Xsrq,COUNT(*) num FROM sim_tbl WHERE Jlxm='%s' GROUP BY Xsrq)");
-		}
-		else
-		{
-			error_info(bobj, _T("无权限"));
-			return cmd_error(bobj);
-		}
-		_stprintf_s(sql, sizeof(sql), pSql, nKhid);
+
+		pSql = _T("SELECT Xsrq,COUNT(*) num FROM sim_tbl WHERE Jlxm='%s' GROUP BY Xsrq)");
+
+		_stprintf_s(sql, sizeof(sql), pSql, strJlxm.c_str());
 
 		MYSQL* pMysql = Mysql_AllocConnection();
 		if (NULL == pMysql)
@@ -320,9 +306,10 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		msgpack::sbuffer sbuf;
 		msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
 		sbuf.write("\xfb\xfc", 6);
-		_msgpack.pack_array(6);
+		_msgpack.pack_array(7);
 		_msgpack.pack(bobj->nCmd);
 		_msgpack.pack(bobj->nSubCmd);
+		_msgpack.pack(bobj->nSubSubCmd);
 		_msgpack.pack(nIndex);
 		_msgpack.pack(0);
 		_msgpack.pack(nRows);
@@ -332,6 +319,50 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			ParserXsrq(_msgpack, row, XSRQ_SELECT_SIZE);
 			row = mysql_fetch_row(res);
 		}
+		mysql_free_result(res);
+
+		DealTail(sbuf, bobj);
+	}
+	break;
+	case KHJL_FIND:
+	{
+		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
+		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
+		std::string strJlxm = (pDataArray++)->as<std::string>();
+
+		const TCHAR* pSql = NULL;
+		TCHAR sql[256];
+		memset(sql, 0x00, sizeof(sql));
+		pSql = _T("SELECT %s FROM khjl_tbl WHERE Jlxm='%s'");
+		_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, strJlxm.c_str());
+
+		MYSQL* pMysql = Mysql_AllocConnection();
+		if (NULL == pMysql)
+		{
+			error_info(bobj, _T("连接数据库失败"));
+			return cmd_error(bobj);
+		}
+
+		MYSQL_RES* res = NULL;
+		if (!SelectFromTbl(sql, pMysql, bobj, &res))
+		{
+			Mysql_BackToPool(pMysql);
+			return cmd_error(bobj);
+		}
+
+		Mysql_BackToPool(pMysql);
+
+		unsigned int nRows = (unsigned int)mysql_num_rows(res);
+		MYSQL_ROW row = mysql_fetch_row(res);
+		msgpack::sbuffer sbuf;
+		msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
+		sbuf.write("\xfb\xfc", 6);
+		_msgpack.pack_array(4);
+		_msgpack.pack(bobj->nCmd);
+		_msgpack.pack(bobj->nSubCmd);
+		_msgpack.pack(0);
+		_msgpack.pack(1);
+		ParserKhjl(_msgpack, row, XSRQ_SELECT_SIZE);
 		mysql_free_result(res);
 
 		DealTail(sbuf, bobj);

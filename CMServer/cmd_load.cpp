@@ -122,6 +122,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			std::string strXsrq = (pArray++)->as<std::string>();
 			std::string strJlxm = (pArray++)->as<std::string>();
 			unsigned int Khid = GetIndexByName(strKhmc.c_str(), bobj);
+			std::string strBz = (pArray++)->as<std::string>();
 			if (0 == Khid)
 			{
 				mysql_rollback(pMysql);
@@ -129,10 +130,10 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 				Mysql_BackToPool(pMysql);
 				goto error;
 			}
-			const TCHAR* pSql = _T("UPDATE sim_tbl SET Khid01=%u,Jlxm='%s',Xsrq='%s' WHERE Jrhm='%s'");
+			const TCHAR* pSql = _T("UPDATE sim_tbl SET Khid01=%u,Jlxm='%s',Xsrq='%s',Bz='%s' WHERE Jrhm='%s'");
 			TCHAR sql[256];
 			memset(sql, 0x00, sizeof(sql));
-			_stprintf_s(sql, sizeof(sql), pSql, Khid, strJlxm.c_str(), strXsrq.c_str(), strJrhm.c_str());
+			_stprintf_s(sql, sizeof(sql), pSql, Khid, strJlxm.c_str(), strXsrq.c_str(), strBz.c_str(), strJrhm.c_str());
 			if (!UpdateTbl(sql, pMysql, bobj))
 			{
 				mysql_rollback(pMysql);
