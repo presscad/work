@@ -185,7 +185,6 @@ void API_RecvCompSuccess(DWORD dwTransion, void* _sobj, void* _bobj)
 
 	if (dwTransion == 0) // 对方关闭连接
 	{
-		_tprintf(_T("客户端关闭\n"));
 		CMCloseSocket(a_sobj);
 		freeSObj(a_sobj);
 		DoReturnData(c_bobj);
