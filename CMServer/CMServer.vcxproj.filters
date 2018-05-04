@@ -61,6 +61,9 @@
     <Filter Include="API\状态查询">
       <UniqueIdentifier>{11262e5e-3b48-4b98-a430-53158712e7fb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="API\流量池信息">
+      <UniqueIdentifier>{c327b162-9b5e-4515-a700-fedc8891c2ed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
