@@ -23,7 +23,7 @@ void API_ConnectCompFailed(void* _sobj, void* _bobj)
 
 	CMCloseSocket(a_sobj);
 	freeSObj(a_sobj);
-
+	error_info(c_bobj, _T("连接API失败"));
 	API_Failed(c_bobj);
 }
 
@@ -64,6 +64,7 @@ void API_ConnectCompSuccess(DWORD dwTransion, void* _sobj, void* _bobj)
 
 	return;
 error:
+	error_info(c_bobj, _T("连接API失败"));
 	API_Failed(c_bobj);
 	return;
 }
@@ -82,7 +83,7 @@ void API_SendCompFailed(void* _sobj, void* _bobj)
 
 	CMCloseSocket(a_sobj);
 	freeSObj(a_sobj);
-
+	error_info(c_bobj, _T("发送API数据失败"));
 	API_Failed(c_bobj);
 }
 
@@ -118,6 +119,7 @@ void API_SendCompSuccess(DWORD dwTransion, void* _sobj, void* _bobj)
 	return;
 
 error:
+	error_info(c_bobj, _T("发送API数据失败"));
 	API_Failed(c_bobj);
 	return;
 }
@@ -136,7 +138,7 @@ void API_RecvZeroCompFailed(void* _sobj, void* _bobj)
 
 	CMCloseSocket(a_sobj);
 	freeSObj(a_sobj);
-
+	error_info(c_bobj, _T("接收API数据失败"));
 	API_Failed(c_bobj);
 }
 
@@ -150,6 +152,7 @@ void API_RecvZeroCompSuccess(DWORD dwTransion, void* _sobj, void* _bobj)
 	{
 		CMCloseSocket(c_sobj);
 		freeSObj(c_sobj);
+		error_info(c_bobj, _T("接收API数据失败"));
 		API_Failed(c_bobj);
 	}
 }
@@ -168,7 +171,7 @@ void API_RecvCompFailed(void* _sobj, void* _bobj)
 
 	CMCloseSocket(a_sobj);
 	freeSObj(a_sobj);
-
+	error_info(c_bobj, _T("接收API数据失败"));
 	API_Failed(c_bobj);
 }
 
@@ -195,6 +198,7 @@ void API_RecvCompSuccess(DWORD dwTransion, void* _sobj, void* _bobj)
 	{
 		CMCloseSocket(a_sobj);
 		freeSObj(a_sobj);
+		error_info(c_bobj, _T("接收API数据失败"));
 		API_Failed(c_bobj);
 		return;
 	}

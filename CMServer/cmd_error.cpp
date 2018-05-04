@@ -16,7 +16,7 @@ bool cmd_error(BUFFER_OBJ* bobj, int nTag/* = 0*/)
 		_msgpack.pack(bobj->nCmd);
 		_msgpack.pack(bobj->nSubCmd);
 		_msgpack.pack(1);
-		_msgpack.pack(bobj->data);
+		_msgpack.pack(std::string(bobj->data));
 	}
 	else
 	{
@@ -26,7 +26,7 @@ bool cmd_error(BUFFER_OBJ* bobj, int nTag/* = 0*/)
 		_msgpack.pack(bobj->nSubSubCmd);
 		_msgpack.pack(nTag);
 		_msgpack.pack(1);
-		_msgpack.pack(bobj->data);
+		_msgpack.pack(std::string(bobj->data));
 	}
 
 	DealTail(sbuf, bobj);

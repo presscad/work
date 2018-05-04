@@ -368,6 +368,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case KH_SIM_LIST:
 	{
+		bobj->nSubSubCmd = (pRootArray++)->as<int>();
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
@@ -375,7 +376,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
-		unsigned int nKhid = (pArray++)->as<unsigned int>();
+		std::string strKhid = (pArray++)->as<std::string>();
+		unsigned int nKhid = 0;
+		sscanf_s(strKhid.c_str(), "%u", &nKhid);
 
 		const TCHAR* pSql = NULL;
 		TCHAR sql[256];
@@ -492,6 +495,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case KH_SIM_ON15D:
 	{
+		bobj->nSubSubCmd = (pRootArray++)->as<int>();
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
@@ -499,7 +503,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
-		unsigned int nKhid = (pArray++)->as<unsigned int>();
+		std::string strKhid = (pArray++)->as<std::string>();
+		unsigned int nKhid = 0;
+		sscanf_s(strKhid.c_str(), "%u", &nKhid);
 
 		const TCHAR* pSql = NULL;
 		TCHAR sql[256];
@@ -609,6 +615,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case KH_SIM_ON1M:
 	{
+		bobj->nSubSubCmd = (pRootArray++)->as<int>();
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
@@ -616,7 +623,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
-		unsigned int nKhid = (pArray++)->as<unsigned int>();
+		std::string strKhid = (pArray++)->as<std::string>();
+		unsigned int nKhid = 0;
+		sscanf_s(strKhid.c_str(), "%u", &nKhid);
 
 		const TCHAR* pSql = NULL;
 		TCHAR sql[256];
@@ -725,6 +734,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case KH_SIM_DU1M:
 	{
+		bobj->nSubSubCmd = (pRootArray++)->as<int>();
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
@@ -732,7 +742,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
-		unsigned int nKhid = (pArray++)->as<unsigned int>();
+		std::string strKhid = (pArray++)->as<std::string>();
+		unsigned int nKhid = 0;
+		sscanf_s(strKhid.c_str(), "%u", &nKhid);
 
 		const TCHAR* pSql = NULL;
 		TCHAR sql[256];
@@ -842,6 +854,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case KH_SIM_DU15D:
 	{
+		bobj->nSubSubCmd = (pRootArray++)->as<int>();
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
@@ -849,7 +862,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
-		unsigned int nKhid = (pArray++)->as<unsigned int>();
+		std::string strKhid = (pArray++)->as<std::string>();
+		unsigned int nKhid = 0;
+		sscanf_s(strKhid.c_str(), "%u", &nKhid);
 
 		const TCHAR* pSql = NULL;
 		TCHAR sql[256];

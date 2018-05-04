@@ -114,6 +114,8 @@ error:
 		freeSObj(a_sobj);
 	}
 
+	error_info(bobj, _T("初始化API连接失败"));
+
 	API_Failed(bobj);
 
 	return false;
@@ -125,10 +127,15 @@ void API_Failed(BUFFER_OBJ* bobj)
 	msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
 	sbuf.write("\xfb\xfc", 6);
 
-	_msgpack.pack_array(3);
+	_msgpack.pack_array(6);
 	_msgpack.pack(bobj->nCmd);
 	_msgpack.pack(bobj->nSubCmd);
+	_msgpack.pack(bobj->nSubSubCmd);
 	_msgpack.pack(1);
+	_msgpack.pack(bobj->strTemp);
+	_msgpack.pack_array(1);
+	_msgpack.pack_array(1);
+	_msgpack.pack(std::string(bobj->data));
 
 	DealTail(sbuf, bobj);
 }
@@ -157,6 +164,26 @@ TCHAR* Utf8ConvertAnsi(const TCHAR* strIn, int inLen)
 	return (TCHAR*)pTargetData;
 }
 
+bool Api_error(BUFFER_OBJ* bobj)
+{
+	msgpack::sbuffer sbuf;
+	msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
+	sbuf.write("\xfb\xfc", 6);
+
+	_msgpack.pack_array(6);
+	_msgpack.pack(bobj->nCmd);
+	_msgpack.pack(bobj->nSubCmd);
+	_msgpack.pack(bobj->nSubSubCmd);
+	_msgpack.pack(1);
+	_msgpack.pack(bobj->strTemp);
+	_msgpack.pack_array(1);
+	_msgpack.pack_array(1);
+	_msgpack.pack(std::string(bobj->data));
+
+	DealTail(sbuf, bobj);
+	return false;
+}
+
 //	static const char* test = "<?xml version = \"1.0\" encoding = \"utf-8\"?>"
 //	"<businessServiceResponse>" // 业务根节点
 //		"<RspType>0</RspType>"	// 请求状态 返回0，标识请求成功
@@ -171,25 +198,24 @@ bool doDisNumberResponse(void* _bobj)
 	tinyxml2::XMLDocument doc;
 	if (tinyxml2::XML_SUCCESS != doc.Parse(pResponData))
 	{
+		error_info(bobj, _T("%s"), pResponData);
 		delete pResponData;
 		return false;
 	}
 	delete pResponData;
 
-	//DIS_NUMBER* pds = new DIS_NUMBER;
-	//pds->strJrhm = bobj->strJrhm;
 	tinyxml2::XMLElement* root = doc.RootElement();
 	tinyxml2::XMLElement* RspType = root->FirstChildElement(); // <RspType>0</RspType>
-	//pds->strRsptype = RspType->GetText();
+	const TCHAR* pRspType = RspType->GetText();
 
 	tinyxml2::XMLElement* result = RspType->NextSiblingElement(); // <result>0</result>
-	//pds->strResult = result->GetText();
+	const TCHAR* presult = result->GetText();
 
 	tinyxml2::XMLElement* resultMsg = result->NextSiblingElement(); // <resultMsg>成功接收消息</resultMsg>
-	//pds->strResultMsg = resultMsg->GetText();
+	const TCHAR* presultMsg = resultMsg->GetText();
 
 	tinyxml2::XMLElement* GROUP_TRANSACTIONID = resultMsg->NextSiblingElement(); // <GROUP_TRANSACTIONID>1000000252201606149170517340</GROUP_TRANSACTIONID>
-	//pds->strGROUP_TRANSACTIONID = GROUP_TRANSACTIONID->GetText();
+	const TCHAR* pGROUP_TRANSACTIONID = GROUP_TRANSACTIONID->GetText();
 
 	msgpack::sbuffer sbuf;
 	msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
@@ -200,17 +226,104 @@ bool doDisNumberResponse(void* _bobj)
 	_msgpack.pack(bobj->nSubCmd);
 	_msgpack.pack(bobj->nSubSubCmd);
 	_msgpack.pack(0);
-//	_msgpack.pack(bobj->strJrhm);
+	_msgpack.pack(bobj->strTemp);
 	_msgpack.pack_array(1);
 	_msgpack.pack_array(4);
-	//_msgpack.pack(atoi(pds->strRsptype.c_str()));
-	//_msgpack.pack(atoi(pds->strResult.c_str()));
-	//_msgpack.pack(pds->strResultMsg);
-	//_msgpack.pack(pds->strGROUP_TRANSACTIONID);
+	_msgpack.pack(std::string(pRspType));
+	_msgpack.pack(std::string(presult));
+	_msgpack.pack(std::string(presultMsg));
+	_msgpack.pack(std::string(pGROUP_TRANSACTIONID));
 
 	DealTail(sbuf, bobj);
 
 //	PostThreadMessage(g_HelpThreadID, MSG_DIS_NUMBER, (WPARAM)pds, 0);// 进行数据库操作
+	_T("UPDATE log_tbl set log_state='完成',log_msg='%s',log_etime=now()");
+
+	return true;
+}
+
+//<?xml version = "1.0" encoding = "utf-8"?>
+//<root>
+//	<Query_response>
+//		<BasicInfo>
+//			<result>0</result>
+//			<resultMsg>处理成功!</resultMsg>
+//		</BasicInfo>
+//		<prodRecords>
+//			<prodRecord>
+//<				productInfo>
+//					<productStatusCd>1</productStatusCd>
+//					<productStatusName>在用</productStatusName>
+//					<servCreateDate>20160531</servCreateDate>
+//				</productInfo>
+//			</prodRecord>
+//		</prodRecords>
+//		<number>14910000000</number>
+//		<GROUP_TRANSACTIONID>1000000252201609302104391983</GROUP_TRANSACTIONID>
+//	</Query_response>
+//</root>
+bool doCardStatusResponse(void* _bobj)
+{
+	BUFFER_OBJ* bobj = (BUFFER_OBJ*)_bobj;
+	TCHAR* pResponData = Utf8ConvertAnsi(bobj->data, bobj->dwRecvedCount);
+	int n = strlen(pResponData);
+	tinyxml2::XMLDocument doc;
+	if (tinyxml2::XML_SUCCESS != doc.Parse(pResponData))
+	{
+		error_info(bobj, _T("%s"), pResponData);
+		delete pResponData;
+		return false;
+	}
+	delete pResponData;
+
+	tinyxml2::XMLElement* root = doc.RootElement();
+	tinyxml2::XMLElement* BasicInfo = root->FirstChildElement()->FirstChildElement();
+	tinyxml2::XMLElement* result = BasicInfo->FirstChildElement(); // <result>0</result>
+	const TCHAR* presult = result->GetText();
+
+	tinyxml2::XMLElement* resultMsg = result->NextSiblingElement(); // <resultMsg>处理成功!</resultMsg>
+	const TCHAR* presultMsg = resultMsg->GetText();
+
+	tinyxml2::XMLElement* prodRecords = BasicInfo->NextSiblingElement();
+	tinyxml2::XMLElement* productInfo = prodRecords->FirstChildElement()->FirstChildElement();
+	tinyxml2::XMLElement* productStatusCd = productInfo->FirstChildElement(); // <productStatusCd>1</productStatusCd>
+	const TCHAR* pproductStatusCd = productStatusCd->GetText();
+
+	tinyxml2::XMLElement* productStatusName = productStatusCd->NextSiblingElement(); // <productStatusName>在用</productStatusName>
+	const TCHAR* pproductStatusName = productStatusName->GetText();
+
+	tinyxml2::XMLElement* servCreateDate = productStatusName->NextSiblingElement(); // <servCreateDate>20160531</servCreateDate>
+	const TCHAR* pservCreateDate = servCreateDate->GetText();
+
+	tinyxml2::XMLElement* number = prodRecords->NextSiblingElement(); // <number>14910000000</number>
+	const TCHAR* pnumber = number->GetText();
+
+	tinyxml2::XMLElement* GROUP_TRANSACTIONID = number->NextSiblingElement(); // <GROUP_TRANSACTIONID>1000000252201609302104391983</GROUP_TRANSACTIONID>
+	const TCHAR* pGROUP_TRANSACTIONID = GROUP_TRANSACTIONID->GetText();
+
+	msgpack::sbuffer sbuf;
+	msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
+	sbuf.write("\xfb\xfc", 6);
+
+	_msgpack.pack_array(6);
+	_msgpack.pack(bobj->nCmd);
+	_msgpack.pack(bobj->nSubCmd);
+	_msgpack.pack(bobj->nSubSubCmd);
+	_msgpack.pack(0);
+	_msgpack.pack(bobj->strTemp);
+	_msgpack.pack_array(1);
+	_msgpack.pack_array(6);
+	_msgpack.pack(std::string(presult));
+	_msgpack.pack(std::string(presultMsg));
+	_msgpack.pack(std::string(pproductStatusCd));
+	_msgpack.pack(std::string(pproductStatusName));
+	_msgpack.pack(std::string(pservCreateDate));
+	//_msgpack.pack(pcs->strNumber);
+	_msgpack.pack(std::string(pGROUP_TRANSACTIONID));
+
+	DealTail(sbuf, bobj);
+
+//	PostThreadMessage(g_HelpThreadID, MSG_CARD_STATUS, (WPARAM)pcs, 0);// 进行数据库操作
 
 	return true;
 }

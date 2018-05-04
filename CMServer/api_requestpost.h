@@ -19,4 +19,8 @@ void DoReturnData(BUFFER_OBJ* bobj);
 
 TCHAR* Utf8ConvertAnsi(const TCHAR* strIn, int inLen);
 
+bool Api_error(BUFFER_OBJ* bobj);
+
 bool doDisNumberResponse(void* _bobj);
+
+bool doCardStatusResponse(void* _bobj);

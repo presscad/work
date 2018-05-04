@@ -161,6 +161,23 @@ bool InsertIntoTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj)
 	return true;
 }
 
+bool Trans_InsertIntoTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj)
+{
+	size_t len = _tcslen(sql);
+	if (0 != mysql_real_query(pMysql, sql, (ULONG)len))
+	{
+		error_info(bobj, _T("数据库异常 ErrorCode = %08x, ErrorMsg = %s"), mysql_errno(pMysql), mysql_error(pMysql));
+		return false;
+	}
+
+	//if (mysql_affected_rows(pMysql) == 0)
+	//{
+	//	return false;
+	//}
+
+	return true;
+}
+
 bool SelectFromTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj, MYSQL_RES** res)
 {
 	size_t len = _tcslen(sql);
@@ -184,6 +201,15 @@ bool SelectFromTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj, MYSQL_RES*
 		return false;
 	}
 
+	my_ulonglong nErr = mysql_affected_rows(pMysql);
+	if ((my_ulonglong)0 == nErr)
+	{
+		error_info(bobj, _T("没有查询到数据 sql = %s"), sql);
+		mysql_free_result(*res);
+		*res = NULL;
+		return false;
+	}
+
 	return true;
 }
 
@@ -201,6 +227,24 @@ bool UpdateTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj)
 		error_info(bobj, _T("数据不存在"));
 		return false;
 	}
+
+	return true;
+}
+
+bool Trans_UpdateTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj)
+{
+	size_t len = _tcslen(sql);
+	if (0 != mysql_real_query(pMysql, sql, (ULONG)len))
+	{
+		error_info(bobj, _T("数据库异常 ErrorCode = %08x, ErrorMsg = %s"), mysql_errno(pMysql), mysql_error(pMysql));
+		return false;
+	}
+
+	//if (mysql_affected_rows(pMysql) == 0)
+	//{
+	//	error_info(bobj, _T("数据不存在"));
+	//	return false;
+	//}
 
 	return true;
 }
@@ -348,4 +392,11 @@ unique key(Dxzh))")
 bool CreateDxzhTbl()
 {
 	return CreateTbl(CREATE_DXZH_TBL);
+}
+
+#define CREATE_LOG_TBL _T("CREATE TABLE IF NOT EXISTS log_tbl(id int unsigned not null auto_increment,\
+log_type int default 0)")
+bool CreateLogTbl()
+{
+	return CreateTbl(CREATE_LOG_TBL);
 }

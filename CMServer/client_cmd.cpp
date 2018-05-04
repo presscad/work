@@ -15,6 +15,7 @@
 #include "cmd_lltc.h"
 #include "cmd_ssdq.h"
 #include "cmd_disnumber.h"
+#include "cmd_state.h"
 
 void Client_CmdCompletionFailed(void* bobj_, void* _bobj)
 {
@@ -112,9 +113,23 @@ void Client_CmdCompletionSuccess(DWORD dwTranstion, void* bobj_, void* _bobj)
 			return;
 		}
 		break;
+		case CARD_STATUS_DATA:
+		{
+			cmd_cardstatus(pArray, bobj);
+			return;
+		}
+		break;
 		default:
 			break;
 		}
+	}
+	catch (msgpack::type_error e)
+	{
+		_tprintf(_T("msgpack::type_error\n"));
+	}
+	catch (msgpack::unpack_error e)
+	{
+		_tprintf(_T("msgpack::unpack_error\n"));
 	}
 	catch (const std::exception&)
 	{

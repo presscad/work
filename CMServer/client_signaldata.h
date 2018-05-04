@@ -40,6 +40,9 @@ typedef struct _buffer_obj_t
 	WSABUF wsaBuf;
 	DWORD dwRecvedCount;
 	DWORD dwSendedCount;
+	std::string strTemp;
+	unsigned int nPerLogID;
+	unsigned int nUserId;
 	int nCmd;
 	int nSubCmd;
 	int nSubSubCmd;
@@ -57,6 +60,9 @@ typedef struct _buffer_obj
 	WSABUF wsaBuf;
 	DWORD dwRecvedCount;
 	DWORD dwSendedCount;
+	std::string strTemp;
+	unsigned int nPerLogID;
+	unsigned int nUserId;
 	int nCmd;
 	int nSubCmd;
 	int nSubSubCmd;
@@ -71,6 +77,8 @@ typedef struct _buffer_obj
 		pfndoApiResponse = NULL;
 		dwRecvedCount = 0;
 		dwSendedCount = 0;
+		nPerLogID = 0;
+		nUserId = 0;
 		nCmd = 0;
 		nSubCmd = 0;
 		nSubSubCmd = 0;

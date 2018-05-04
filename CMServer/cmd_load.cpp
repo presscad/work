@@ -77,7 +77,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			TCHAR sql[256];
 			memset(sql, 0x00, sizeof(sql));
 			_stprintf_s(sql, sizeof(sql), pSql, strJrhm.c_str(), strIccid.c_str(), strDxzh.c_str(), strLlchm.c_str(), strLlclx.c_str(), strIccid.c_str());
-			if (!InsertIntoTbl(sql, pMysql, bobj))
+			if (!Trans_InsertIntoTbl(sql, pMysql, bobj))
 			{
 				mysql_rollback(pMysql);
 				mysql_autocommit(pMysql, 1);
@@ -134,7 +134,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			TCHAR sql[256];
 			memset(sql, 0x00, sizeof(sql));
 			_stprintf_s(sql, sizeof(sql), pSql, Khid, strJlxm.c_str(), strXsrq.c_str(), strBz.c_str(), strJrhm.c_str());
-			if (!UpdateTbl(sql, pMysql, bobj))
+			if (!Trans_UpdateTbl(sql, pMysql, bobj))
 			{
 				mysql_rollback(pMysql);
 				mysql_autocommit(pMysql, 1);
@@ -176,12 +176,12 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			std::string strJrhm = (pArray++)->as<std::string>();
 			std::string strXfrq = (pArray++)->as<std::string>();
 			int nMonth = (pArray++)->as<int>();
-			std::string strBz = (pArray++)->as<std::string>();
-			const TCHAR* pSql = _T("UPDATE sim_tbl SET Xfrq='%s',Dqrq=DATE_ADD(IF('%s'>IFNULL(Dqrq,'1988-01-01'),'%s',Dqrq),INTERVAL %d MONTH),Bz='%s' WHERE Jrhm='%s'");
+//			std::string strBz = (pArray++)->as<std::string>();
+			const TCHAR* pSql = _T("UPDATE sim_tbl SET Xfrq='%s',Dqrq=DATE_ADD(IF('%s'>IFNULL(Dqrq,'1988-01-01'),'%s',Dqrq),INTERVAL %d MONTH) WHERE Jrhm='%s'");
 			TCHAR sql[256];
 			memset(sql, 0x00, sizeof(sql));
-			_stprintf_s(sql, sizeof(sql), pSql, strXfrq.c_str(), strXfrq.c_str(), strXfrq.c_str(), nMonth, strBz.c_str(), strJrhm.c_str());
-			if (!UpdateTbl(sql, pMysql, bobj))
+			_stprintf_s(sql, sizeof(sql), pSql, strXfrq.c_str(), strXfrq.c_str(), strXfrq.c_str(), nMonth, strJrhm.c_str());
+			if (!Trans_UpdateTbl(sql, pMysql, bobj))
 			{
 				mysql_rollback(pMysql);
 				mysql_autocommit(pMysql, 1);
