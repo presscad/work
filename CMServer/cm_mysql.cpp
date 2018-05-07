@@ -395,7 +395,18 @@ bool CreateDxzhTbl()
 }
 
 #define CREATE_LOG_TBL _T("CREATE TABLE IF NOT EXISTS log_tbl(id int unsigned not null auto_increment,\
-log_type int default 0)")
+Opname varchar(32) not null,\
+Userid int unsigend not null,\
+Requesttime datatime(),\
+Status varchar(16) not null,\
+Respondtime datatime(),\
+Respondmsg varchar(32),\
+Transid varchar(32),\
+Nctime dataime(),\
+Ncmsg varchar(32),\
+Result varchar(64),\
+primary key(id),\
+unique key(Transid))")
 bool CreateLogTbl()
 {
 	return CreateTbl(CREATE_LOG_TBL);

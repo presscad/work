@@ -5,6 +5,9 @@
 #include "nc_postcompletion.h"
 #include "client_mem.h"
 #include "nc_requestpost.h"
+#include "cmd_ncdata.h"
+
+extern TCHAR* Utf8ConvertAnsi(const TCHAR* strIn, int inLen);
 
 extern struct tcp_keepalive alive_in;
 extern struct tcp_keepalive alive_out;
@@ -60,10 +63,13 @@ void Nc_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void* _bobj)
 		&localAddr, &localAddrlen,
 		&remoteAddr, &remoteAddrlen);
 
-	if (NULL == strstr(bobj->data, "</NotifyContractRoot>") && NULL == strstr(bobj->data, "</WanrningContractRoot>"))
+	TCHAR* pResponData = Utf8ConvertAnsi(bobj->data, bobj->dwRecvedCount);
+	tinyxml2::XMLDocument doc;
+	if (tinyxml2::XML_SUCCESS != doc.Parse(pResponData))
 	{
+		delete pResponData;
 		bobj->SetIoRequestFunction(NC_RecvZeroCompFailed, NC_RecvZeroCompSuccess);
-		if (Nc_PostZeroRecv(sobj, bobj))
+		if (!Nc_PostZeroRecv(sobj, bobj))
 		{
 			CMCloseSocket(sobj);
 			freeSObj(sobj);
@@ -73,7 +79,9 @@ void Nc_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void* _bobj)
 	}
 	else
 	{
-		//doNcData(c_bobj);
+		delete pResponData;
+		doNcResponse(bobj); // 返回推送反馈报文
+		doNcData(doc);
 	}
 }
 
@@ -135,8 +143,13 @@ void NC_RecvCompSuccess(DWORD dwTransion, void* _sobj, void* _bobj)
 	BUFFER_OBJ* c_bobj = (BUFFER_OBJ*)_bobj;
 
 	c_bobj->dwRecvedCount += dwTransion;
-	if (NULL == strstr(c_bobj->data, "</NotifyContractRoot>") && NULL == strstr(c_bobj->data, "</WanrningContractRoot>"))
+
+	TCHAR* pResponData = Utf8ConvertAnsi(c_bobj->data, c_bobj->dwRecvedCount);
+	tinyxml2::XMLDocument doc;
+	if (tinyxml2::XML_SUCCESS != doc.Parse(pResponData))
+	//if (NULL == strstr(c_bobj->data, "</NotifyContractRoot>") && NULL == strstr(c_bobj->data, "</WanrningContractRoot>"))
 	{
+		delete pResponData;
 		c_bobj->SetIoRequestFunction(NC_RecvZeroCompFailed, NC_RecvZeroCompSuccess);
 		if (!Nc_PostZeroRecv(c_sobj, c_bobj))
 		{
@@ -148,7 +161,9 @@ void NC_RecvCompSuccess(DWORD dwTransion, void* _sobj, void* _bobj)
 	}
 	else
 	{
-		//doNcData(c_bobj);
+		delete pResponData;
+		doNcResponse(c_bobj); // 返回推送反馈报文
+		doNcData(doc);
 	}
 }
 
@@ -164,7 +179,7 @@ void NC_SendCompFailed(void* _sobj, void* _bobj)
 		_tprintf(_T("函数:%s ErrorCode = %d\n"), __FUNCTION__, WSAGetLastError());
 #endif
 
-	(c_sobj);
+	CMCloseSocket(c_sobj);
 	freeSObj(c_sobj);
 	freeBObj(c_bobj);
 }

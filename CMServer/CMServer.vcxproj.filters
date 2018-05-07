@@ -159,6 +159,9 @@
     <ClInclude Include="cmd_state.h">
       <Filter>API\状态查询</Filter>
     </ClInclude>
+    <ClInclude Include="cmd_ncdata.h">
+      <Filter>NC</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -253,6 +256,9 @@
     </ClCompile>
     <ClCompile Include="cmd_state..cpp">
       <Filter>API\状态查询</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_ncdata.cpp">
+      <Filter>NC</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

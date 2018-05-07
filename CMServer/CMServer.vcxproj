@@ -166,6 +166,7 @@
     <ClInclude Include="cmd_lltc.h" />
     <ClInclude Include="cmd_load.h" />
     <ClInclude Include="cmd_kh.h" />
+    <ClInclude Include="cmd_ncdata.h" />
     <ClInclude Include="cmd_sim.h" />
     <ClInclude Include="cmd_ssdq.h" />
     <ClInclude Include="cmd_state.h" />
@@ -202,6 +203,7 @@
     <ClCompile Include="cmd_lltc.cpp" />
     <ClCompile Include="cmd_load.cpp" />
     <ClCompile Include="cmd_kh.cpp" />
+    <ClCompile Include="cmd_ncdata.cpp" />
     <ClCompile Include="cmd_sim.cpp" />
     <ClCompile Include="cmd_ssdq.cpp" />
     <ClCompile Include="cmd_state..cpp" />

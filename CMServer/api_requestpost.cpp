@@ -8,6 +8,7 @@
 #include "client_mem.h"
 #include "tinyxml2.h"
 #include "cJSON.h"
+#include "cm_mysql.h"
 
 extern void API_ConnectCompFailed(void* _sobj, void* _bobj);
 extern void API_ConnectCompSuccess(DWORD dwTransion, void* _sobj, void* _bobj);
@@ -236,9 +237,11 @@ bool doDisNumberResponse(void* _bobj)
 
 	DealTail(sbuf, bobj);
 
-//	PostThreadMessage(g_HelpThreadID, MSG_DIS_NUMBER, (WPARAM)pds, 0);// 进行数据库操作
-	_T("UPDATE log_tbl set log_state='完成',log_msg='%s',log_etime=now()");
-
+	const TCHAR* pSql = _T("UPDATE TABLE log_tbl SET Status='等待报竣',Respondtime=now(),Respondmsg='%s',Transid='%s' WHERE id=%u");
+	TCHAR sql[256];
+	memset(sql, 0x00, sizeof(sql));
+	_stprintf_s(sql, sizeof(sql), pSql, presultMsg, pGROUP_TRANSACTIONID);
+	
 	return true;
 }
 
@@ -321,9 +324,39 @@ bool doCardStatusResponse(void* _bobj)
 	//_msgpack.pack(pcs->strNumber);
 	_msgpack.pack(std::string(pGROUP_TRANSACTIONID));
 
+	const TCHAR* pSql = _T("UPDATA TABLE log_tbl SET log_zt='等待报竣',log_etime=now(),log_transid='%s' WHERE id=%u");
+	TCHAR sql[256];
+	memset(sql, 0x00, sizeof(sql));
+	_stprintf_s(sql, sizeof(sql), pSql, pGROUP_TRANSACTIONID, bobj->nPerLogID);
+
 	DealTail(sbuf, bobj);
 
 //	PostThreadMessage(g_HelpThreadID, MSG_CARD_STATUS, (WPARAM)pcs, 0);// 进行数据库操作
+
+	return true;
+}
+
+bool log_api(const TCHAR* sql)
+{
+	MYSQL* pMysql = Mysql_AllocConnection();
+	if (NULL == pMysql)
+	{
+		return false;
+	}
+	size_t len = _tcslen(sql);
+	if (0 != mysql_real_query(pMysql, sql, (ULONG)len))
+	{
+		Mysql_BackToPool(pMysql);
+		return false;
+	}
+
+	if (mysql_affected_rows(pMysql) == 0)
+	{
+		Mysql_BackToPool(pMysql);
+		return false;
+	}
+
+	Mysql_BackToPool(pMysql);
 
 	return true;
 }

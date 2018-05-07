@@ -76,9 +76,19 @@ void DoDisNumData(msgpack::object* pRootArray, BUFFER_OBJ* bobj, const TCHAR* pD
 
 	_stprintf_s(bobj->data, bobj->datalen, pData, row[0], bobj->strTemp.c_str(), (const char*)(_bstr_t)varPwd, (const char*)(_bstr_t)varSign);
 	bobj->dwRecvedCount = strlen(bobj->data);
-	if (atoi(orderTypeId) == 19)
-		_T("INSERT INTO log_tbl (id,log_mc,log_state,log_stime) values(null,'停机-%s','新建',now())");
-	else
-		_T("INSERT INTO log_tbl (id,log_mc,log_state,log_stime) values(null,'复机-%s','新建',now())");
+
+	int nType = atoi(orderTypeId);
+	if (nType == 19)
+	{
+		pSql = _T("INSERT INTO log_tbl (id,Userid,Opname,Status,Requesttime) values(null,%u,'停机-%s','等待响应',now())");
+	}
+	else if (nType == 20)
+	{
+		pSql = _T("INSERT INTO log_tbl (id,Userid,Opname,Status,Requesttime) values(null,%u,'复机-%s','等待响应',now())");
+	}
+
+	memset(sql, 0x00, sizeof(sql));
+	_stprintf_s(sql, sizeof(sql), pSql, bobj->nUserId, bobj->strTemp.c_str());
+
 	doApi(bobj);
 }
