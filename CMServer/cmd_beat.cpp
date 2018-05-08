@@ -13,7 +13,7 @@ bool cmd_beat(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	sbuf.write("\xfb\xfc", 6);
 	_msgpack.pack_array(1);
 	_msgpack.pack(0);
-
+	_tprintf_s(_T("ÐÄÌø\n"));
 	DealTail(sbuf, bobj);
 	return 0;
 }

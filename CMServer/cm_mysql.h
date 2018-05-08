@@ -15,6 +15,8 @@ bool UpdateTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj);
 
 bool Trans_UpdateTbl(const TCHAR* sql, MYSQL* pMysql, BUFFER_OBJ* bobj);
 
+bool CreateDB();
+
 bool CreateUserTbl();
 
 bool CreateKhTbl();

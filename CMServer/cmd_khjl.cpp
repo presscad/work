@@ -96,12 +96,25 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		int nAB = (pRootArray++)->as<int>();
 		int nKeyid = (pRootArray++)->as<int>();
 
+		std::string strJlxm = (pRootArray++)->as<std::string>();
+		bool bType = strcmp(strJlxm.c_str(), "") == 0;
+
 		const TCHAR* pSql = NULL;
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
 
-		pSql = _T("SELECT COUNT(*) AS num FROM khjl_tbl");
-		_stprintf_s(sql, sizeof(sql), pSql);
+		if (!bType)
+		{
+			pSql = _T("SELECT COUNT(*) AS num FROM khjl_tbl WHERE Jlxm='%s'");
+			_stprintf_s(sql, sizeof(sql), pSql, strJlxm.c_str());
+		}
+		else
+		{
+			pSql = _T("SELECT COUNT(*) AS num FROM khjl_tbl");
+			_stprintf_s(sql, sizeof(sql), pSql);
+		}
+		/*pSql = _T("SELECT COUNT(*) AS num FROM khjl_tbl");
+		_stprintf_s(sql, sizeof(sql), pSql);*/
 
 		MYSQL* pMysql = Mysql_AllocConnection();
 		if (NULL == pMysql)
@@ -124,24 +137,65 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		if (nAB == 0) // Ê×Ò³
 		{
-			pSql = _T("SELECT %s FROM khjl_tbl WHERE id>%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, nKeyid, nPagesize);
+			if (!bType)
+			{
+				pSql = _T("SELECT %s FROM khjl_tbl WHERE Jlxm='%s'");
+				_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, strJlxm.c_str());
+			}
+			else
+			{
+				pSql = _T("SELECT %s FROM khjl_tbl WHERE id>%u LIMIT %d");
+				_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, nKeyid, nPagesize);
+			}
+			/*pSql = _T("SELECT %s FROM khjl_tbl WHERE id>%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, nKeyid, nPagesize);*/
 		}
 		else if (nAB == 1)
 		{
-			pSql = _T("SELECT %s FROM (SELECT %s FROM khjl_tbl WHERE id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
-			_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, KHJL_SELECT, nKeyid, nPagesize);
+			if (!bType)
+			{
+				pSql = _T("SELECT %s FROM khjl_tbl WHERE Jlxm='%s'");
+				_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, strJlxm.c_str());
+			}
+			else
+			{
+				pSql = _T("SELECT %s FROM (SELECT %s FROM khjl_tbl WHERE id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, KHJL_SELECT, nKeyid, nPagesize);
+			}
+			/*pSql = _T("SELECT %s FROM (SELECT %s FROM khjl_tbl WHERE id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+			_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, KHJL_SELECT, nKeyid, nPagesize);*/
 		}
 		else if (nAB == 2)
 		{
-			pSql = _T("SELECT %s FROM khjl_tbl WHERE id>%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, nKeyid, nPagesize);
+			if (!bType)
+			{
+				pSql = _T("SELECT %s FROM khjl_tbl WHERE Jlxm='%s'");
+				_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, strJlxm.c_str());
+			}
+			else
+			{
+				pSql = _T("SELECT %s FROM khjl_tbl WHERE id>%u LIMIT %d");
+				_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, nKeyid, nPagesize);
+			}
+			/*pSql = _T("SELECT %s FROM khjl_tbl WHERE id>%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, nKeyid, nPagesize);*/
 		}
 		else
 		{
-			unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+			if (!bType)
+			{
+				pSql = _T("SELECT %s FROM khjl_tbl WHERE Jlxm='%s'");
+				_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, strJlxm.c_str());
+			}
+			else
+			{
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM khjl_tbl ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, KHJL_SELECT, nTemp);
+			}
+			/*unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
 			pSql = _T("SELECT %s FROM (SELECT %s FROM khjl_tbl ORDER BY id desc LIMIT %d) a ORDER BY id asc");
-			_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, KHJL_SELECT, nTemp);
+			_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, KHJL_SELECT, nTemp);*/
 		}
 
 		res = NULL;
@@ -178,6 +232,7 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case KHJL_KH:
 	{
+		bobj->nSubSubCmd = (pRootArray++)->as<int>();
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
@@ -324,7 +379,7 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		DealTail(sbuf, bobj);
 	}
 	break;
-	case KHJL_FIND:
+	case KHJL_SELECT_BY_NAME:
 	{
 		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
@@ -362,7 +417,7 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack(bobj->nSubCmd);
 		_msgpack.pack(0);
 		_msgpack.pack(1);
-		ParserKhjl(_msgpack, row, XSRQ_SELECT_SIZE);
+		ParserKhjl(_msgpack, row, KHJL_SELECT_SIZE);
 		mysql_free_result(res);
 
 		DealTail(sbuf, bobj);

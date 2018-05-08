@@ -37,6 +37,36 @@ unsigned int GetIndexByName(const TCHAR* name , BUFFER_OBJ* bobj)
 	return nNum;
 }
 
+std::string GetLlchmByJrhm(const TCHAR* jrhm, BUFFER_OBJ* bobj)
+{
+	const TCHAR* pSql = NULL;
+	TCHAR sql[256];
+	memset(sql, 0x00, sizeof(sql));
+
+	pSql = _T("SELECT Llchm FROM sim_tbl WHERE Jrhm='%s'");
+	_stprintf_s(sql, sizeof(sql), pSql, jrhm);
+
+	MYSQL* pMysql = Mysql_AllocConnection();
+	if (NULL == pMysql)
+	{
+		error_info(bobj, _T("连接数据库失败"));
+		return "";
+	}
+
+	MYSQL_RES* res = NULL;
+	if (!SelectFromTbl(sql, pMysql, bobj, &res))
+	{
+		Mysql_BackToPool(pMysql);
+		return "";
+	}
+	MYSQL_ROW row = mysql_fetch_row(res);
+	mysql_free_result(res);
+
+	Mysql_BackToPool(pMysql);
+
+	return std::string(row[0]);
+}
+
 bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 {
 	bobj->nSubCmd = (pRootArray++)->as<int>();
@@ -86,6 +116,22 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			}
 		}
 
+		if (0)
+		{
+			const TCHAR* pSql = _T("UPDATE TABLE llc_tbl SET Kzsl=Kzsl+%d WHERE Llchm='%s'");
+			TCHAR sql[256];
+			memset(sql, 0x00, sizeof(sql));
+			_stprintf_s(sql, sizeof(sql), pSql, nArraySize, strLlchm.c_str());
+			if (!Trans_UpdateTbl(sql, pMysql, bobj))
+			{
+				mysql_rollback(pMysql);
+				mysql_autocommit(pMysql, 1);
+				Mysql_BackToPool(pMysql);
+				goto error;
+			}
+
+		}
+		
 		mysql_commit(pMysql);
 		mysql_autocommit(pMysql, 1);
 		Mysql_BackToPool(pMysql);
@@ -123,7 +169,8 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			std::string strJlxm = (pArray++)->as<std::string>();
 			unsigned int Khid = GetIndexByName(strKhmc.c_str(), bobj);
 			std::string strBz = (pArray++)->as<std::string>();
-			if (0 == Khid)
+			std::string strLlchm = GetLlchmByJrhm(strJrhm.c_str(), bobj);
+			if (0 == Khid || "" == strLlchm)
 			{
 				mysql_rollback(pMysql);
 				mysql_autocommit(pMysql, 1);
@@ -140,6 +187,30 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 				mysql_autocommit(pMysql, 1);
 				Mysql_BackToPool(pMysql);
 				goto error;
+			}
+			if (0)
+			{
+				pSql = _T("UPDATE kh_tbl SET Kzsl=Kzsl+1 WHERE id=%u");
+				memset(sql, 0x00, sizeof(sql));
+				_stprintf_s(sql, sizeof(sql), pSql, Khid);
+				if (!Trans_UpdateTbl(sql, pMysql, bobj))
+				{
+					mysql_rollback(pMysql);
+					mysql_autocommit(pMysql, 1);
+					Mysql_BackToPool(pMysql);
+					goto error;
+				}
+
+				pSql = _T("UPDATE llc_tbl SET Xssl=Xssl+1 WHERE Llchm='%s'");
+				memset(sql, 0x00, sizeof(sql));
+				_stprintf_s(sql, sizeof(sql), pSql, strLlchm.c_str());
+				if (!Trans_UpdateTbl(sql, pMysql, bobj))
+				{
+					mysql_rollback(pMysql);
+					mysql_autocommit(pMysql, 1);
+					Mysql_BackToPool(pMysql);
+					goto error;
+				}
 			}
 		}
 

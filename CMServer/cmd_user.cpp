@@ -13,8 +13,12 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	{
 	case USER_ADD:
 	{
-		unsigned int nId = (pRootArray++)->as<unsigned int>();
-		unsigned int nUsertype = (pRootArray++)->as<unsigned int>();
+		std::string strId = (pRootArray++)->as<std::string>();
+		unsigned int nId = 0;
+		sscanf_s(strId.c_str(), "%u", &nId);
+		std::string strUsertype = (pRootArray++)->as<std::string>();
+		unsigned int nUsertype = 0;
+		sscanf_s(strUsertype.c_str(), "%u", &nUsertype);
 		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
 		std::string strUser = (pArray++)->as<std::string>();
@@ -160,8 +164,13 @@ bool cmd_user(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case USER_LIST:
 	{
-		unsigned int nId = (pRootArray++)->as<unsigned int>();
-		unsigned int nUsertype = (pRootArray++)->as<unsigned int>();
+		std::string strId = (pRootArray++)->as<std::string>();
+		unsigned int nId = 0;
+		sscanf_s(strId.c_str(), "%u", &nId);
+		std::string strUsertype = (pRootArray++)->as<std::string>();
+		unsigned int nUsertype = 0;
+		sscanf_s(strUsertype.c_str(), "%u", &nUsertype);
+		bobj->nSubSubCmd = (pRootArray++)->as<int>();
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();

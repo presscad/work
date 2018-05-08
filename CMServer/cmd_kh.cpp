@@ -285,13 +285,27 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		int nAB = (pRootArray++)->as<int>();
 		int nKeyid = (pRootArray++)->as<int>();
 
-		const TCHAR* pSql = pSql = _T("SELECT COUNT(*) num FROM kh_tbl WHERE Fatherid=%u");
+		std::string strKhmc = (pRootArray++)->as<std::string>();
+		bool bType = strcmp(strKhmc.c_str(), "") == 0;
+
+		const TCHAR* pSql = _T("SELECT COUNT(*) num FROM kh_tbl WHERE Fatherid=%u");
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
 		if (nUsertype == 1) // 超级管理员
 			nId = 1;
 
-		_stprintf_s(sql, sizeof(sql), pSql, nId);
+		if (!bType)
+		{
+			pSql = _T("SELECT COUNT(*) num FROM kh_tbl WHERE Khmc='%s'");
+			_stprintf_s(sql, sizeof(sql), pSql, strKhmc.c_str());
+		}
+		else
+		{
+			pSql = _T("SELECT COUNT(*) num FROM kh_tbl WHERE Fatherid=%u");
+			_stprintf_s(sql, sizeof(sql), pSql, nId);
+		}
+
+		//_stprintf_s(sql, sizeof(sql), pSql, nId);
 
 		MYSQL* pMysql = Mysql_AllocConnection();
 		if (NULL == pMysql)
@@ -314,24 +328,65 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		if (nAB == 0) // 首页
 		{
-			pSql = _T("SELECT %s FROM kh_tbl WHERE Fatherid=%u AND id>%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, nId, nKeyid, nPagesize);
+			if (!bType)
+			{
+				pSql = _T("SELECT %s FROM kh_tbl WHERE Khmc='%s'");
+				_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, strKhmc.c_str());
+			}
+			else
+			{
+				pSql = _T("SELECT %s FROM kh_tbl WHERE Fatherid=%u AND id>%u LIMIT %d");
+				_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, nId, nKeyid, nPagesize);
+			}
+			/*pSql = _T("SELECT %s FROM kh_tbl WHERE Fatherid=%u AND id>%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, nId, nKeyid, nPagesize);*/
 		}
 		else if (nAB == 1)
 		{
-			pSql = _T("SELECT %s FROM (SELECT %s FROM kh_tbl WHERE Fatherid=%u AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
-			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, KH_SELECT, nId, nKeyid, nPagesize);
+			if (!bType)
+			{
+				pSql = _T("SELECT %s FROM kh_tbl WHERE Khmc='%s'");
+				_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, strKhmc.c_str());
+			}
+			else
+			{
+				pSql = _T("SELECT %s FROM (SELECT %s FROM kh_tbl WHERE Fatherid=%u AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, KH_SELECT, nId, nKeyid, nPagesize);
+			}
+			/*pSql = _T("SELECT %s FROM (SELECT %s FROM kh_tbl WHERE Fatherid=%u AND id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, KH_SELECT, nId, nKeyid, nPagesize);*/
 		}
 		else if (nAB == 2)
 		{
-			pSql = _T("SELECT %s FROM kh_tbl WHERE Fatherid=%u AND id>%u LIMIT %d");
-			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, nId, nKeyid, nPagesize);
+			if (!bType)
+			{
+				pSql = _T("SELECT %s FROM kh_tbl WHERE Khmc='%s'");
+				_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, strKhmc.c_str());
+			}
+			else
+			{
+				pSql = _T("SELECT %s FROM kh_tbl WHERE Fatherid=%u AND id>%u LIMIT %d");
+				_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, nId, nKeyid, nPagesize);
+			}
+			/*pSql = _T("SELECT %s FROM kh_tbl WHERE Fatherid=%u AND id>%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, nId, nKeyid, nPagesize);*/
 		}
 		else
 		{
-			unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+			if (!bType)
+			{
+				pSql = _T("SELECT %s FROM kh_tbl WHERE Khmc='%s'");
+				_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, strKhmc.c_str());
+			}
+			else
+			{
+				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+				pSql = _T("SELECT %s FROM (SELECT %s FROM kh_tbl WHERE Fatherid=%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+				_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, KH_SELECT, nId, nTemp);
+			}
+			/*unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
 			pSql = _T("SELECT %s FROM (SELECT %s FROM kh_tbl WHERE Fatherid=%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
-			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, KH_SELECT, nId, nTemp);
+			_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, KH_SELECT, nId, nTemp);*/
 		}
 
 		res = NULL;
@@ -967,6 +1022,50 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			ParserSim(_msgpack, row, SIM_SELECT_SIZE);
 			row = mysql_fetch_row(res);
 		}
+		mysql_free_result(res);
+
+		DealTail(sbuf, bobj);
+	}
+	break;
+	case KH_SELECT_BY_NAME:
+	{
+		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
+		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
+		std::string strKhmc = (pDataArray++)->as<std::string>();
+
+		const TCHAR* pSql = NULL;
+		TCHAR sql[256];
+		memset(sql, 0x00, sizeof(sql));
+		pSql = _T("SELECT %s FROM kh_tbl WHERE Khmc='%s'");
+		_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, strKhmc.c_str());
+
+		MYSQL* pMysql = Mysql_AllocConnection();
+		if (NULL == pMysql)
+		{
+			error_info(bobj, _T("连接数据库失败"));
+			return cmd_error(bobj);
+		}
+
+		MYSQL_RES* res = NULL;
+		if (!SelectFromTbl(sql, pMysql, bobj, &res))
+		{
+			Mysql_BackToPool(pMysql);
+			return cmd_error(bobj);
+		}
+
+		Mysql_BackToPool(pMysql);
+
+		unsigned int nRows = (unsigned int)mysql_num_rows(res);
+		MYSQL_ROW row = mysql_fetch_row(res);
+		msgpack::sbuffer sbuf;
+		msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
+		sbuf.write("\xfb\xfc", 6);
+		_msgpack.pack_array(4);
+		_msgpack.pack(bobj->nCmd);
+		_msgpack.pack(bobj->nSubCmd);
+		_msgpack.pack(0);
+		_msgpack.pack(1);
+		ParserKh(_msgpack, row, KH_SELECT_SIZE);
 		mysql_free_result(res);
 
 		DealTail(sbuf, bobj);

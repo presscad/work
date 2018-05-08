@@ -7,8 +7,8 @@
 #pragma comment(lib, "libmysql.lib")
 
 #define DB_NAME _T("cardb")
-#define DB_USER _T("baolan123")
-#define DB_PWD _T("baolan123")
+#define DB_USER _T("king")
+#define DB_PWD _T("123456")
 #define DB_DSN _T("mysql_db_a")
 
 std::vector<MYSQL*> vctMysql;
@@ -24,7 +24,7 @@ bool Mysql_ConnectDB(MYSQL** pMysql)
 	if (NULL == *pMysql)
 		return false;
 
-	if (NULL == mysql_real_connect(*pMysql, _T("localhost"), DB_USER, DB_PWD, DB_NAME, 3306, NULL, 0))
+	if (NULL == mysql_real_connect(*pMysql, _T("192.168.1.25"), DB_USER, DB_PWD, DB_NAME, 3306, NULL, 0))
 	{
 		return false;
 	}
@@ -266,6 +266,13 @@ bool CreateTbl(const TCHAR* sql)
 	}
 	Mysql_BackToPool(pMysql);
 	return true;
+}
+
+#define CREATE_DATABASE _T("CREATE DATABASE IF NOT EXISTS cardb")
+bool CreateDB()
+{
+
+	return CreateTbl(CREATE_DATABASE);
 }
 
 #define CREATE_USER_TBL _T("CREATE TABLE IF NOT EXISTS user_tbl(id int unsigned not null auto_increment,\

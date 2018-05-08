@@ -14,6 +14,7 @@ typedef enum
 	KH_SIM_ON1M,
 	KH_SIM_DU1M,
 	KH_SIM_DU15D,
+	KH_SELECT_BY_NAME,
 }SUBCMD_KH;
 
 bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj);

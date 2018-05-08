@@ -162,6 +162,9 @@
     <ClInclude Include="cmd_ncdata.h">
       <Filter>NC</Filter>
     </ClInclude>
+    <ClInclude Include="cmd_poolinfo.h">
+      <Filter>API\流量池信息</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -259,6 +262,9 @@
     </ClCompile>
     <ClCompile Include="cmd_ncdata.cpp">
       <Filter>NC</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_poolinfo.cpp">
+      <Filter>API\流量池信息</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

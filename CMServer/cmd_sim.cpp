@@ -17,7 +17,7 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	std::string strUsertype = (pRootArray++)->as<std::string>();
 	unsigned int nUsertype = 0;
 	sscanf_s(strUsertype.c_str(), "%u", &nUsertype);
-	switch (bobj->nCmd)
+	switch (bobj->nSubCmd)
 	{
 	case SIM_ADD:
 	{
@@ -214,8 +214,8 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
 		std::string strJrhm = (pArray++)->as<std::string>();
 
-		const TCHAR* pSql = _T("SELECT a.id,a.Jrhm,a.Iccid,a.Llchm,a.Llclx,b.Khmc FROM (SELECT %s FROM sim_tbl WHERE Jrhm='%s') a LEFT JOIN kh_tbl b ON a.Khid01=b.id");
-		TCHAR sql[256];
+		const TCHAR* pSql = _T("SELECT a.id,a.Jrhm,a.Iccid,a.Dxzh,b.Khmc,a.Jlxm,a.Zt,a.Llchm,a.Llclx,b.Dj,a.Xsrq,a.Jhrq,a.Xfrq,a.Dqrq,a.Zxrq,a.Bz FROM (SELECT %s,Jlxm,Khid01 FROM sim_tbl WHERE Jrhm='%s') a LEFT JOIN kh_tbl b ON a.Khid01=b.id");
+		TCHAR sql[512];
 		memset(sql, 0x00, sizeof(sql));
 		_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, strJrhm.c_str());
 		MYSQL* pMysql = Mysql_AllocConnection();
@@ -233,7 +233,6 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		}
 		MYSQL_ROW row = mysql_fetch_row(res);
 
-		row = mysql_fetch_row(res);
 		msgpack::sbuffer sbuf;
 		msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
 		sbuf.write("\xfb\xfc", 6);
@@ -242,7 +241,7 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_msgpack.pack(bobj->nSubCmd);
 		_msgpack.pack(0);
 		_msgpack.pack_array(1);
-		ParserSim(_msgpack, row, SIM_SELECT_SIZE);
+		ParserSim(_msgpack, row, 16);
 		mysql_free_result(res);
 
 		DealTail(sbuf, bobj);

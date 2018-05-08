@@ -146,7 +146,7 @@ bool cmd_llc(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		else
 		{
 			unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
-			pSql = _T("SELECT %s FROM (SELECT %s FROM llc_tbl ORDER BY id desc LIMIT %d) a OEDER BY id asc");
+			pSql = _T("SELECT %s FROM (SELECT %s FROM llc_tbl ORDER BY id desc LIMIT %d) a ORDER BY id asc");
 			_stprintf_s(sql, sizeof(sql), pSql, LLC_SELECT, LLC_SELECT, nTemp);
 		}
 

@@ -24,3 +24,9 @@ bool Api_error(BUFFER_OBJ* bobj);
 bool doDisNumberResponse(void* _bobj);
 
 bool doCardStatusResponse(void* _bobj);
+
+bool doPoolList01Response(void* _bobj);
+
+bool doPoolList02Response(void* _bobj);
+
+bool doPoolList03Response(void* _bobj);
