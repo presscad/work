@@ -32,3 +32,5 @@ bool CreateLltcTbl();
 bool CreateSsdqTbl();
 
 bool CreateDxzhTbl();
+
+bool CreateStatisticsTbl();

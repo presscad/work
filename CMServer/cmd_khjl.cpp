@@ -424,6 +424,20 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		DealTail(sbuf, bobj);
 	}
 	break;
+	case KHJL_SIM_XSRQ:
+	{
+		bobj->nSubSubCmd = (pRootArray++)->as<int>();;
+		int nIndex = (pRootArray++)->as<int>();
+		int nPagesize = (pRootArray++)->as<int>();
+		int nAB = (pRootArray++)->as<int>();
+		int nKeyid = (pRootArray++)->as<int>();
+
+		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
+		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
+		std::string strJlxm = (pDataArray++)->as<std::string>();
+		std::string strXsrq = (pDataArray++)->as<std::string>();
+	}
+	break;
 	default:
 		break;
 	}

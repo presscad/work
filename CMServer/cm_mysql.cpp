@@ -421,3 +421,20 @@ bool CreateLogTbl()
 {
 	return CreateTbl(CREATE_LOG_TBL);
 }
+
+#define CREATE_STATISTICS_TBL _T("CREATE TABLE IF NOT EXISTS statistic_tbl(id int unsigned not null auto_increment,\
+type int not null default 0,\
+ssid int unsigned not null default 0,\
+Total int unsigned default 0,\
+Onusing int unsigned default 0,\
+Zx int unsigned default 0,\
+On1m int unsigned default 0,\
+On15d int unsigned default 0,\
+Du15d int unsigned default 0,\
+Du1m int unsigned default 0,\
+primary key(id),\
+unique key(ssid)")
+bool CreateStatisticsTbl()
+{
+	return CreateTbl(CREATE_STATISTICS_TBL);
+}

@@ -214,6 +214,7 @@ SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 
 
 	unsigned int Simtotal = 0,
 		Onusing = 0,
+		Zx = 0,
 		On15d = 0,
 		On1m = 0,
 		Du1m = 0,
@@ -223,10 +224,15 @@ SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 
 	{
 		sscanf_s(row[0], "%u", &Simtotal);
 		sscanf_s(row[1], "%u", &Onusing);
-		sscanf_s(row[2], "%u", &On15d);
-		sscanf_s(row[3], "%u", &On1m);
-		sscanf_s(row[4], "%u", &Du1m);
-		sscanf_s(row[5], "%u", &Du15d);
+		sscanf_s(row[2], "%u", &Zx);
+		sscanf_s(row[3], "%u", &On15d);
+		sscanf_s(row[4], "%u", &On1m);
+		sscanf_s(row[5], "%u", &Du1m);
+		sscanf_s(row[6], "%u", &Du15d);
 	}
 	mysql_free_result(res);
+
+	pSql = _T("UPDATE statistic_tbl SET Total=%d,Onusing=%d,Zx=%d,On1m=%d,On15d=%d,Du15d=%d,Du1m=%d");
+	memset(sql, 0x00, sizeof(sql));
+	_stprintf_s(sql, sizeof(sql), pSql, Simtotal, Onusing, Zx, On1m, On15d, Du15d, Du1m);
 }
