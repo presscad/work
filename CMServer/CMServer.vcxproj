@@ -183,6 +183,7 @@
     <ClInclude Include="cm_mysql.h" />
     <ClInclude Include="global_data.h" />
     <ClInclude Include="init.h" />
+    <ClInclude Include="statistics _thread.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="tinyxml2.h" />
@@ -222,6 +223,7 @@
     <ClCompile Include="cm_mysql.cpp" />
     <ClCompile Include="global_data.cpp" />
     <ClCompile Include="init.cpp" />
+    <ClCompile Include="statistics _thread.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

@@ -323,6 +323,7 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case KHJL_QUERY:
 	{
+		bobj->nSubSubCmd = (pRootArray++)->as<int>();;
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
@@ -336,7 +337,7 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
 
-		pSql = _T("SELECT Xsrq,COUNT(*) num FROM sim_tbl WHERE Jlxm='%s' GROUP BY Xsrq)");
+		pSql = _T("SELECT Xsrq,COUNT(*) num FROM sim_tbl WHERE Jlxm='%s' GROUP BY Xsrq");
 
 		_stprintf_s(sql, sizeof(sql), pSql, strJlxm.c_str());
 

@@ -2,8 +2,8 @@
 
 void ParserData(msgpack::packer<msgpack::sbuffer>& _msgpack, MYSQL_ROW& row, unsigned int nColumn );
 
-#define KH_SELECT_SIZE 12
-#define KH_SELECT _T("id,Khmc,Lxfs,Ssdq,Jlxm,Dj,On1m,On15d,Du15d,Du1m,Xgsj,Bz")
+#define KH_SELECT_SIZE 13
+#define KH_SELECT _T("id,Khmc,Lxfs,Ssdq,Jlxm,Dj,Kzsl,On1m,On15d,Du15d,Du1m,Xgsj,Bz")
 //void ParserKh(msgpack::packer<msgpack::sbuffer>& _msgpack, MYSQL_ROW& row);
 #define ParserKh ParserData
 

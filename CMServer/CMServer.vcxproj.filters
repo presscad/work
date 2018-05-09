@@ -64,6 +64,9 @@
     <Filter Include="API\流量池信息">
       <UniqueIdentifier>{c327b162-9b5e-4515-a700-fedc8891c2ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="统计线程">
+      <UniqueIdentifier>{7ec86c17-2ef8-41a8-8a57-d5d46909b32a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -165,6 +168,9 @@
     <ClInclude Include="cmd_poolinfo.h">
       <Filter>API\流量池信息</Filter>
     </ClInclude>
+    <ClInclude Include="statistics _thread.h">
+      <Filter>统计线程</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -265,6 +271,9 @@
     </ClCompile>
     <ClCompile Include="cmd_poolinfo.cpp">
       <Filter>API\流量池信息</Filter>
+    </ClCompile>
+    <ClCompile Include="statistics _thread.cpp">
+      <Filter>统计线程</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

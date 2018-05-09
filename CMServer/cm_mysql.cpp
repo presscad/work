@@ -299,6 +299,7 @@ Jlxm char(64) NOT NULL,\
 Dj double(8,2) DEFAULT 0.00,\
 Lxfs varchar(64),\
 Ssdq varchar(64), \
+Kzsl int DEFAULT 0,\
 On1m int unsigned DEFAULT 0,\
 On15d int unsigned DEFAULT 0,\
 Du15d int unsigned DEFAULT 0,\
@@ -318,7 +319,7 @@ bool CreateKhTbl()
 Jrhm char(16) NOT NULL,\
 Iccid char(20) NOT NULL,\
 Dxzh varchar(64) NOT NULL,\
-Zt char(16),\
+Zt int default 19,\
 Llchm varchar(32) NOT NULL,\
 Llclx varchar(32),\
 Jlxm char(32),\
@@ -355,6 +356,8 @@ bool CreateKhjlTbl()
 Llchm char(16) NOT NULL,\
 Llclx char(8) NOT NULL,\
 Dxzh varchar(64) NOT NULL,\
+Kzsl int DEFAULT 0,\
+Kysl int DEFAULT 0,\
 Xgsj datetime,\
 Bz varchar(64),\
 primary key(id),\

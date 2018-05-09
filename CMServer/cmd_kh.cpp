@@ -438,14 +438,17 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		const TCHAR* pSql = NULL;
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
-		if (nUsertype == 1)
-		{
-			pSql = _T("SELECT COUNT(*) num FROM sim_tbl WHERE Khid01=%u");
-		}
-		else if (nUsertype == 2)
-		{
-			pSql = _T("SELECT COUNT(*) num FROM sim_tbl WHERE Khid02=%u");
-		}
+		//if (nUsertype == 1)
+		//{
+		//	//pSql = _T("SELECT COUNT(*) num FROM sim_tbl WHERE Khid01=%u");
+		//	pSql = _T("SELECT Kzsl FROM kh_tbl WHERE id=%u");
+		//}
+		//else if (nUsertype == 2)
+		//{
+		//	//pSql = _T("SELECT COUNT(*) num FROM sim_tbl WHERE Khid02=%u");
+		//	pSql = _T("SELECT Kzsl FROM kh_tbl WHERE id=%u");
+		//}
+		pSql = _T("SELECT Kzsl FROM kh_tbl WHERE id=%u");
 		_stprintf_s(sql, sizeof(sql), pSql, nKhid);
 
 		MYSQL* pMysql = Mysql_AllocConnection();

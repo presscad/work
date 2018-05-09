@@ -247,6 +247,71 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		DealTail(sbuf, bobj);
 	}
 	break;
+	case SIM_TOTAL:
+	{
+		const TCHAR* pSql = _T("SELECT COUNT(*) AS 'SimTotal',\
+SUM(CASE WHEN Zt=1 THEN 1 ELSE 0 END) AS 'Onusing',\
+SUM(CASE WHER Zt=150001 THEN 1 ELSE 0 END) AS 'Zx',\
+SUM(CASE WHEN dqrq>CURDATE() AND dqrq<DATE_ADD(CURDATE(), INTERVAL 15 DAY) THEN 1 ELSE 0 END) AS 'On15d',\
+SUM(CASE WHEN dqrq>CURDATE() AND dqrq<DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN 1 ELSE 0 END) AS 'On1m',\
+SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 1 MONTH) THEN 1 ELSE 0 END) AS 'Du1m',\
+SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 1 ELSE 0 END) AS 'Du15d' FROM sim_tbl");
+		TCHAR sql[1024];
+		memset(sql, 0x00, sizeof(sql));
+		_stprintf_s(sql, sizeof(sql), pSql);
+
+		MYSQL* pMysql = Mysql_AllocConnection();
+		if (NULL == pMysql)
+		{
+			error_info(bobj, _T("连接数据库失败"));
+			return cmd_error(bobj);
+		}
+
+		MYSQL_RES* res = NULL;
+		if (!SelectFromTbl(sql, pMysql, bobj, &res))
+		{
+			Mysql_BackToPool(pMysql);
+			return cmd_error(bobj);
+		}
+		Mysql_BackToPool(pMysql);
+
+		MYSQL_ROW row = mysql_fetch_row(res);
+		unsigned int Simtotal = 0,
+			Onusing = 0,
+			Zx = 0,
+			On15d = 0,
+			On1m = 0,
+			Du1m = 0,
+			Du15d = 0;
+
+		sscanf_s(row[0], "%u", &Simtotal);
+		sscanf_s(row[1], "%u", &Onusing);
+		sscanf_s(row[2], "%u", &Zx);
+		sscanf_s(row[3], "%u", &On15d);
+		sscanf_s(row[4], "%u", &On1m);
+		sscanf_s(row[5], "%u", &Du1m);
+		sscanf_s(row[6], "%u", &Du15d);
+		mysql_free_result(res);
+
+		msgpack::sbuffer sbuf;
+		msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
+		sbuf.write("\xfb\xfc", 6);
+		_msgpack.pack_array(4);
+		_msgpack.pack(bobj->nCmd);
+		_msgpack.pack(bobj->nSubCmd);
+		_msgpack.pack(0);
+		_msgpack.pack_array(1);
+		_msgpack.pack_array(6);
+		_msgpack.pack(Simtotal);
+		_msgpack.pack(Onusing);
+		_msgpack.pack(On15d);
+		_msgpack.pack(On1m);
+		_msgpack.pack(Du1m);
+		_msgpack.pack(Du15d);
+
+		DealTail(sbuf, bobj);
+	}
+	break;
 	default:
 		break;
 	}

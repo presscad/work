@@ -121,7 +121,7 @@ bool DoNotifyContractRoot(tinyxml2::XMLElement* root)
 	{
 		if (strcmp(pSTATUSINFO, "竣工") == 0) // 修改状态
 		{
-			pSql = _T("UPDATE TABLE sim_tbl SET zt='停机' WHERE Jrhm='%s'");
+			pSql = _T("UPDATE sim_tbl SET zt=2 WHERE Jrhm='%s'");
 			_stprintf_s(sql, sizeof(sql), pSql, pACCNBR);
 		}
 	}
@@ -130,7 +130,7 @@ bool DoNotifyContractRoot(tinyxml2::XMLElement* root)
 	{
 		if (strcmp(pSTATUSINFO, "竣工") == 0) // 修改状态
 		{
-			pSql = _T("UPDATE TABLE sim_tbl SET zt='在用' WHERE Jrhm='%s'");
+			pSql = _T("UPDATE sim_tbl SET zt=1 WHERE Jrhm='%s'");
 			_stprintf_s(sql, sizeof(sql), pSql, pACCNBR);
 		}
 	}
@@ -155,7 +155,7 @@ bool DoNotifyContractRoot(tinyxml2::XMLElement* root)
 	}
 
 	// 记录日志
-	pSql = _T("UPDATE TABLE log_tbl SET Status='报竣完成',Ncmsg='%s',Nctime=now(),Result='%s' WHERE Transid='%s'");
+	pSql = _T("UPDATE log_tbl SET Status='报竣完成',Ncmsg='%s',Nctime=now(),Result='%s' WHERE Transid='%s'");
 	_stprintf_s(sql, sizeof(sql), pSql, pSTATUSINFO, pRESULTMSG, pGROUP_TRANSACTIONID);
 
 	return true;

@@ -237,7 +237,7 @@ bool doDisNumberResponse(void* _bobj)
 
 	DealTail(sbuf, bobj);
 
-	const TCHAR* pSql = _T("UPDATE TABLE log_tbl SET Status='等待报竣',Respondtime=now(),Respondmsg='%s',Transid='%s' WHERE id=%u");
+	const TCHAR* pSql = _T("UPDATE log_tbl SET Status='等待报竣',Respondtime=now(),Respondmsg='%s',Transid='%s' WHERE id=%u");
 	TCHAR sql[256];
 	memset(sql, 0x00, sizeof(sql));
 	_stprintf_s(sql, sizeof(sql), pSql, presultMsg, pGROUP_TRANSACTIONID);
@@ -324,14 +324,26 @@ bool doCardStatusResponse(void* _bobj)
 	//_msgpack.pack(pcs->strNumber);
 	_msgpack.pack(std::string(pGROUP_TRANSACTIONID));
 
-	const TCHAR* pSql = _T("UPDATA TABLE log_tbl SET log_zt='等待报竣',log_etime=now(),log_transid='%s' WHERE id=%u");
-	TCHAR sql[256];
-	memset(sql, 0x00, sizeof(sql));
-	_stprintf_s(sql, sizeof(sql), pSql, pGROUP_TRANSACTIONID, bobj->nPerLogID);
-
 	DealTail(sbuf, bobj);
 
-//	PostThreadMessage(g_HelpThreadID, MSG_CARD_STATUS, (WPARAM)pcs, 0);// 进行数据库操作
+	const TCHAR* pSql = _T("UPDATA sim_tbl SET Zt=%s WHERE Jrhm='%s'");
+	TCHAR sql[256];
+	memset(sql, 0x00, sizeof(sql));
+	_stprintf_s(sql, sizeof(sql), pSql, pproductStatusCd, pnumber);
+
+
+	MYSQL* pMysql = Mysql_AllocConnection();
+	if (NULL == pMysql)
+	{
+		return true;;
+	}
+	size_t len = _tcslen(sql);
+	if (0 != mysql_real_query(pMysql, sql, (ULONG)len))
+	{
+		mysql_rollback(pMysql);
+		return true;
+	}
+	mysql_rollback(pMysql);
 
 	return true;
 }

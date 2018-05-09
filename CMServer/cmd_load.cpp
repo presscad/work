@@ -94,19 +94,19 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		}
 		mysql_autocommit(pMysql, 0);
 
+		const TCHAR* pSql = _T("INSERT INTO sim_tbl (id,Jrhm,Iccid,Dxzh,Llchm,Llclx) VALUES(null,'%s','%s','%s','%s','%s')  ON DUPLICATE KEY UPDATE Iccid='%s'");
+		TCHAR sql[256];
+		int nNewData = 0;
+
 		for (int i = 0; i < nArraySize; i++)
 		{
 			msgpack::object* pArray = (pDataArray++)->via.array.ptr;
 			std::string strJrhm = (pArray++)->as<std::string>();
 			std::string strIccid = (pArray++)->as<std::string>();
 			std::string strDxzh = (pArray++)->as<std::string>();
-			//std::string strLlchm = (pArray++)->as<std::string>();
-			//std::string strLlclx = (pArray++)->as<std::string>();
-			// insert into sim_tbl (id,jrhm,iccid,dxzh,llchm,llclx) value(null,'%s','%s','%s','%s','%s') ON DUPLICATE KEY UPDATE iccid='%s'
-			const TCHAR* pSql = _T("INSERT INTO sim_tbl (id,Jrhm,Iccid,Dxzh,Llchm,Llclx) VALUES(null,'%s','%s','%s','%s','%s')  ON DUPLICATE KEY UPDATE Iccid='%s'");
-			TCHAR sql[256];
 			memset(sql, 0x00, sizeof(sql));
 			_stprintf_s(sql, sizeof(sql), pSql, strJrhm.c_str(), strIccid.c_str(), strDxzh.c_str(), strLlchm.c_str(), strLlclx.c_str(), strIccid.c_str());
+
 			if (!Trans_InsertIntoTbl(sql, pMysql, bobj))
 			{
 				mysql_rollback(pMysql);
@@ -114,22 +114,24 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 				Mysql_BackToPool(pMysql);
 				goto error;
 			}
+
+			// nAffectedRows = 0重复导入,但是没有更新
+			// nAffectedRows = 1新插入数据
+			// nAffectedRows = 2更新数据
+			int nAffectedRows = (int)mysql_affected_rows(pMysql);
+			if (1 == nAffectedRows)
+				++nNewData;
 		}
 
-		if (0)
+		pSql = _T("UPDATE llc_tbl SET Kzsl=Kzsl+%d WHERE Llchm='%s'");
+		memset(sql, 0x00, sizeof(sql));
+		_stprintf_s(sql, sizeof(sql), pSql, nNewData, strLlchm.c_str());
+		if (!Trans_UpdateTbl(sql, pMysql, bobj))
 		{
-			const TCHAR* pSql = _T("UPDATE TABLE llc_tbl SET Kzsl=Kzsl+%d WHERE Llchm='%s'");
-			TCHAR sql[256];
-			memset(sql, 0x00, sizeof(sql));
-			_stprintf_s(sql, sizeof(sql), pSql, nArraySize, strLlchm.c_str());
-			if (!Trans_UpdateTbl(sql, pMysql, bobj))
-			{
-				mysql_rollback(pMysql);
-				mysql_autocommit(pMysql, 1);
-				Mysql_BackToPool(pMysql);
-				goto error;
-			}
-
+			mysql_rollback(pMysql);
+			mysql_autocommit(pMysql, 1);
+			Mysql_BackToPool(pMysql);
+			goto error;
 		}
 		
 		mysql_commit(pMysql);
@@ -160,6 +162,8 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		}
 		mysql_autocommit(pMysql, 0);
 
+		const TCHAR* pSql = NULL;
+		TCHAR sql[256];
 		for (int i = 0; i < nArraySize; i++)
 		{
 			msgpack::object* pArray = (pDataArray++)->via.array.ptr;
@@ -177,8 +181,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 				Mysql_BackToPool(pMysql);
 				goto error;
 			}
-			const TCHAR* pSql = _T("UPDATE sim_tbl SET Khid01=%u,Jlxm='%s',Xsrq='%s',Bz='%s' WHERE Jrhm='%s'");
-			TCHAR sql[256];
+			pSql = _T("UPDATE sim_tbl SET Khid01=%u,Jlxm='%s',Xsrq='%s',Bz='%s' WHERE Jrhm='%s'");
 			memset(sql, 0x00, sizeof(sql));
 			_stprintf_s(sql, sizeof(sql), pSql, Khid, strJlxm.c_str(), strXsrq.c_str(), strBz.c_str(), strJrhm.c_str());
 			if (!Trans_UpdateTbl(sql, pMysql, bobj))
@@ -188,7 +191,11 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 				Mysql_BackToPool(pMysql);
 				goto error;
 			}
-			if (0)
+
+			// nAffectedRows = 0 更新数据与数据库中数据完全一样
+			// nAffectedRows = 1 数据被跟新
+			int nAffectedRows = (int)mysql_affected_rows(pMysql);
+			if (1 == nAffectedRows)
 			{
 				pSql = _T("UPDATE kh_tbl SET Kzsl=Kzsl+1 WHERE id=%u");
 				memset(sql, 0x00, sizeof(sql));
@@ -201,7 +208,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 					goto error;
 				}
 
-				pSql = _T("UPDATE llc_tbl SET Xssl=Xssl+1 WHERE Llchm='%s'");
+				pSql = _T("UPDATE llc_tbl SET Kysl=Kysl+1 WHERE Llchm='%s'");
 				memset(sql, 0x00, sizeof(sql));
 				_stprintf_s(sql, sizeof(sql), pSql, strLlchm.c_str());
 				if (!Trans_UpdateTbl(sql, pMysql, bobj))
@@ -241,6 +248,9 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		}
 		mysql_autocommit(pMysql, 0);
 
+		const TCHAR* pSql = _T("UPDATE sim_tbl SET Xfrq='%s',Dqrq=DATE_ADD(IF('%s'>IFNULL(Dqrq,'1988-01-01'),'%s',Dqrq),INTERVAL %d MONTH) WHERE Jrhm='%s'");
+		TCHAR sql[256];
+
 		for (int i = 0; i < nArraySize; i++)
 		{
 			msgpack::object* pArray = (pDataArray++)->via.array.ptr;
@@ -248,8 +258,6 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			std::string strXfrq = (pArray++)->as<std::string>();
 			int nMonth = (pArray++)->as<int>();
 //			std::string strBz = (pArray++)->as<std::string>();
-			const TCHAR* pSql = _T("UPDATE sim_tbl SET Xfrq='%s',Dqrq=DATE_ADD(IF('%s'>IFNULL(Dqrq,'1988-01-01'),'%s',Dqrq),INTERVAL %d MONTH) WHERE Jrhm='%s'");
-			TCHAR sql[256];
 			memset(sql, 0x00, sizeof(sql));
 			_stprintf_s(sql, sizeof(sql), pSql, strXfrq.c_str(), strXfrq.c_str(), strXfrq.c_str(), nMonth, strJrhm.c_str());
 			if (!Trans_UpdateTbl(sql, pMysql, bobj))
