@@ -170,7 +170,7 @@ void SimTotal()
 {
 	const TCHAR* pSql = _T("SELECT COUNT(*) AS 'SimTotal',\
 SUM(CASE WHEN Zt=1 THEN 1 ELSE 0 END) AS 'Onusing',\
-SUM(CASE WHER Zt=150001 THEN 1 ELSE 0 END) AS 'Zx',\
+SUM(CASE WHEN Zt=150001 THEN 1 ELSE 0 END) AS 'Zx',\
 SUM(CASE WHEN dqrq>CURDATE() AND dqrq<DATE_ADD(CURDATE(), INTERVAL 15 DAY) THEN 1 ELSE 0 END) AS 'On15d',\
 SUM(CASE WHEN dqrq>CURDATE() AND dqrq<DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN 1 ELSE 0 END) AS 'On1m',\
 SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 1 MONTH) THEN 1 ELSE 0 END) AS 'Du1m',\
@@ -185,10 +185,32 @@ SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 
 		return;
 	}
 
+	//static bool bInit = true;
+	//if (!bInit)
+	//{
+	//	const TCHAR* pInitSql = _T("INSERT INTO statistic_tbl (id,ssid) values(null,0)");
+	//	size_t len = _tcslen(pInitSql);
+	//	if (0 != mysql_real_query(pMysql, pInitSql, (ULONG)len))
+	//	{
+	//		_tprintf_s(_T("%s\n"), mysql_error(pMysql));
+	//		Mysql_BackToPool(pMysql);
+	//		return;
+	//	}
+
+	//	if (mysql_affected_rows(pMysql) == 0)
+	//	{
+	//		Mysql_BackToPool(pMysql);
+	//		return;
+	//	}
+
+	//	bInit = true;
+	//}
+
 	MYSQL_RES* res = NULL;
 	size_t len = _tcslen(sql);
 	if (0 != mysql_real_query(pMysql, sql, (ULONG)len))
 	{
+		_tprintf_s(_T("%s\n"), mysql_error(pMysql));
 		Mysql_BackToPool(pMysql);
 		return;
 	}
@@ -208,7 +230,6 @@ SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 
 		Mysql_BackToPool(pMysql);
 		return;
 	}
-	Mysql_BackToPool(pMysql);
 
 	MYSQL_ROW row = mysql_fetch_row(res);
 
@@ -235,4 +256,14 @@ SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 
 	pSql = _T("UPDATE statistic_tbl SET Total=%d,Onusing=%d,Zx=%d,On1m=%d,On15d=%d,Du15d=%d,Du1m=%d");
 	memset(sql, 0x00, sizeof(sql));
 	_stprintf_s(sql, sizeof(sql), pSql, Simtotal, Onusing, Zx, On1m, On15d, Du15d, Du1m);
+
+	len = _tcslen(sql);
+	if (0 != mysql_real_query(pMysql, sql, (ULONG)len))
+	{
+		_tprintf_s(_T("%s\n"), mysql_error(pMysql));
+		Mysql_BackToPool(pMysql);
+		return;
+	}
+
+	Mysql_BackToPool(pMysql);
 }

@@ -433,7 +433,7 @@ On15d int unsigned default 0,\
 Du15d int unsigned default 0,\
 Du1m int unsigned default 0,\
 primary key(id),\
-unique key(ssid)")
+unique key(ssid))")
 bool CreateStatisticsTbl()
 {
 	return CreateTbl(CREATE_STATISTICS_TBL);
