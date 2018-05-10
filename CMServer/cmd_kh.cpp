@@ -92,6 +92,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case KH_QUERY:
 	{
+		bobj->nSubSubCmd = (pRootArray++)->as<int>();
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
@@ -99,7 +100,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
-		unsigned int nKhid = (pArray++)->as<unsigned int>();
+		std::string strKhid = (pArray++)->as<std::string>();
+		unsigned int nKhid = 0;
+		sscanf_s(strKhid.c_str(), "%u", &nKhid);
 
 		const TCHAR* pSql = NULL;
 		TCHAR sql[256];
@@ -155,6 +158,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case KH_SIM_XSRQ:
 	{
+		bobj->nSubSubCmd = (pRootArray++)->as<int>();
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
@@ -162,7 +166,9 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
-		unsigned int nKhid = (pArray++)->as<unsigned int>();
+		std::string strKhid = (pArray++)->as<std::string>();
+		unsigned int nKhid = 0;
+		sscanf_s(strKhid.c_str(), "%u", &nKhid);
 		std::string strXsrq = (pArray++)->as<std::string>();
 
 		const TCHAR* pSql = NULL;
@@ -202,23 +208,23 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			if (nAB == 0) // Ê×Ò³
 			{
 				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u AND Xsrq='%s' and id>%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, strXsrq.c_str(), nKeyid, nPagesize);
 			}
 			else if (nAB == 1)
 			{
 				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u AND Xsrq='%s'and id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, strXsrq.c_str(), nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
 				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid01=%u AND Xsrq='%s'and id>%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, strXsrq.c_str(), nKeyid, nPagesize);
 			}
 			else
 			{
 				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
 				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid01=%u AND Xsrq='%s'ORDER BY id desc LIMIT %d) a ORDER BY id asc");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, strXsrq.c_str(), nTemp);
 			}
 		}
 		else if (nUsertype == 2)
@@ -226,23 +232,23 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 			if (nAB == 0) // Ê×Ò³
 			{
 				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u AND Xsrq='%s'and id>%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, strXsrq.c_str(), nKeyid, nPagesize);
 			}
 			else if (nAB == 1)
 			{
 				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u AND Xsrq='%s'and id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, strXsrq.c_str(), nKeyid, nPagesize);
 			}
 			else if (nAB == 2)
 			{
 				pSql = _T("SELECT %s FROM sim_tbl WHERE Khid02=%u AND Xsrq='%s'and id>%u LIMIT %d");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, nKeyid, nPagesize);
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, nKhid, strXsrq.c_str(), nKeyid, nPagesize);
 			}
 			else
 			{
 				unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
 				pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Khid02=%u AND Xsrq='%s'ORDER BY id desc LIMIT %d) a ORDER BY id asc");
-				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, nTemp);
+				_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, nKhid, strXsrq.c_str(), nTemp);
 			}
 		}
 

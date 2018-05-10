@@ -169,6 +169,7 @@ SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 
 void SimTotal()
 {
 	const TCHAR* pSql = _T("SELECT COUNT(*) AS 'SimTotal',\
+SUM(CASE WHEN Khid01=0 THEN 1 ELSE 0 END) AS 'Nousing',\
 SUM(CASE WHEN Zt=1 THEN 1 ELSE 0 END) AS 'Onusing',\
 SUM(CASE WHEN Zt=150001 THEN 1 ELSE 0 END) AS 'Zx',\
 SUM(CASE WHEN dqrq>CURDATE() AND dqrq<DATE_ADD(CURDATE(), INTERVAL 15 DAY) THEN 1 ELSE 0 END) AS 'On15d',\
@@ -184,27 +185,6 @@ SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 
 	{
 		return;
 	}
-
-	//static bool bInit = true;
-	//if (!bInit)
-	//{
-	//	const TCHAR* pInitSql = _T("INSERT INTO statistic_tbl (id,ssid) values(null,0)");
-	//	size_t len = _tcslen(pInitSql);
-	//	if (0 != mysql_real_query(pMysql, pInitSql, (ULONG)len))
-	//	{
-	//		_tprintf_s(_T("%s\n"), mysql_error(pMysql));
-	//		Mysql_BackToPool(pMysql);
-	//		return;
-	//	}
-
-	//	if (mysql_affected_rows(pMysql) == 0)
-	//	{
-	//		Mysql_BackToPool(pMysql);
-	//		return;
-	//	}
-
-	//	bInit = true;
-	//}
 
 	MYSQL_RES* res = NULL;
 	size_t len = _tcslen(sql);
@@ -234,6 +214,7 @@ SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 
 	MYSQL_ROW row = mysql_fetch_row(res);
 
 	unsigned int Simtotal = 0,
+		Nousing = 0,
 		Onusing = 0,
 		Zx = 0,
 		On15d = 0,
@@ -244,18 +225,21 @@ SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 
 	if (NULL != row[0])
 	{
 		sscanf_s(row[0], "%u", &Simtotal);
-		sscanf_s(row[1], "%u", &Onusing);
-		sscanf_s(row[2], "%u", &Zx);
-		sscanf_s(row[3], "%u", &On15d);
-		sscanf_s(row[4], "%u", &On1m);
-		sscanf_s(row[5], "%u", &Du1m);
-		sscanf_s(row[6], "%u", &Du15d);
+		sscanf_s(row[1], "%u", &Nousing);
+		sscanf_s(row[2], "%u", &Onusing);
+		sscanf_s(row[3], "%u", &Zx);
+		sscanf_s(row[4], "%u", &On15d);
+		sscanf_s(row[5], "%u", &On1m);
+		sscanf_s(row[6], "%u", &Du1m);
+		sscanf_s(row[7], "%u", &Du15d);
 	}
 	mysql_free_result(res);
 
-	pSql = _T("UPDATE statistic_tbl SET Total=%d,Onusing=%d,Zx=%d,On1m=%d,On15d=%d,Du15d=%d,Du1m=%d");
+	//pSql = _T("UPDATE statistic_tbl SET Total=%d,Onusing=%d,Zx=%d,On1m=%d,On15d=%d,Du15d=%d,Du1m=%d");
+	pSql = _T("INSERT INTO statistic_tbl(id, type, ssid, Total, Xssl, Onusing, Zx, On1m, On15d, Du15d, Du1m) VALUES(null, 1, 1, %u, %u, %u, %u, %u, %u, %u, %u)\
+  ON DUPLICATE KEY UPDATE Total=%u,Xssl=%u,Onusing=%u,Zx=%u,On1m=%u,On15d=%u,Du15d=%u,Du1m=%u");
 	memset(sql, 0x00, sizeof(sql));
-	_stprintf_s(sql, sizeof(sql), pSql, Simtotal, Onusing, Zx, On1m, On15d, Du15d, Du1m);
+	_stprintf_s(sql, sizeof(sql), pSql, Simtotal, Simtotal - Nousing, Onusing, Zx, On1m, On15d, Du15d, Du1m, Simtotal, Simtotal - Nousing, Onusing, Zx, On1m, On15d, Du15d, Du1m);
 
 	len = _tcslen(sql);
 	if (0 != mysql_real_query(pMysql, sql, (ULONG)len))

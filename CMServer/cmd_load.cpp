@@ -284,6 +284,93 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		DealTail(sbuf, bobj);
 	}
 	break;
+	case EXCEL_TKQD:
+	{
+		// 流量池中Kysl - 1;
+		// 客户名下 Kzsl - 1
+		// 卡状态 Zt = 20,Khid01=0,Khid02=0,Rq=null,Jlxm=null
+		int nArraySize = pRootArray->via.array.size;
+		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
+		MYSQL* pMysql = Mysql_AllocConnection();
+		if (NULL == pMysql)
+		{
+			error_info(bobj, _T("连接数据库失败"));
+			goto error;
+		}
+		mysql_autocommit(pMysql, 0);
+
+		//const TCHAR* pSql = NULL;
+		TCHAR sql[256];
+		for (int i = 0; i < nArraySize; i++)
+		{
+			msgpack::object* pArray = (pDataArray++)->via.array.ptr;
+			std::string strJrhm = (pArray++)->as<std::string>();
+			std::string strKhmc = (pArray++)->as<std::string>();
+			unsigned int Khid = GetIndexByName(strKhmc.c_str(), bobj);
+			std::string strBz = (pArray++)->as<std::string>();
+			std::string strLlchm = GetLlchmByJrhm(strJrhm.c_str(), bobj);
+			if (0 == Khid || "" == strLlchm)
+			{
+				mysql_rollback(pMysql);
+				mysql_autocommit(pMysql, 1);
+				Mysql_BackToPool(pMysql);
+				goto error;
+			}
+			const TCHAR* pSql = _T("UPDATE sim_tbl SET Zt=20,Khid01=0,Khid02=0,Jlxm=null,Xsrq=null,Jhrq=null,Xfrq=null,Dqrq=null,Zxrq=null,Bz='%s' WHERE Jrhm='%s'");
+			memset(sql, 0x00, sizeof(sql));
+			_stprintf_s(sql, sizeof(sql), pSql, strJrhm.c_str());
+			if (!Trans_UpdateTbl(sql, pMysql, bobj))
+			{
+				mysql_rollback(pMysql);
+				mysql_autocommit(pMysql, 1);
+				Mysql_BackToPool(pMysql);
+				goto error;
+			}
+
+			// nAffectedRows = 0 更新数据与数据库中数据完全一样
+			// nAffectedRows = 1 数据被跟新
+			int nAffectedRows = (int)mysql_affected_rows(pMysql);
+			if (1 == nAffectedRows)
+			{
+				pSql = _T("UPDATE kh_tbl SET Kzsl=Kzsl-1 WHERE id=%u");
+				memset(sql, 0x00, sizeof(sql));
+				_stprintf_s(sql, sizeof(sql), pSql, Khid);
+				if (!Trans_UpdateTbl(sql, pMysql, bobj))
+				{
+					mysql_rollback(pMysql);
+					mysql_autocommit(pMysql, 1);
+					Mysql_BackToPool(pMysql);
+					goto error;
+				}
+
+				pSql = _T("UPDATE llc_tbl SET Kysl=Kysl-1 WHERE Llchm='%s'");
+				memset(sql, 0x00, sizeof(sql));
+				_stprintf_s(sql, sizeof(sql), pSql, strLlchm.c_str());
+				if (!Trans_UpdateTbl(sql, pMysql, bobj))
+				{
+					mysql_rollback(pMysql);
+					mysql_autocommit(pMysql, 1);
+					Mysql_BackToPool(pMysql);
+					goto error;
+				}
+			}
+		}
+
+		mysql_commit(pMysql);
+		mysql_autocommit(pMysql, 1);
+		Mysql_BackToPool(pMysql);
+
+		msgpack::sbuffer sbuf;
+		msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
+		sbuf.write("\xfb\xfc", 6);
+		_msgpack.pack_array(4);
+		_msgpack.pack(bobj->nCmd);
+		_msgpack.pack(bobj->nSubCmd);
+		_msgpack.pack(nIndex);
+		_msgpack.pack(0);
+		DealTail(sbuf, bobj);
+	}
+	break;
 	default:
 		break;
 	}

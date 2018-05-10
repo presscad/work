@@ -426,7 +426,7 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case KHJL_SIM_XSRQ:
 	{
-		bobj->nSubSubCmd = (pRootArray++)->as<int>();;
+		bobj->nSubSubCmd = (pRootArray++)->as<int>();
 		int nIndex = (pRootArray++)->as<int>();
 		int nPagesize = (pRootArray++)->as<int>();
 		int nAB = (pRootArray++)->as<int>();
@@ -434,8 +434,88 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
 		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
-		std::string strJlxm = (pDataArray++)->as<std::string>();
-		std::string strXsrq = (pDataArray++)->as<std::string>();
+		std::string strJlxm = (pArray++)->as<std::string>();
+		std::string strXsrq = (pArray++)->as<std::string>();
+
+		const TCHAR* pSql = NULL;
+		TCHAR sql[256];
+		memset(sql, 0x00, sizeof(sql));
+
+		pSql = _T("SELECT COUNT(*) num FROM sim_tbl WHERE Jlxm='%s' AND Xsrq='%s'");
+
+		_stprintf_s(sql, sizeof(sql), pSql, strJlxm.c_str(), strXsrq.c_str());
+
+		MYSQL* pMysql = Mysql_AllocConnection();
+		if (NULL == pMysql)
+		{
+			error_info(bobj, _T("连接数据库失败"));
+			return cmd_error(bobj, nIndex);
+		}
+
+		MYSQL_RES* res = NULL;
+		if (!SelectFromTbl(sql, pMysql, bobj, &res))
+		{
+			Mysql_BackToPool(pMysql);
+			return cmd_error(bobj, nIndex);
+		}
+		MYSQL_ROW row = mysql_fetch_row(res);
+		mysql_free_result(res);
+
+		unsigned int nNum = 0;
+		sscanf_s(row[0], "%u", &nNum);
+
+		if (nAB == 0) // 首页
+		{
+			pSql = _T("SELECT %s FROM sim_tbl WHERE Jlxm='%s' AND Xsrq='%s' and id>%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, strJlxm.c_str(), strXsrq.c_str(), nKeyid, nPagesize);
+		}
+		else if (nAB == 1)
+		{
+			pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Jlxm='%s' AND Xsrq='%s'and id<%u ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+			_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, strJlxm.c_str(), strXsrq.c_str(), nKeyid, nPagesize);
+		}
+		else if (nAB == 2)
+		{
+			pSql = _T("SELECT %s FROM sim_tbl WHERE Jlxm='%s' AND Xsrq='%s'and id>%u LIMIT %d");
+			_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, strJlxm.c_str(), strXsrq.c_str(), nKeyid, nPagesize);
+		}
+		else
+		{
+			unsigned int nTemp = (nNum % nPagesize) == 0 ? nPagesize : (nNum % nPagesize);
+			pSql = _T("SELECT %s FROM (SELECT %s FROM sim_tbl WHERE Jlxm='%s' AND Xsrq='%s'ORDER BY id desc LIMIT %d) a ORDER BY id asc");
+			_stprintf_s(sql, sizeof(sql), pSql, SIM_SELECT, SIM_SELECT, strJlxm.c_str(), strXsrq.c_str(), nTemp);
+		}
+
+		res = NULL;
+		if (!SelectFromTbl(sql, pMysql, bobj, &res))
+		{
+			Mysql_BackToPool(pMysql);
+			return cmd_error(bobj, nIndex);
+		}
+
+		Mysql_BackToPool(pMysql);
+
+		unsigned int nRows = (unsigned int)mysql_num_rows(res);
+		row = mysql_fetch_row(res);
+		msgpack::sbuffer sbuf;
+		msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
+		sbuf.write("\xfb\xfc", 6);
+		_msgpack.pack_array(7);
+		_msgpack.pack(bobj->nCmd);
+		_msgpack.pack(bobj->nSubCmd);
+		_msgpack.pack(bobj->nSubSubCmd);
+		_msgpack.pack(nIndex);
+		_msgpack.pack(0);
+		_msgpack.pack(nNum);
+		_msgpack.pack_array(nRows);
+		while (row)
+		{
+			ParserSim(_msgpack, row, SIM_SELECT_SIZE);
+			row = mysql_fetch_row(res);
+		}
+		mysql_free_result(res);
+
+		DealTail(sbuf, bobj);
 	}
 	break;
 	default:

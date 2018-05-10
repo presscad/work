@@ -249,13 +249,7 @@ bool cmd_sim(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case SIM_TOTAL:
 	{
-		const TCHAR* pSql = _T("SELECT COUNT(*) AS 'SimTotal',\
-SUM(CASE WHEN Zt=1 THEN 1 ELSE 0 END) AS 'Onusing',\
-SUM(CASE WHEN Zt=150001 THEN 1 ELSE 0 END) AS 'Zx',\
-SUM(CASE WHEN dqrq>CURDATE() AND dqrq<DATE_ADD(CURDATE(), INTERVAL 15 DAY) THEN 1 ELSE 0 END) AS 'On15d',\
-SUM(CASE WHEN dqrq>CURDATE() AND dqrq<DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN 1 ELSE 0 END) AS 'On1m',\
-SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 1 MONTH) THEN 1 ELSE 0 END) AS 'Du1m',\
-SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 1 ELSE 0 END) AS 'Du15d' FROM sim_tbl");
+		const TCHAR* pSql = _T("SELECT Total,Xssl,Onusing,Zx,On1m,On15d,Du15d,Du1m FROM statistic_tbl WHERE type=1");
 		TCHAR sql[1024];
 		memset(sql, 0x00, sizeof(sql));
 		_stprintf_s(sql, sizeof(sql), pSql);
@@ -277,6 +271,7 @@ SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 
 
 		MYSQL_ROW row = mysql_fetch_row(res);
 		unsigned int Simtotal = 0,
+			Xssl = 0,
 			Onusing = 0,
 			Zx = 0,
 			On15d = 0,
@@ -285,12 +280,13 @@ SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 
 			Du15d = 0;
 
 		sscanf_s(row[0], "%u", &Simtotal);
-		sscanf_s(row[1], "%u", &Onusing);
-		sscanf_s(row[2], "%u", &Zx);
-		sscanf_s(row[3], "%u", &On15d);
+		sscanf_s(row[1], "%u", &Xssl);
+		sscanf_s(row[2], "%u", &Onusing);
+		sscanf_s(row[3], "%u", &Zx);
 		sscanf_s(row[4], "%u", &On1m);
-		sscanf_s(row[5], "%u", &Du1m);
+		sscanf_s(row[5], "%u", &On15d);
 		sscanf_s(row[6], "%u", &Du15d);
+		sscanf_s(row[7], "%u", &Du1m);
 		mysql_free_result(res);
 
 		msgpack::sbuffer sbuf;
@@ -301,13 +297,15 @@ SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 
 		_msgpack.pack(bobj->nSubCmd);
 		_msgpack.pack(0);
 		_msgpack.pack_array(1);
-		_msgpack.pack_array(6);
+		_msgpack.pack_array(8);
 		_msgpack.pack(Simtotal);
+		_msgpack.pack(Xssl);
 		_msgpack.pack(Onusing);
-		_msgpack.pack(On15d);
+		_msgpack.pack(Zx);
 		_msgpack.pack(On1m);
-		_msgpack.pack(Du1m);
+		_msgpack.pack(On15d);
 		_msgpack.pack(Du15d);
+		_msgpack.pack(Du1m);
 
 		DealTail(sbuf, bobj);
 	}

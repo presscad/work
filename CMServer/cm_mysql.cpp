@@ -426,6 +426,7 @@ bool CreateLogTbl()
 type int not null default 0,\
 ssid int unsigned not null default 0,\
 Total int unsigned default 0,\
+Xssl int unsigned default 0,\
 Onusing int unsigned default 0,\
 Zx int unsigned default 0,\
 On1m int unsigned default 0,\
