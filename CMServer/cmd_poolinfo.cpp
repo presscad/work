@@ -54,7 +54,7 @@ bool cmd_poolinfo(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_variant_t varSign = ep->strEncSign3(row[0], row[1], pMethod,key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
 
 		_stprintf_s(bobj->data, bobj->datalen, pData, row[0], (const char*)(_bstr_t)varPwd, (const char*)(_bstr_t)varSign);
-		bobj->dwRecvedCount = strlen(bobj->data);
+		bobj->dwRecvedCount = (DWORD)strlen(bobj->data);
 
 		doApi(bobj);
 	}
@@ -96,7 +96,7 @@ bool cmd_poolinfo(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_variant_t varSign = ep->strEncSign5(row[0], row[1], pMethod, strLlchm.c_str(), strCurrentPage.c_str(), key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
 
 		_stprintf_s(bobj->data, bobj->datalen, pData, row[0], (const char*)(_bstr_t)varPwd, (const char*)(_bstr_t)varSign, strLlchm.c_str(), strCurrentPage.c_str());
-		bobj->dwRecvedCount = strlen(bobj->data);
+		bobj->dwRecvedCount = (DWORD)strlen(bobj->data);
 
 		doApi(bobj);
 	}
@@ -136,7 +136,7 @@ bool cmd_poolinfo(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_variant_t varSign = ep->strEncSign4(row[0], row[1], pMethod, bobj->strTemp.c_str(), key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
 
 		_stprintf_s(bobj->data, bobj->datalen, pData, row[0], (const char*)(_bstr_t)varPwd, (const char*)(_bstr_t)varSign, bobj->strTemp.c_str());
-		bobj->dwRecvedCount = strlen(bobj->data);
+		bobj->dwRecvedCount = (DWORD)strlen(bobj->data);
 
 		doApi(bobj);
 	}

@@ -75,7 +75,7 @@ void DoDisNumData(msgpack::object* pRootArray, BUFFER_OBJ* bobj, const TCHAR* pD
 		key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
 
 	_stprintf_s(bobj->data, bobj->datalen, pData, row[0], bobj->strTemp.c_str(), (const char*)(_bstr_t)varPwd, (const char*)(_bstr_t)varSign);
-	bobj->dwRecvedCount = strlen(bobj->data);
+	bobj->dwRecvedCount = (DWORD)strlen(bobj->data);
 
 	int nType = atoi(orderTypeId);
 	if (nType == 19)

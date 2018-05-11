@@ -54,11 +54,11 @@ byte csum(unsigned char *addr, int count)
 void DealTail(msgpack::sbuffer& sBuf, BUFFER_OBJ* bobj)
 {
 	char* pCh = sBuf.data();
-	int nLen = sBuf.size();
+	size_t nLen = sBuf.size();
 	byte pData[1024 * 32];
 	memset(pData, 0, 1024 * 32);
 	memcpy(pData, pCh + 6, nLen - 6);
-	byte nSum = csum(pData, nLen - 6);
+	byte nSum = csum(pData, (int)nLen - 6);
 	sBuf.write("\x00", 1);
 	memcpy(pCh + nLen, &nSum, 1);
 	sBuf.write("\x0d", 1);
@@ -68,7 +68,7 @@ void DealTail(msgpack::sbuffer& sBuf, BUFFER_OBJ* bobj)
 	nLen += 8;
 
 	memcpy(bobj->data, pCh, nLen);// ÓÅ»¯
-	bobj->dwRecvedCount = nLen;
+	bobj->dwRecvedCount = (DWORD)nLen;
 	DoSend(bobj);
 }
 

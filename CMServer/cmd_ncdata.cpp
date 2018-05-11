@@ -184,7 +184,7 @@ bool DoWanrningContractRoot(tinyxml2::XMLElement* RootElment)
 void doNcResponse(BUFFER_OBJ* bobj)
 {
 	const TCHAR* pData = _T("<?xml version = \"1.0\" encoding = \"UTF8\"?><ContractRoot><SUCCESS>true</SUCCESS><NOTIFY_CODE>000000</NOTIFY_CODE><RESULTMSG>调用成功</RESULTMSG></ContractRoot>");
-	bobj->dwRecvedCount = strlen(pData);
+	bobj->dwRecvedCount = (DWORD)strlen(pData);
 	memcpy_s(bobj->data, bobj->datalen, pData, bobj->dwRecvedCount);
 	bobj->SetIoRequestFunction(NC_SendCompFailed, NC_SendCompSuccess);
 	if (!Nc_PostSend((SOCKET_OBJ*)bobj->pRelateClientSock, bobj))

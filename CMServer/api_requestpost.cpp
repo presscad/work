@@ -95,7 +95,7 @@ bool doApi(BUFFER_OBJ* bobj)
 	a_sobj->dwTick = GetTickCount();
 	InsertIntoPendingConnMap(a_sobj);
 
-	if (!lpfnConnectEx(a_sobj->sock, (sockaddr*)sAddrInfo->ai_addr, sAddrInfo->ai_addrlen, bobj->data, bobj->dwRecvedCount, &dwBytes, &bobj->ol))
+	if (!lpfnConnectEx(a_sobj->sock, (sockaddr*)sAddrInfo->ai_addr, (int)sAddrInfo->ai_addrlen, bobj->data, bobj->dwRecvedCount, &dwBytes, &bobj->ol))
 	{
 		if (WSA_IO_PENDING != WSAGetLastError())
 		{
@@ -269,7 +269,6 @@ bool doCardStatusResponse(void* _bobj)
 {
 	BUFFER_OBJ* bobj = (BUFFER_OBJ*)_bobj;
 	TCHAR* pResponData = Utf8ConvertAnsi(bobj->data, bobj->dwRecvedCount);
-	int n = strlen(pResponData);
 	tinyxml2::XMLDocument doc;
 	if (tinyxml2::XML_SUCCESS != doc.Parse(pResponData))
 	{
@@ -364,7 +363,6 @@ bool doPoolList01Response(void* _bobj)
 {
 	BUFFER_OBJ* bobj = (BUFFER_OBJ*)_bobj;
 	TCHAR* pResponData = Utf8ConvertAnsi(bobj->data, bobj->dwRecvedCount);
-	int n = strlen(pResponData);
 	tinyxml2::XMLDocument doc;
 	if (tinyxml2::XML_SUCCESS != doc.Parse(pResponData))
 	{
@@ -438,7 +436,6 @@ bool doPoolList02Response(void* _bobj)
 {
 	BUFFER_OBJ* bobj = (BUFFER_OBJ*)_bobj;
 	TCHAR* pResponData = Utf8ConvertAnsi(bobj->data, bobj->dwRecvedCount);
-	int n = strlen(pResponData);
 	tinyxml2::XMLDocument doc;
 	if (tinyxml2::XML_SUCCESS != doc.Parse(pResponData))
 	{
