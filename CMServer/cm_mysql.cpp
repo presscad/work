@@ -25,7 +25,7 @@ bool Mysql_ConnectDB(MYSQL** pMysql)
 		return false;
 
 	//if (NULL == mysql_real_connect(*pMysql, _T("123.149.232.30"), DB_USER, DB_PWD, DB_NAME, 3306, NULL, 0))
-	if (NULL == mysql_real_connect(*pMysql, _T("123.149.232.30"), DB_USER, DB_PWD, DB_NAME, 3306, NULL, 0))
+	if (NULL == mysql_real_connect(*pMysql, _T("localhost"), DB_USER, DB_PWD, DB_NAME, 3306, NULL, 0))
 	{
 		return false;
 	}

@@ -79,8 +79,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\work\CMServer\tbb_concurrent_hash_map\include;D:\work\CMServer\msgpack-c\include;D:\work\CMServer\mysql_include_x64;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\work\CMServer\tbb_concurrent_hash_map\build\vs2013\x64\Debug;D:\work\CMServer\mysql_lib_x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\tbb_concurrent_hash_map\include;..\msgpack-c\include;..\mysql_include_x64;$(IncludePath)</IncludePath>
+    <LibraryPath>..\tbb_concurrent_hash_map\build\vs2013\x64\Debug-MT;..\mysql_lib_x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -89,8 +89,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\work\CMServer\mysql_include_x64;D:\work\CMServer\msgpack-c\include;D:\work\CMServer\tbb_concurrent_hash_map\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\work\CMServer\tbb_concurrent_hash_map\build\vs2013\x64\Release;D:\work\CMServer\mysql_lib_x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\mysql_include_x64;..\msgpack-c\include;..\tbb_concurrent_hash_map\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\tbb_concurrent_hash_map\build\vs2013\x64\Release-MT;..\mysql_lib_x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

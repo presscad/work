@@ -168,7 +168,7 @@ SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 
 
 void SimTotal()
 {
-	const TCHAR* pSql = _T("SELECT COUNT(*) AS 'SimTotal',\
+	const TCHAR* pSql = _T("SELECT SUM(1) AS 'SimTotal',\
 SUM(CASE WHEN Khid01=0 THEN 1 ELSE 0 END) AS 'Nousing',\
 SUM(CASE WHEN Zt=1 THEN 1 ELSE 0 END) AS 'Onusing',\
 SUM(CASE WHEN Zt=150001 THEN 1 ELSE 0 END) AS 'Zx',\
