@@ -67,6 +67,9 @@
     <Filter Include="统计线程">
       <UniqueIdentifier>{7ec86c17-2ef8-41a8-8a57-d5d46909b32a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="API\流量查询">
+      <UniqueIdentifier>{95592c38-5428-4b10-af29-1972a857254f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -171,6 +174,9 @@
     <ClInclude Include="statistics _thread.h">
       <Filter>统计线程</Filter>
     </ClInclude>
+    <ClInclude Include="cmd_traffic.h">
+      <Filter>API\流量查询</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -274,6 +280,9 @@
     </ClCompile>
     <ClCompile Include="statistics _thread.cpp">
       <Filter>统计线程</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_traffic.cpp">
+      <Filter>API\流量查询</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

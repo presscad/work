@@ -196,6 +196,7 @@ bool doDisNumberResponse(void* _bobj)
 {
 	BUFFER_OBJ* bobj = (BUFFER_OBJ*)_bobj;
 	TCHAR* pResponData = Utf8ConvertAnsi(bobj->data, bobj->dwRecvedCount);
+	_tprintf_s(_T("api--%s\n"), pResponData);
 	tinyxml2::XMLDocument doc;
 	if (tinyxml2::XML_SUCCESS != doc.Parse(pResponData))
 	{

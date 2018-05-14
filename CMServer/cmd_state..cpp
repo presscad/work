@@ -77,7 +77,7 @@ void DoCSData(msgpack::object* pRootArray, BUFFER_OBJ* bobj, const TCHAR* pData)
 	_variant_t varSign = ep->strEncSign4(bobj->strTemp.c_str(), row[0], row[1], method.c_str(),
 		key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
 
-	_stprintf_s(bobj->data, bobj->datalen, pData, row[0], bobj->strTemp.c_str(), (const char*)(_bstr_t)varPwd, (const char*)(_bstr_t)varSign);
+	_stprintf_s(bobj->data, bobj->datalen, pData, bobj->strTemp.c_str(), row[0], (const char*)(_bstr_t)varPwd, (const char*)(_bstr_t)varSign);
 	bobj->dwRecvedCount = (DWORD)strlen(bobj->data);
 	doApi(bobj);
 }

@@ -39,7 +39,7 @@ void Nc_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void* _bobj)
 
 	WSAIoctl(sobj->sock, SIO_KEEPALIVE_VALS, &alive_in, sizeof(alive_in),
 		&alive_out, sizeof(alive_out), &ulBytesReturn, NULL, NULL);
-
+	_tprintf_s(_T("NC--%s\n"), "testtest");
 	if (NULL == CreateIoCompletionPort((HANDLE)sobj->sock, hComport, (ULONG_PTR)sobj, 0))
 	{
 		CMCloseSocket(sobj);
@@ -64,6 +64,7 @@ void Nc_AcceptCompletionSuccess(DWORD dwTranstion, void* _lsock, void* _bobj)
 		&remoteAddr, &remoteAddrlen);
 
 	TCHAR* pResponData = Utf8ConvertAnsi(bobj->data, bobj->dwRecvedCount);
+	_tprintf_s(_T("NC--%s\n"), pResponData);
 	tinyxml2::XMLDocument doc;
 	if (tinyxml2::XML_SUCCESS != doc.Parse(pResponData))
 	{
@@ -145,6 +146,7 @@ void NC_RecvCompSuccess(DWORD dwTransion, void* _sobj, void* _bobj)
 	c_bobj->dwRecvedCount += dwTransion;
 
 	TCHAR* pResponData = Utf8ConvertAnsi(c_bobj->data, c_bobj->dwRecvedCount);
+	_tprintf_s(_T("NC--%s\n"), pResponData);
 	tinyxml2::XMLDocument doc;
 	if (tinyxml2::XML_SUCCESS != doc.Parse(pResponData))
 	//if (NULL == strstr(c_bobj->data, "</NotifyContractRoot>") && NULL == strstr(c_bobj->data, "</WanrningContractRoot>"))

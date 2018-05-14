@@ -20,7 +20,7 @@ bool cmd_poolinfo(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 	switch (bobj->nSubCmd)
 	{
-	case PL_GET_LIST:
+	case PL_GET_POOL_LIST:
 	{
 		bobj->pfndoApiResponse = NULL;
 		const TCHAR* pMethod = _T("getPoolList");
@@ -59,7 +59,7 @@ bool cmd_poolinfo(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		doApi(bobj);
 	}
 	break;
-	case PL_LLC_INFO:
+	case PL_GET_POOL_MEM_LIST:
 	{
 		bobj->pfndoApiResponse = NULL;
 		const TCHAR* pMethod = _T("getPoolMemberList");
@@ -101,7 +101,49 @@ bool cmd_poolinfo(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		doApi(bobj);
 	}
 	break;
-	case PL_LLC_POOLQRY:
+	case PL_GET_POOL_MEM:
+	{
+		bobj->pfndoApiResponse = NULL;
+		const TCHAR* pMethod = _T("getPoolMember");
+		const TCHAR* pData = _T("GET /m2m_ec/query.do?method=getPoolMember&user_id=%s&passWord=%s&sign=%s&poolNbr=%s&member_accNbr=%s\r\n\r\n");
+
+		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
+		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
+		std::string strpoolNbr = (pArray++)->as<std::string>();
+		bobj->strTemp = (pArray++)->as<std::string>();
+		std::string dxzh = (pArray++)->as<std::string>();
+
+		const TCHAR* pSql = _T("SELECT User,Password,MKey FROM dxzh_tbl WHERE Dxzh LIKE '%%%s%%'");
+		TCHAR sql[256];
+		memset(sql, 0x00, 256);
+		_stprintf_s(sql, 256, pSql, dxzh.c_str());
+		MYSQL* pMysql = Mysql_AllocConnection();
+		if (NULL == pMysql)
+		{
+			error_info(bobj, _T("连接数据库失败"));
+			return Api_error(bobj);
+		}
+
+		MYSQL_RES* res = NULL;
+		if (!SelectFromTbl(sql, pMysql, bobj, &res))
+		{
+			Mysql_BackToPool(pMysql);
+			return Api_error(bobj);
+		}
+		MYSQL_ROW row = mysql_fetch_row(res);
+		std::string key(row[2]);
+
+		WOTEDUtils::EncInterfacePtr ep(__uuidof(DesUtils));
+		_variant_t varPwd = ep->strEnc(row[1], key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
+		_variant_t varSign = ep->strEncSign5(row[0], row[1], pMethod, strpoolNbr.c_str(), bobj->strTemp.c_str(), key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
+
+		_stprintf_s(bobj->data, bobj->datalen, pData, row[0], (const char*)(_bstr_t)varPwd, (const char*)(_bstr_t)varSign, strpoolNbr.c_str(), bobj->strTemp.c_str());
+		bobj->dwRecvedCount = (DWORD)strlen(bobj->data);
+
+		doApi(bobj);
+	}
+	break;
+	case PL_POOL_QRY:
 	{
 		bobj->pfndoApiResponse = NULL;
 		const TCHAR* pMethod = _T("poolQry");
@@ -136,6 +178,50 @@ bool cmd_poolinfo(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		_variant_t varSign = ep->strEncSign4(row[0], row[1], pMethod, bobj->strTemp.c_str(), key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
 
 		_stprintf_s(bobj->data, bobj->datalen, pData, row[0], (const char*)(_bstr_t)varPwd, (const char*)(_bstr_t)varSign, bobj->strTemp.c_str());
+		bobj->dwRecvedCount = (DWORD)strlen(bobj->data);
+
+		doApi(bobj);
+	}
+	break;
+	case PL_POOL_MEM_QRY:
+	{
+		bobj->pfndoApiResponse = NULL;
+		const TCHAR* pMethod = _T("poolMemQry");
+		// monthSelect表示查询月份，1表示当月，0表示上月
+		const TCHAR* pData = _T("GET /m2m_ec/query.do?method=poolMemQry&user_id=%s&passWord=%s&sign=%s&poolNbr=%s&member_accNbr=%s&monthSelect=%s\r\n\r\n");
+
+		msgpack::object* pDataArray = (pRootArray++)->via.array.ptr;
+		msgpack::object* pArray = (pDataArray++)->via.array.ptr;
+		std::string strpoolNbr = (pArray++)->as<std::string>();
+		bobj->strTemp = (pArray++)->as<std::string>();
+		std::string strmonthSelect = (pArray++)->as<std::string>();
+		std::string dxzh = (pArray++)->as<std::string>();
+
+		const TCHAR* pSql = _T("SELECT User,Password,MKey FROM dxzh_tbl WHERE Dxzh LIKE '%%%s%%'");
+		TCHAR sql[256];
+		memset(sql, 0x00, 256);
+		_stprintf_s(sql, 256, pSql, dxzh.c_str());
+		MYSQL* pMysql = Mysql_AllocConnection();
+		if (NULL == pMysql)
+		{
+			error_info(bobj, _T("连接数据库失败"));
+			return Api_error(bobj);
+		}
+
+		MYSQL_RES* res = NULL;
+		if (!SelectFromTbl(sql, pMysql, bobj, &res))
+		{
+			Mysql_BackToPool(pMysql);
+			return Api_error(bobj);
+		}
+		MYSQL_ROW row = mysql_fetch_row(res);
+		std::string key(row[2]);
+
+		WOTEDUtils::EncInterfacePtr ep(__uuidof(DesUtils));
+		_variant_t varPwd = ep->strEnc(row[1], key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
+		_variant_t varSign = ep->strEncSign6(row[0], row[1], pMethod, strpoolNbr.c_str(), bobj->strTemp.c_str(), strmonthSelect.c_str(), key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
+
+		_stprintf_s(bobj->data, bobj->datalen, pData, row[0], (const char*)(_bstr_t)varPwd, (const char*)(_bstr_t)varSign, strpoolNbr.c_str(), bobj->strTemp.c_str(), strmonthSelect.c_str());
 		bobj->dwRecvedCount = (DWORD)strlen(bobj->data);
 
 		doApi(bobj);

@@ -13,6 +13,7 @@ unsigned int _stdcall statistics_func(LPVOID pVoid)
 	{
 		DueTostatistical();
 		SimTotal();
+		// 根据已到期的天数，自动做注销
 	}
 	return 0;
 }

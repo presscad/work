@@ -179,6 +179,7 @@
     <ClInclude Include="cmd_sim.h" />
     <ClInclude Include="cmd_ssdq.h" />
     <ClInclude Include="cmd_state.h" />
+    <ClInclude Include="cmd_traffic.h" />
     <ClInclude Include="nc_postcompletion.h" />
     <ClInclude Include="nc_requestpost.h" />
     <ClInclude Include="client_cmd.h" />
@@ -220,6 +221,7 @@
     <ClCompile Include="cmd_sim.cpp" />
     <ClCompile Include="cmd_ssdq.cpp" />
     <ClCompile Include="cmd_state..cpp" />
+    <ClCompile Include="cmd_traffic.cpp" />
     <ClCompile Include="nc_postcompletion.cpp" />
     <ClCompile Include="nc_requestpost.cpp" />
     <ClCompile Include="client_cmd.cpp" />
