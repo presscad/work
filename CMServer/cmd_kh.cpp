@@ -292,7 +292,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		int nKeyid = (pRootArray++)->as<int>();
 
 		std::string strKhmc = (pRootArray++)->as<std::string>();
-		bool bType = strcmp(strKhmc.c_str(), "") == 0;
+		bool bType = _tcscmp(strKhmc.c_str(), "") == 0;
 
 		const TCHAR* pSql = _T("SELECT COUNT(*) num FROM kh_tbl WHERE Fatherid=%u");
 		TCHAR sql[256];

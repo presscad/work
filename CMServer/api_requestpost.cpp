@@ -457,7 +457,7 @@ bool doPoolList02Response(void* _bobj)
 //	<pool_total>529530880</pool_total>
 //	<GROUP_TRANSACTIONID>1000000190201804216859677554</GROUP_TRANSACTIONID>
 //</SvcCont>
-bool doPoolList03Response(void* _bobj)
+bool dopoolQryResponse(void* _bobj)
 {
 	BUFFER_OBJ* bobj = (BUFFER_OBJ*)_bobj;
 	TCHAR* pResponData = Utf8ConvertAnsi(bobj->data, bobj->dwRecvedCount);

@@ -65,7 +65,7 @@ void DueTostatistical()
 		sscanf_s(row[0], "%u", &nKhid);
 
 		// On1m,On15d,Du15d,Du1m
-		if (atoi(row[1]) == 1)
+		if (_tstoi(row[1]) == 1)
 		{
 			pSql = _T("SELECT SUM(CASE WHEN Zt=1 THEN 1 ELSE 0 END) AS 'Onusing',\
 SUM(CASE WHEN Zt=150001 THEN 1 ELSE 0 END) AS 'Zx',\
@@ -74,7 +74,7 @@ SUM(CASE WHEN dqrq>CURDATE() AND dqrq<DATE_ADD(CURDATE(), INTERVAL 1 MONTH) THEN
 SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 1 MONTH) THEN 1 ELSE 0 END) AS 'Du1m',\
 SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 1 ELSE 0 END) AS 'Du15d' FROM sim_tbl WHERE Khid01=%u");
 		}
-		else if (atoi(row[1]) > 1)
+		else if (_tstoi(row[1]) > 1)
 		{
 			pSql = _T("SELECT SUM(CASE WHEN Zt=1 THEN 1 ELSE 0 END) AS 'Onusing',\
 SUM(CASE WHEN Zt=150001 THEN 1 ELSE 0 END) AS 'Zx',\

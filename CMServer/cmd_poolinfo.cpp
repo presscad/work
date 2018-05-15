@@ -145,7 +145,7 @@ bool cmd_poolinfo(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	break;
 	case PL_POOL_QRY:
 	{
-		bobj->pfndoApiResponse = NULL;
+		bobj->pfndoApiResponse = dopoolQryResponse;
 		const TCHAR* pMethod = _T("poolQry");
 		const TCHAR* pData = _T("GET /m2m_ec/query.do?method=poolQry&user_id=%s&passWord=%s&sign=%s&poolNbr=%s\r\n\r\n");
 

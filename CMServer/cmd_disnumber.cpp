@@ -77,7 +77,7 @@ void DoDisNumData(msgpack::object* pRootArray, BUFFER_OBJ* bobj, const TCHAR* pD
 	_stprintf_s(bobj->data, bobj->datalen, pData, row[0], bobj->strTemp.c_str(), (const char*)(_bstr_t)varPwd, (const char*)(_bstr_t)varSign);
 	bobj->dwRecvedCount = (DWORD)strlen(bobj->data);
 
-	int nType = atoi(orderTypeId);
+	int nType = _tstoi(orderTypeId);
 	if (nType == 19)
 	{
 		pSql = _T("INSERT INTO log_tbl (id,Userid,Opname,Status,Requesttime) values(null,%u,'Í£»ú-%s','µÈ´ýÏìÓ¦',now())");

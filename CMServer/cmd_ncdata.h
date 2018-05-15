@@ -1,8 +1,6 @@
 #pragma once
 #include "tinyxml2.h"
 
-bool doNcData(BUFFER_OBJ* bobj);
-
-bool doNcData(tinyxml2::XMLDocument& doc);
+bool doNcData(const TCHAR* pData);
 
 void doNcResponse(BUFFER_OBJ* bobj);

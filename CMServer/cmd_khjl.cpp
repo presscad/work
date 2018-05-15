@@ -97,7 +97,7 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		int nKeyid = (pRootArray++)->as<int>();
 
 		std::string strJlxm = (pRootArray++)->as<std::string>();
-		bool bType = strcmp(strJlxm.c_str(), "") == 0;
+		bool bType = _tcscmp(strJlxm.c_str(), "") == 0;
 
 		const TCHAR* pSql = NULL;
 		TCHAR sql[256];

@@ -29,4 +29,4 @@ bool doPoolList01Response(void* _bobj);
 
 bool doPoolList02Response(void* _bobj);
 
-bool doPoolList03Response(void* _bobj);
+bool dopoolQryResponse(void* _bobj); // 流量池总使用量查询

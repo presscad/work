@@ -14,30 +14,24 @@ bool DoNotifyContractRoot(tinyxml2::XMLElement* root);
 bool DoWanrningContractRoot(tinyxml2::XMLElement* RootElment);
 void doNcResponse(BUFFER_OBJ* bobj);
 
-bool doNcData(BUFFER_OBJ* bobj)
+bool doNcData(const TCHAR* pData)
 {
-	TCHAR* pResponData = Utf8ConvertAnsi(bobj->data, bobj->dwRecvedCount);
-	doNcResponse(bobj); // 返回推送反馈报文
+	_tprintf_s(_T("NC--%s\n"), pData);
 	tinyxml2::XMLDocument doc;
-	if (tinyxml2::XML_SUCCESS != doc.Parse(pResponData))
+	if (tinyxml2::XML_SUCCESS != doc.Parse(pData))
 	{
-		delete pResponData;
+		delete pData;
+		_tprintf_s(_T("NC--%s\n"), _T("格式化xml失败"));
 		return false;
 	}
-	delete pResponData;
-	
-	return true;
-}
-
-bool doNcData(tinyxml2::XMLDocument& doc)
-{
+	delete pData;
 	tinyxml2::XMLElement* RootElment = doc.RootElement();
-	const TCHAR* rootName = RootElment->GetText();
-	if (strcmp(rootName, "NotifyContractRoot") == 0)
+	const TCHAR* rootName = RootElment->Value();
+	if (_tcscmp(rootName, _T("NotifyContractRoot")) == 0)
 	{
 		return DoNotifyContractRoot(RootElment);
 	}
-	else if (strcmp(rootName, "NotifyContractRoot") == 0)
+	else if (_tcscmp(rootName, _T("NotifyContractRoot")) == 0)
 	{
 		return DoWanrningContractRoot(RootElment);
 	}
@@ -47,51 +41,38 @@ bool doNcData(tinyxml2::XMLDocument& doc)
 
 //<?xml version = "1.0" encoding = "utf-8"?>
 //<NotifyContractRoot>
-//<!--报文类型 1：报竣 2：告警-->
 //<TYPE>1< / TYPE>
-//<!- 流水号->
-//	<GROUP_TRANSACTIONID>1000000252201605131983898593< / GROUP_TRANSACTIONID>
-//	<!- 报竣信息，比如：竣工，前端错误等，判断本次操作是否竣工也用这个节点->
-//	<STATUSINFO>竣工< / STATUSINFO>
-//	<!- 号码->
-//	<ACCNBR>1064915901733< / ACCNBR>
-//	<!- 请求发送时间->
-//	<SENDDT>20160513153805< / SENDDT>
-//	<!--操作类型，具体描述见本节第6节-->
-//	<ACCEPTTYPE>8< / ACCEPTTYPE>
-//	<!- 操作详情->
-//	<ACCEPTMSG>号码:1064915901733，办理停机保号< / ACCEPTMSG>
-//	<!- 响应时间->
-//	<STATUSDT>20160513153905< / STATUSDT>
-//	<!- 响应消息，如有错误也在这里记入, 本节点不作为判断竣工的依据->
-//	<RESULTMSG>成功< / RESULTMSG>
-//	< / NotifyContractRoot>
+//<GROUP_TRANSACTIONID>1000000252201605131983898593< / GROUP_TRANSACTIONID>
+//<CUSTOMER_TRANSACTIONID></CUSTOMER_TRANSACTIONID>
+//<STATUSINFO>竣工</STATUSINFO>
+//<ACCNBR>1064915901733</ACCNBR>
+//<ACCEPTTYPE>8</ACCEPTTYPE>
+//<ACCEPTMSG>号码:1064915901733，办理停机保号</ACCEPTMSG>
+//<STATUSDT>20160513153905</STATUSDT>
+//<RESULTMSG>成功</RESULTMSG>
+//</NotifyContractRoot>
 
 bool DoNotifyContractRoot(tinyxml2::XMLElement* root)
 {
-	tinyxml2::XMLElement* TYPE = root->FirstChildElement(); // <TYPE>1</TYPE> 
+	tinyxml2::XMLElement* GROUP_TRANSACTIONID = root->FirstChildElement("GROUP_TRANSACTIONID");
+	tinyxml2::XMLElement* STATUSINFO = root->FirstChildElement("STATUSINFO");
+	tinyxml2::XMLElement* ACCNBR = root->FirstChildElement("ACCNBR");
+	tinyxml2::XMLElement* ACCEPTTYPE = root->FirstChildElement("ACCEPTTYPE");
+	tinyxml2::XMLElement* STATUSDT = root->FirstChildElement("STATUSDT");
+	if (NULL == GROUP_TRANSACTIONID || NULL == STATUSINFO || NULL == ACCNBR || NULL == ACCEPTTYPE || NULL == STATUSDT)
+	{
+		_tprintf_s(_T("接收到的报竣数据格式有误\n"));
+		return false;
+	}
 
-	tinyxml2::XMLElement* GROUP_TRANSACTIONID = TYPE->NextSiblingElement(); // <GROUP_TRANSACTIONID>1000000252201605131983898593</GROUP_TRANSACTIONID>
 	const TCHAR* pGROUP_TRANSACTIONID = GROUP_TRANSACTIONID->GetText();
-
-	tinyxml2::XMLElement* STATUSINFO = GROUP_TRANSACTIONID->NextSiblingElement(); // <STATUSINFO>竣工</STATUSINFO>
 	const TCHAR* pSTATUSINFO = STATUSINFO->GetText();
-
-	tinyxml2::XMLElement* ACCNBR = STATUSINFO->NextSiblingElement(); // <ACCNBR>1064915901733</ACCNBR>
 	const TCHAR* pACCNBR = ACCNBR->GetText();
+	const TCHAR* pACCEPTTYPE = ACCEPTTYPE->GetText();
+	const TCHAR* pSTATUSDT = STATUSDT->GetText();
 
-	tinyxml2::XMLElement* SENDDT = ACCNBR->NextSiblingElement(); // <SENDDT>20160513153805</SENDDT>
+	int nType = _tstoi(pACCEPTTYPE);
 
-	tinyxml2::XMLElement* ACCEPTTYPE = SENDDT->NextSiblingElement(); // <ACCEPTTYPE>8</ACCEPTTYPE>
-	const TCHAR* pAccepttype = ACCEPTTYPE->GetText();
-	int nType = atoi(pAccepttype);
-
-	tinyxml2::XMLElement* ACCEPTMSG = ACCEPTTYPE->NextSiblingElement(); // <ACCEPTMSG>号码:1064915901733，办理停机保号</ACCEPTMSG>
-
-	tinyxml2::XMLElement* STATUSDT = ACCEPTMSG->NextSiblingElement(); // <STATUSDT>20160513153905</STATUSDT>
-
-	tinyxml2::XMLElement* RESULTMSG = STATUSDT->NextSiblingElement(); // <RESULTMSG>成功</RESULTMSG>
-	const TCHAR* pRESULTMSG = RESULTMSG->GetText();
 
 	const TCHAR* pSql = NULL;
 	TCHAR sql[256];
@@ -119,7 +100,7 @@ bool DoNotifyContractRoot(tinyxml2::XMLElement* root)
 	break;
 	case 8:// 停机
 	{
-		if (strcmp(pSTATUSINFO, "竣工") == 0) // 修改状态
+		if (_tcscmp(pSTATUSINFO, _T("竣工")) == 0) // 修改状态
 		{
 			pSql = _T("UPDATE sim_tbl SET zt=2 WHERE Jrhm='%s'");
 			_stprintf_s(sql, sizeof(sql), pSql, pACCNBR);
@@ -128,7 +109,7 @@ bool DoNotifyContractRoot(tinyxml2::XMLElement* root)
 	break;
 	case 9:// 复机
 	{
-		if (strcmp(pSTATUSINFO, "竣工") == 0) // 修改状态
+		if (_tcscmp(pSTATUSINFO, _T("竣工")) == 0) // 修改状态
 		{
 			pSql = _T("UPDATE sim_tbl SET zt=1 WHERE Jrhm='%s'");
 			_stprintf_s(sql, sizeof(sql), pSql, pACCNBR);
@@ -155,8 +136,8 @@ bool DoNotifyContractRoot(tinyxml2::XMLElement* root)
 	}
 
 	// 记录日志
-	pSql = _T("UPDATE log_tbl SET Status='报竣完成',Ncmsg='%s',Nctime=now(),Result='%s' WHERE Transid='%s'");
-	_stprintf_s(sql, sizeof(sql), pSql, pSTATUSINFO, pRESULTMSG, pGROUP_TRANSACTIONID);
+	pSql = _T("UPDATE log_tbl SET Status='报竣完成',Ncmsg='%s',Nctime=now() WHERE Transid='%s'");
+	_stprintf_s(sql, sizeof(sql), pSql, pSTATUSINFO, pGROUP_TRANSACTIONID);
 
 	return true;
 }
@@ -171,7 +152,7 @@ bool DoWanrningContractRoot(tinyxml2::XMLElement* RootElment)
 	}
 	const TCHAR* pcType = pType->GetText();
 	_tprintf(_T("%s\n"), pcType);
-	if (atoi(pcType) != 2)
+	if (_tstoi(pcType) != 2)
 	{
 		return false;
 	}
@@ -183,7 +164,8 @@ bool DoWanrningContractRoot(tinyxml2::XMLElement* RootElment)
 
 void doNcResponse(BUFFER_OBJ* bobj)
 {
-	const TCHAR* pData = _T("<?xml version = \"1.0\" encoding = \"UTF8\"?><ContractRoot><SUCCESS>true</SUCCESS><NOTIFY_CODE>000000</NOTIFY_CODE><RESULTMSG>调用成功</RESULTMSG></ContractRoot>");
+	//const TCHAR* pData = _T("HTTP/1.1 200 OK\r\n<?xml version = \"1.0\" encoding = \"UTF8\"?><ContractRoot><SUCCESS>true</SUCCESS><NOTIFY_CODE>000000</NOTIFY_CODE><RESULTMSG>调用成功</RESULTMSG></ContractRoot>\r\n\r\n");
+	const TCHAR* pData = _T("HTTP/1.1 200 OK\r\n\r\n");
 	bobj->dwRecvedCount = (DWORD)strlen(pData);
 	memcpy_s(bobj->data, bobj->datalen, pData, bobj->dwRecvedCount);
 	bobj->SetIoRequestFunction(NC_SendCompFailed, NC_SendCompSuccess);
