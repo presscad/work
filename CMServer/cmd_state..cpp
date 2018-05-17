@@ -52,8 +52,8 @@ void DoCSData(msgpack::object* pRootArray, BUFFER_OBJ* bobj, const TCHAR* pData)
 	std::string dxzh = (pDataObj++)->as<std::string>();
 	const TCHAR* pSql = _T("SELECT User,Password,MKey FROM dxzh_tbl WHERE Dxzh LIKE '%%%s%%'");
 	TCHAR sql[256];
-	memset(sql, 0x00, 256);
-	_stprintf_s(sql, 256, pSql, dxzh.c_str());
+	memset(sql, 0x00, sizeof(sql));
+	_stprintf_s(sql, sizeof(sql), pSql, dxzh.c_str());
 	MYSQL* pMysql = Mysql_AllocConnection();
 	if (NULL == pMysql)
 	{

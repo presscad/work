@@ -109,7 +109,7 @@ bool DoNotifyContractRoot(tinyxml2::XMLElement* root)
 			pSql = _T("UPDATE sim_tbl SET zt=2 WHERE Jrhm='%s'");
 			TCHAR* sql = new TCHAR[256 * sizeof(TCHAR)];
 			memset(sql, 0x00, 256 * sizeof(TCHAR));
-			_stprintf_s(sql, sizeof(sql), pSql, pACCNBR);
+			_stprintf_s(sql, 256 * sizeof(TCHAR), pSql, pACCNBR);
 			PostThreadMessage(mysqlThreadId, MYSQL_UPDATE, (WPARAM)sql, NULL);
 		}
 	}
@@ -121,7 +121,7 @@ bool DoNotifyContractRoot(tinyxml2::XMLElement* root)
 			pSql = _T("UPDATE sim_tbl SET zt=1 WHERE Jrhm='%s'");
 			TCHAR* sql = new TCHAR[256 * sizeof(TCHAR)];
 			memset(sql, 0x00, 256 * sizeof(TCHAR));
-			_stprintf_s(sql, sizeof(sql), pSql, pACCNBR);
+			_stprintf_s(sql, 256 * sizeof(TCHAR), pSql, pACCNBR);
 			PostThreadMessage(mysqlThreadId, MYSQL_UPDATE, (WPARAM)sql, NULL);
 		}
 	}

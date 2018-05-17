@@ -330,7 +330,7 @@ bool doCardStatusResponse(void* _bobj)
 	DealTail(sbuf, bobj);
 
 	// 150001未实名制违规停机
-	const TCHAR* pSql = _T("UPDATA sim_tbl SET Zt=%s WHERE Jrhm='%s'");
+	const TCHAR* pSql = _T("UPDATE sim_tbl SET Zt=%s WHERE Jrhm='%s'");
 	TCHAR sql[256];
 	memset(sql, 0x00, sizeof(sql));
 	_stprintf_s(sql, sizeof(sql), pSql, pproductStatusCd, pnumber);
@@ -344,6 +344,7 @@ bool doCardStatusResponse(void* _bobj)
 	size_t len = _tcslen(sql);
 	if (0 != mysql_real_query(pMysql, sql, (ULONG)len))
 	{
+		_tprintf_s(_T("%s\n"), mysql_error(pMysql));
 		mysql_rollback(pMysql);
 		return true;
 	}
