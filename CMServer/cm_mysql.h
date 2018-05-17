@@ -34,3 +34,5 @@ bool CreateSsdqTbl();
 bool CreateDxzhTbl();
 
 bool CreateStatisticsTbl();
+
+bool CreateLogTbl();

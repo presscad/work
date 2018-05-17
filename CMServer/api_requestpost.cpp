@@ -196,7 +196,6 @@ bool doDisNumberResponse(void* _bobj)
 {
 	BUFFER_OBJ* bobj = (BUFFER_OBJ*)_bobj;
 	TCHAR* pResponData = Utf8ConvertAnsi(bobj->data, bobj->dwRecvedCount);
-	_tprintf_s(_T("api--%s\n"), pResponData);
 	tinyxml2::XMLDocument doc;
 	if (tinyxml2::XML_SUCCESS != doc.Parse(pResponData))
 	{
@@ -219,6 +218,13 @@ bool doDisNumberResponse(void* _bobj)
 	tinyxml2::XMLElement* GROUP_TRANSACTIONID = resultMsg->NextSiblingElement(); // <GROUP_TRANSACTIONID>1000000252201606149170517340</GROUP_TRANSACTIONID>
 	const TCHAR* pGROUP_TRANSACTIONID = GROUP_TRANSACTIONID->GetText();
 
+	const TCHAR* pSql = NULL;
+	TCHAR* sql = new TCHAR[256 * sizeof(TCHAR)];
+	memset(sql, 0x00, 256 * sizeof(TCHAR));
+
+	pSql = _T("UPDATE log_tbl SET lshm='%s',reslutmsg='%s' WHERE id=%u");
+	_stprintf_s(sql, 256 * sizeof(TCHAR), pSql, pGROUP_TRANSACTIONID, presultMsg, bobj->nPerLogID);
+
 	msgpack::sbuffer sbuf;
 	msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
 	sbuf.write("\xfb\xfc", 6);
@@ -238,11 +244,8 @@ bool doDisNumberResponse(void* _bobj)
 
 	DealTail(sbuf, bobj);
 
-	const TCHAR* pSql = _T("UPDATE log_tbl SET Status='等待报竣',Respondtime=now(),Respondmsg='%s',Transid='%s' WHERE id=%u");
-	TCHAR sql[256];
-	memset(sql, 0x00, sizeof(sql));
-	_stprintf_s(sql, sizeof(sql), pSql, presultMsg, pGROUP_TRANSACTIONID);
-	
+	PostThreadMessage(mysqlThreadId, MYSQL_UPDATE, (WPARAM)sql, NULL);
+
 	return true;
 }
 
@@ -326,6 +329,7 @@ bool doCardStatusResponse(void* _bobj)
 
 	DealTail(sbuf, bobj);
 
+	// 150001未实名制违规停机
 	const TCHAR* pSql = _T("UPDATA sim_tbl SET Zt=%s WHERE Jrhm='%s'");
 	TCHAR sql[256];
 	memset(sql, 0x00, sizeof(sql));

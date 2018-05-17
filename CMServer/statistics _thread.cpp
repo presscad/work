@@ -252,3 +252,52 @@ SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 
 
 	Mysql_BackToPool(pMysql);
 }
+
+unsigned int mysqlThreadId = 0;
+
+unsigned int _stdcall mysql_thread(LPVOID pVoid)
+{
+	MSG msg;
+	PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
+
+	while (GetMessage(&msg, NULL, NULL, NULL))
+	{
+		TCHAR* sql = (TCHAR*)msg.wParam;
+		MYSQL* pMysql = Mysql_AllocConnection();
+		if (NULL == pMysql)
+		{
+			_tprintf_s(_T("mysql_thread:分配数据库连接失败\n"));
+			delete sql;
+			continue;
+		}
+		switch (msg.message)
+		{
+		case MYSQL_INSERT:
+		case MYSQL_UPDATE:
+		case MYSQL_DELETE:
+		{
+			size_t len = _tcslen(sql);
+			if (0 != mysql_real_query(pMysql, sql, (ULONG)len))
+			{
+
+				_tprintf_s(_T("mysql_thread:插入数据失败--%s\n%s"), sql, mysql_error(pMysql));
+				delete sql;
+				Mysql_BackToPool(pMysql);
+				continue;
+			}
+
+			if (mysql_affected_rows(pMysql) == 0)
+			{
+				_tprintf_s(_T("mysql_thread:插入数据影响行数为0--%s\n"), sql);
+			}
+			Mysql_BackToPool(pMysql);
+			delete sql;
+		}
+		break;
+		default:
+			break;
+		}
+	}
+
+	return 0;
+}

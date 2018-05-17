@@ -453,3 +453,9 @@ typedef struct _socket_obj
 	}
 }SOCKET_OBJ;
 #define SIZE_OF_SOCKET_OBJ sizeof(SOCKET_OBJ)
+
+extern unsigned int mysqlThreadId;
+
+#define MYSQL_INSERT WM_USER + 300
+#define MYSQL_UPDATE WM_USER + 301
+#define MYSQL_DELETE WM_USER + 302

@@ -405,24 +405,6 @@ bool CreateDxzhTbl()
 	return CreateTbl(CREATE_DXZH_TBL);
 }
 
-#define CREATE_LOG_TBL _T("CREATE TABLE IF NOT EXISTS log_tbl(id int unsigned not null auto_increment,\
-Opname varchar(32) not null,\
-Userid int unsigend not null,\
-Requesttime datatime(),\
-Status varchar(16) not null,\
-Respondtime datatime(),\
-Respondmsg varchar(32),\
-Transid varchar(32),\
-Nctime dataime(),\
-Ncmsg varchar(32),\
-Result varchar(64),\
-primary key(id),\
-unique key(Transid))")
-bool CreateLogTbl()
-{
-	return CreateTbl(CREATE_LOG_TBL);
-}
-
 #define CREATE_STATISTICS_TBL _T("CREATE TABLE IF NOT EXISTS statistic_tbl(id int unsigned not null auto_increment,\
 type int not null default 0,\
 ssid int unsigned not null default 0,\
@@ -439,4 +421,25 @@ unique key(ssid))")
 bool CreateStatisticsTbl()
 {
 	return CreateTbl(CREATE_STATISTICS_TBL);
+}
+
+
+
+#define CREATE_LOG_TBL _T("CREATE TABLE IF NOT EXISTS log_tbl(\
+	id INT UNSIGNED NOT NULL AUTO_INCREMENT,\
+	Userid INT UNSIGNED NOT NULL,\
+	jrhm CHAR(16) NOT NULL,\
+	lshm CHAR(32) NULL DEFAULT '',\
+	acceptmsg VARCHAR(45) NULL DEFAULT '',\
+	reslutmsg VARCHAR(256) NULL DEFAULT '',\
+	statusinfo VARCHAR(45) NULL DEFAULT '',\
+	senddt DATETIME NULL,\
+	statusdt DATETIME NULL,\
+	PRIMARY KEY(id),\
+	KEY(lshm),\
+	KEY(jrhm))")
+
+bool CreateLogTbl()
+{
+	return CreateTbl(CREATE_LOG_TBL);
 }

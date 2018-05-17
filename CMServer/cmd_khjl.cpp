@@ -105,7 +105,7 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		if (!bType)
 		{
-			pSql = _T("SELECT COUNT(*) AS num FROM khjl_tbl WHERE Jlxm='%s'");
+			pSql = _T("SELECT COUNT(*) AS num FROM khjl_tbl WHERE Jlxm LIKE '%%%s%%'");
 			_stprintf_s(sql, sizeof(sql), pSql, strJlxm.c_str());
 		}
 		else
@@ -139,7 +139,7 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		{
 			if (!bType)
 			{
-				pSql = _T("SELECT %s FROM khjl_tbl WHERE Jlxm='%s'");
+				pSql = _T("SELECT %s FROM khjl_tbl WHERE Jlxm LIKE '%%%s%%'");
 				_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, strJlxm.c_str());
 			}
 			else
@@ -154,7 +154,7 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		{
 			if (!bType)
 			{
-				pSql = _T("SELECT %s FROM khjl_tbl WHERE Jlxm='%s'");
+				pSql = _T("SELECT %s FROM khjl_tbl WHERE Jlxm LIKE '%%%s%%'");
 				_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, strJlxm.c_str());
 			}
 			else
@@ -169,7 +169,7 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		{
 			if (!bType)
 			{
-				pSql = _T("SELECT %s FROM khjl_tbl WHERE Jlxm='%s'");
+				pSql = _T("SELECT %s FROM khjl_tbl WHERE Jlxm LIKE '%%%s%%'");
 				_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, strJlxm.c_str());
 			}
 			else
@@ -184,7 +184,7 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		{
 			if (!bType)
 			{
-				pSql = _T("SELECT %s FROM khjl_tbl WHERE Jlxm='%s'");
+				pSql = _T("SELECT %s FROM khjl_tbl WHERE Jlxm LIKE '%%%s%%'");
 				_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, strJlxm.c_str());
 			}
 			else
@@ -389,7 +389,7 @@ bool cmd_khjl(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		const TCHAR* pSql = NULL;
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
-		pSql = _T("SELECT %s FROM khjl_tbl WHERE Jlxm='%s'");
+		pSql = _T("SELECT %s FROM khjl_tbl WHERE Jlxm LIKE '%%%s%%'");
 		_stprintf_s(sql, sizeof(sql), pSql, KHJL_SELECT, strJlxm.c_str());
 
 		MYSQL* pMysql = Mysql_AllocConnection();

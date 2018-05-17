@@ -49,7 +49,7 @@ void DoDisNumData(msgpack::object* pRootArray, BUFFER_OBJ* bobj, const TCHAR* pD
 	std::string dxzh = (pArray++)->as<std::string>();
 	const TCHAR* pSql = _T("SELECT User,Password,MKey FROM dxzh_tbl WHERE Dxzh LIKE '%%%s%%'");
 	TCHAR sql[256];
-	memset(sql, 0x00, 256);
+	memset(sql, 0, 256);
 	_stprintf_s(sql, 256, pSql, dxzh.c_str());
 	MYSQL* pMysql = Mysql_AllocConnection();
 	if (NULL == pMysql)
@@ -67,6 +67,8 @@ void DoDisNumData(msgpack::object* pRootArray, BUFFER_OBJ* bobj, const TCHAR* pD
 		return;
 	}
 	MYSQL_ROW row = mysql_fetch_row(res);
+	mysql_free_result(res);
+
 	std::string key(row[2]);
 	std::string method = _T("disabledNumber");
 	WOTEDUtils::EncInterfacePtr ep(__uuidof(DesUtils));
@@ -80,15 +82,25 @@ void DoDisNumData(msgpack::object* pRootArray, BUFFER_OBJ* bobj, const TCHAR* pD
 	int nType = _tstoi(orderTypeId);
 	if (nType == 19)
 	{
-		pSql = _T("INSERT INTO log_tbl (id,Userid,Opname,Status,Requesttime) values(null,%u,'停机-%s','等待响应',now())");
+		pSql = _T("INSERT INTO log_tbl (id,Userid,jrhm,acceptmsg,senddt) values(null,%u,'%s','停机-%s',now())");
 	}
 	else if (nType == 20)
 	{
-		pSql = _T("INSERT INTO log_tbl (id,Userid,Opname,Status,Requesttime) values(null,%u,'复机-%s','等待响应',now())");
+		pSql = _T("INSERT INTO log_tbl (id,Userid,jrhm,acceptmsg,senddt) values(null,%u,'%s','复机-%s',now())");
 	}
 
 	memset(sql, 0x00, sizeof(sql));
-	_stprintf_s(sql, sizeof(sql), pSql, bobj->nUserId, bobj->strTemp.c_str());
+	_stprintf_s(sql, sizeof(sql), pSql, bobj->nUserId, bobj->strTemp.c_str(), bobj->strTemp.c_str());
+	if (!InsertIntoTbl(sql, pMysql, bobj))
+	{
+		Mysql_BackToPool(pMysql);
+		Api_error(bobj);
+		return;
+	}
+
+	bobj->nPerLogID = (unsigned int)mysql_insert_id(pMysql);
+
+	Mysql_BackToPool(pMysql);
 
 	doApi(bobj);
 }

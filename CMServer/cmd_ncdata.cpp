@@ -73,10 +73,14 @@ bool DoNotifyContractRoot(tinyxml2::XMLElement* root)
 
 	int nType = _tstoi(pACCEPTTYPE);
 
-
 	const TCHAR* pSql = NULL;
-	TCHAR sql[256];
-	memset(sql, 0x00, sizeof(sql));
+	TCHAR* sql = new TCHAR[256 * sizeof(TCHAR)];
+	memset(sql, 0x00, 256 * sizeof(TCHAR));
+
+	pSql = _T("UPDATE log_tbl SET statusinfo='%s',statusdt='%s' WHERE lshm='%s'");
+	_stprintf_s(sql, 256 * sizeof(TCHAR), pSql, pSTATUSINFO, pSTATUSDT, pGROUP_TRANSACTIONID);
+	PostThreadMessage(mysqlThreadId, MYSQL_UPDATE, (WPARAM)sql, NULL);
+
 	// 根据流水号匹配停复机响应信息
 	switch (nType)
 	{
@@ -103,7 +107,10 @@ bool DoNotifyContractRoot(tinyxml2::XMLElement* root)
 		if (_tcscmp(pSTATUSINFO, _T("竣工")) == 0) // 修改状态
 		{
 			pSql = _T("UPDATE sim_tbl SET zt=2 WHERE Jrhm='%s'");
+			TCHAR* sql = new TCHAR[256 * sizeof(TCHAR)];
+			memset(sql, 0x00, 256 * sizeof(TCHAR));
 			_stprintf_s(sql, sizeof(sql), pSql, pACCNBR);
+			PostThreadMessage(mysqlThreadId, MYSQL_UPDATE, (WPARAM)sql, NULL);
 		}
 	}
 	break;
@@ -112,7 +119,10 @@ bool DoNotifyContractRoot(tinyxml2::XMLElement* root)
 		if (_tcscmp(pSTATUSINFO, _T("竣工")) == 0) // 修改状态
 		{
 			pSql = _T("UPDATE sim_tbl SET zt=1 WHERE Jrhm='%s'");
+			TCHAR* sql = new TCHAR[256 * sizeof(TCHAR)];
+			memset(sql, 0x00, 256 * sizeof(TCHAR));
 			_stprintf_s(sql, sizeof(sql), pSql, pACCNBR);
+			PostThreadMessage(mysqlThreadId, MYSQL_UPDATE, (WPARAM)sql, NULL);
 		}
 	}
 	break;
@@ -134,10 +144,6 @@ bool DoNotifyContractRoot(tinyxml2::XMLElement* root)
 	default:
 		break;
 	}
-
-	// 记录日志
-	pSql = _T("UPDATE log_tbl SET Status='报竣完成',Ncmsg='%s',Nctime=now() WHERE Transid='%s'");
-	_stprintf_s(sql, sizeof(sql), pSql, pSTATUSINFO, pGROUP_TRANSACTIONID);
 
 	return true;
 }

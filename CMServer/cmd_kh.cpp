@@ -302,7 +302,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 
 		if (!bType)
 		{
-			pSql = _T("SELECT COUNT(*) num FROM kh_tbl WHERE Khmc='%s'");
+			pSql = _T("SELECT COUNT(*) num FROM kh_tbl WHERE Khmc LIKE '%%%s%%'");
 			_stprintf_s(sql, sizeof(sql), pSql, strKhmc.c_str());
 		}
 		else
@@ -336,7 +336,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		{
 			if (!bType)
 			{
-				pSql = _T("SELECT %s FROM kh_tbl WHERE Khmc='%s'");
+				pSql = _T("SELECT %s FROM kh_tbl WHERE Khmc LIKE '%%%s%%'");
 				_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, strKhmc.c_str());
 			}
 			else
@@ -351,7 +351,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		{
 			if (!bType)
 			{
-				pSql = _T("SELECT %s FROM kh_tbl WHERE Khmc='%s'");
+				pSql = _T("SELECT %s FROM kh_tbl WHERE Khmc LIKE '%%%s%%'");
 				_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, strKhmc.c_str());
 			}
 			else
@@ -366,7 +366,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		{
 			if (!bType)
 			{
-				pSql = _T("SELECT %s FROM kh_tbl WHERE Khmc='%s'");
+				pSql = _T("SELECT %s FROM kh_tbl WHERE Khmc LIKE '%%%s%%'");
 				_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, strKhmc.c_str());
 			}
 			else
@@ -381,7 +381,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		{
 			if (!bType)
 			{
-				pSql = _T("SELECT %s FROM kh_tbl WHERE Khmc='%s'");
+				pSql = _T("SELECT %s FROM kh_tbl WHERE Khmc LIKE '%%%s%%'");
 				_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, strKhmc.c_str());
 			}
 			else
@@ -1045,7 +1045,7 @@ bool cmd_kh(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		const TCHAR* pSql = NULL;
 		TCHAR sql[256];
 		memset(sql, 0x00, sizeof(sql));
-		pSql = _T("SELECT %s FROM kh_tbl WHERE Khmc='%s'");
+		pSql = _T("SELECT %s FROM kh_tbl WHERE Khmc LIKE '%%%s%%'");
 		_stprintf_s(sql, sizeof(sql), pSql, KH_SELECT, strKhmc.c_str());
 
 		MYSQL* pMysql = Mysql_AllocConnection();
