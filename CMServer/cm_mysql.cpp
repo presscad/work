@@ -327,6 +327,7 @@ Jlxm char(32),\
 Khid01 int unsigned default 0,\
 Khid02 int unsigned default 0, \
 Xsrq date,\
+Jmrq date,\
 Jhrq date,\
 Xfrq date,\
 Dqrq date,\
