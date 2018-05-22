@@ -465,6 +465,7 @@ extern unsigned int mysqlThreadId;
 
 typedef struct _llc_qry_s
 {
+	unsigned int id;
 	unsigned int nCount;
 	std::string llchm;
 	std::string already;

@@ -605,6 +605,7 @@ bool doLlcQryResponse(void* _bobj)
 
 	LLC_QRY_S* pBack = ((std::list<LLC_QRY_S*>*)bobj->pTempData)->back();
 
+	pBack->id = bobj->nPerLogID;
 	pBack->already = pool_already->GetText(); // 已经使用的流量
 	pBack->left = pool_left->GetText(); // 剩余的流量
 	pBack->total = pool_total->GetText(); // 总流量

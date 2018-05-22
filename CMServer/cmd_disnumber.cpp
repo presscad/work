@@ -25,54 +25,8 @@ bool cmd_disnumber(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 	{
 	case DN_DISABLE:
 	{
-		const TCHAR* pSql = _T("SELECT a.id,a.Llchm,a.Kzsl,b.User,b.Password,b.MKey FROM (SELECT id,Dxzh,Llchm,Kzsl FROM Llc_tbl WHERE Llclx='后向' LIMIT 1) a LEFT JOIN Dxzh_tbl b ON a.Dxzh=b.Dxzh");
-		MYSQL* pMysql = Mysql_AllocConnection();
-		if (NULL == pMysql)
-		{
-			error_info(bobj, _T("连接数据库失败"));
-			return Api_error(bobj);
-		}
-
-		MYSQL_RES* res = NULL;
-		if (!SelectFromTbl(pSql, pMysql, bobj, &res))
-		{
-			//error_info(bobj, _T("连接数据库失败"));
-			Mysql_BackToPool(pMysql);
-			return Api_error(bobj);
-		}
-
-		MYSQL_ROW row = mysql_fetch_row(res);
-
-		_tprintf_s(_T("%s,%s,%s,%s,%s,%s"), row[0], row[1], row[2], row[3], row[4], row[5]);
-
-		bobj->nPerLogID = _tstoi(row[0]);
-
-		bobj->pfndoApiResponse = doLlcQryResponse;
-		const TCHAR* pMethod = _T("poolQry");
-		const TCHAR* pData = _T("GET /m2m_ec/query.do?method=poolQry&user_id=%s&passWord=%s&sign=%s&poolNbr=%s\r\n\r\n");
-
-		std::string key(row[5]);
-
-		WOTEDUtils::EncInterfacePtr ep(__uuidof(DesUtils));
-		_variant_t varPwd = ep->strEnc(row[4], key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
-		_variant_t varSign = ep->strEncSign4(row[3], row[4], pMethod, row[1], key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
-
-		_stprintf_s(bobj->data, bobj->datalen, pData, row[3], (const char*)(_bstr_t)varPwd, (const char*)(_bstr_t)varSign, row[1]);
-		bobj->dwRecvedCount = (DWORD)strlen(bobj->data);
-
-		bobj->pTempData = new std::list<LLC_QRY_S*>;
-		std::list<LLC_QRY_S*>* p = (std::list<LLC_QRY_S*>*)(bobj->pTempData);
-
-		LLC_QRY_S * pLlcQry = new LLC_QRY_S;
-		_stscanf_s(row[2], _T("%u"), &pLlcQry->nCount);
-		pLlcQry->llchm = row[1];
-		p->push_back(pLlcQry);
-
-		doApi(bobj);
-
-		mysql_free_result(res);
-		//const TCHAR* pData = _T("GET /m2m_ec/query.do?method=disabledNumber&user_id=%s&access_number=%s&acctCd=&passWord=%s&sign=%s&orderTypeId=19\r\n\r\n");
-		//DoDisNumData(pRootArray, bobj, pData, "19");
+		const TCHAR* pData = _T("GET /m2m_ec/query.do?method=disabledNumber&user_id=%s&access_number=%s&acctCd=&passWord=%s&sign=%s&orderTypeId=19\r\n\r\n");
+		DoDisNumData(pRootArray, bobj, pData, "19");
 	}
 	break;
 	case DN_ABLE:
