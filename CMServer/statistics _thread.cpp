@@ -5,6 +5,7 @@
 
 void DueTostatistical();
 void SimTotal();
+void ZxInfo();
 
 unsigned int _stdcall statistics_func(LPVOID pVoid)
 {
@@ -13,6 +14,7 @@ unsigned int _stdcall statistics_func(LPVOID pVoid)
 	{
 		DueTostatistical();
 		SimTotal();
+		ZxInfo();
 		// 根据已到期的天数，自动做注销
 	}
 	return 0;
@@ -251,6 +253,25 @@ SUM(CASE WHEN dqrq<CURDATE() AND dqrq>DATE_SUB(CURDATE(), INTERVAL 15 DAY) THEN 
 	}
 
 	Mysql_BackToPool(pMysql);
+}
+
+void ZxInfo()
+{
+	const TCHAR* pSql = _T("UPDATE sim_tbl SET Zt=150001 WHERE Zxrq=CURDATE()");
+	MYSQL* pMysql = Mysql_AllocConnection();
+	if (NULL == pMysql)
+	{
+		return;
+	}
+
+	MYSQL_RES* res = NULL;
+	size_t len = _tcslen(pSql);
+	if (0 != mysql_real_query(pMysql, pSql, (ULONG)len))
+	{
+		_tprintf_s(_T("%s\n"), mysql_error(pMysql));
+		Mysql_BackToPool(pMysql);
+		return;
+	}
 }
 
 unsigned int mysqlThreadId = 0;

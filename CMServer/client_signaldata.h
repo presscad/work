@@ -43,6 +43,7 @@ typedef struct _buffer_obj_t
 	std::string strTemp;
 	unsigned int nPerLogID;
 	unsigned int nUserId;
+	void* pTempData;
 	int nCmd;
 	int nSubCmd;
 	int nSubSubCmd;
@@ -63,6 +64,7 @@ typedef struct _buffer_obj
 	std::string strTemp;
 	unsigned int nPerLogID;
 	unsigned int nUserId;
+	void* pTempData;
 	int nCmd;
 	int nSubCmd;
 	int nSubSubCmd;
@@ -79,6 +81,7 @@ typedef struct _buffer_obj
 		dwSendedCount = 0;
 		nPerLogID = 0;
 		nUserId = 0;
+		pTempData = NULL;
 		nCmd = 0;
 		nSubCmd = 0;
 		nSubSubCmd = 0;
@@ -459,3 +462,12 @@ extern unsigned int mysqlThreadId;
 #define MYSQL_INSERT WM_USER + 300
 #define MYSQL_UPDATE WM_USER + 301
 #define MYSQL_DELETE WM_USER + 302
+
+typedef struct _llc_qry_s
+{
+	unsigned int nCount;
+	std::string llchm;
+	std::string already;
+	std::string left;
+	std::string total;
+}LLC_QRY_S;

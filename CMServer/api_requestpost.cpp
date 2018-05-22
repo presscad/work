@@ -524,3 +524,133 @@ bool dopoolQryResponse(void* _bobj)
 
 	return true;
 }
+
+void ClearList(BUFFER_OBJ* bobj)
+{
+	std::list<LLC_QRY_S*>* pList = (std::list<LLC_QRY_S*>*)bobj->pTempData;
+	LLC_QRY_S* p = NULL;
+	while (!pList->empty())
+	{
+		p = pList->back();
+		pList->pop_back();
+		if (NULL != p)
+		{
+			delete p;
+			p = NULL;
+		}	
+	}
+	delete pList;
+	bobj->pTempData = NULL;
+}
+
+bool ReturnData(BUFFER_OBJ* bobj)
+{
+	msgpack::sbuffer sbuf;
+	msgpack::packer<msgpack::sbuffer> _msgpack(&sbuf);
+	sbuf.write("\xfb\xfc", 6);
+
+	std::list<LLC_QRY_S*>* pList = (std::list<LLC_QRY_S*>*)bobj->pTempData;
+	int nSize = (int)pList->size();
+	_msgpack.pack_array(5);
+	_msgpack.pack(bobj->nCmd);
+	_msgpack.pack(bobj->nSubCmd);
+	_msgpack.pack(bobj->nSubSubCmd);
+	_msgpack.pack(0);
+	_msgpack.pack_array(nSize);
+
+	LLC_QRY_S* p = NULL;
+	while (!pList->empty())
+	{
+		p = pList->back();
+		pList->pop_back();
+		if (NULL != p)
+		{
+			_msgpack.pack_array(5);
+			_msgpack.pack(p->nCount);
+			_msgpack.pack(p->llchm);// 执行成功
+			_msgpack.pack(p->already); // 已经使用的流量
+			_msgpack.pack(p->left); // 剩余的流量
+			_msgpack.pack(p->total); // 总流量
+			delete p;
+			p = NULL;
+		}
+	}
+	delete pList;
+	bobj->pTempData = NULL;
+
+	DealTail(sbuf, bobj);
+
+	return true;
+}
+
+bool doLlcQryResponse(void* _bobj)
+{
+	BUFFER_OBJ* bobj = (BUFFER_OBJ*)_bobj;
+	TCHAR* pResponData = Utf8ConvertAnsi(bobj->data, bobj->dwRecvedCount);
+	tinyxml2::XMLDocument doc;
+	if (tinyxml2::XML_SUCCESS != doc.Parse(pResponData))
+	{
+		ClearList(bobj);
+		delete pResponData;
+		return false;
+	}
+	delete pResponData;
+
+	tinyxml2::XMLElement* SvcCont = doc.RootElement();
+	tinyxml2::XMLElement* IRESULT = SvcCont->FirstChildElement();
+	tinyxml2::XMLElement* pool_already = IRESULT->NextSiblingElement();
+	tinyxml2::XMLElement* pool_left = pool_already->NextSiblingElement();
+	tinyxml2::XMLElement* pool_total = pool_left->NextSiblingElement();
+	tinyxml2::XMLElement* GROUP_TRANSACTIONID = pool_total->NextSiblingElement();
+
+	LLC_QRY_S* pBack = ((std::list<LLC_QRY_S*>*)bobj->pTempData)->back();
+
+	pBack->already = pool_already->GetText(); // 已经使用的流量
+	pBack->left = pool_left->GetText(); // 剩余的流量
+	pBack->total = pool_total->GetText(); // 总流量
+
+	const TCHAR* pSql = _T("SELECT a.id,a.Llchm,a.Kzsl,b.User,b.Password,b.MKey FROM (SELECT id,Dxzh,Llchm,Kzsl FROM Llc_tbl WHERE Llclx='后向' AND id>%u LIMIT 1) a LEFT JOIN Dxzh_tbl b ON a.Dxzh=b.Dxzh");
+	TCHAR sql[256];
+	memset(sql, 0x00, sizeof(sql));
+	_stprintf_s(sql, sizeof(sql), pSql, bobj->nPerLogID);
+	MYSQL* pMysql = Mysql_AllocConnection();
+	if (NULL == pMysql)
+	{
+		ClearList(bobj);
+		error_info(bobj, _T("连接数据库失败"));
+		return Api_error(bobj);
+	}
+
+	MYSQL_RES* res = NULL;
+	if (!SelectFromTbl(sql, pMysql, bobj, &res))
+	{
+		Mysql_BackToPool(pMysql);
+		return ReturnData(bobj);
+	}
+
+	MYSQL_ROW row = mysql_fetch_row(res);
+	bobj->nPerLogID = _tstoi(row[0]);
+
+	bobj->pfndoApiResponse = doLlcQryResponse;
+	const TCHAR* pMethod = _T("poolQry");
+	const TCHAR* pData = _T("GET /m2m_ec/query.do?method=poolQry&user_id=%s&passWord=%s&sign=%s&poolNbr=%s\r\n\r\n");
+
+	std::string key(row[5]);
+
+	WOTEDUtils::EncInterfacePtr ep(__uuidof(DesUtils));
+	_variant_t varPwd = ep->strEnc(row[4], key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
+	_variant_t varSign = ep->strEncSign4(row[3], row[4], pMethod, row[1], key.substr(0, 3).c_str(), key.substr(3, 3).c_str(), key.substr(6, 3).c_str());
+
+	_stprintf_s(bobj->data, bobj->datalen, pData, row[3], (const char*)(_bstr_t)varPwd, (const char*)(_bstr_t)varSign, row[1]);
+	bobj->dwRecvedCount = (DWORD)strlen(bobj->data);
+
+	LLC_QRY_S * pLlcQry = new LLC_QRY_S;
+	_stscanf_s(row[2], _T("%u"), &pLlcQry->nCount);
+	pLlcQry->llchm = row[1];
+	((std::list<LLC_QRY_S*>*)bobj->pTempData)->push_back(pLlcQry);
+	mysql_free_result(res);
+
+	doApi(bobj);
+
+	return true;
+}

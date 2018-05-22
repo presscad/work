@@ -99,8 +99,10 @@ bool DoNotifyContractRoot(tinyxml2::XMLElement* root)
 	case 5:
 	{}
 	break;
-	case 7:
-	{}
+	case 7:// »î¿¨¼¤»î
+	{
+		
+	}
 	break;
 	case 8:// Í£»ú
 	{

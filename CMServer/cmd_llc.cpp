@@ -182,6 +182,24 @@ bool cmd_llc(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 		DealTail(sbuf, bobj);
 	}
 	break;
+	case LLC_QRY:
+	{
+		const TCHAR* pSql = _T("SELECT a.id,a.Llchm,b.User,b.Password,b.MKey FROM (SELECT id,Dxzh,Llchm FROM Llc_tbl WHERE Llclx='后向' LIMIT 1) a LEFT JOIN Dxzh_tbl b ON a.Dxzh=b.Dxzh");
+		MYSQL* pMysql = Mysql_AllocConnection();
+		if (NULL == pMysql)
+		{
+			error_info(bobj, _T("连接数据库失败"));
+			return cmd_error(bobj);
+		}
+
+		MYSQL_RES* res = NULL;
+		if (!SelectFromTbl(pSql, pMysql, bobj, &res))
+		{
+			error_info(bobj, _T("连接数据库失败"));
+			return cmd_error(bobj);
+		}
+	}
+	break;
 	default:
 		break;
 	}
