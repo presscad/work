@@ -181,7 +181,7 @@ bool cmd_load(msgpack::object* pRootArray, BUFFER_OBJ* bobj)
 				Mysql_BackToPool(pMysql);
 				goto error;
 			}
-			 pSql = _T("UPDATE sim_tbl SET Khid01=%u,Jlxm='%s',Xsrq='%s',Jmrq=DATE_ADD(Xsrq,INTERVAL 6 MONTH),Bz='%s' WHERE Jrhm='%s'");// Jmrq是在Xsrq的基础之上增加6个月
+			 pSql = _T("UPDATE sim_tbl SET Khid01=%u,Jlxm='%s',Xsrq='%s',Jmrq=DATE_ADD(Xsrq,INTERVAL 4 MONTH),Bz='%s' WHERE Jrhm='%s'");// Jmrq是在Xsrq的基础之上增加6个月
 			// pSql = _T("UPDATE sim_tbl SET Khid01=%u,Jlxm='%s',Xsrq='%s',Bz='%s' WHERE Jrhm='%s'");
 			memset(sql, 0x00, sizeof(sql));
 			_stprintf_s(sql, sizeof(sql), pSql, Khid, strJlxm.c_str(), strXsrq.c_str(), strBz.c_str(), strJrhm.c_str());
